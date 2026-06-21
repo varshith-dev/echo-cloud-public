@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS Photos - Secure Cloud Photo Storage</title>
+    <meta name="description" content="OQENS Photos is the ultimate platform for storing, organizing, and sharing your high-resolution photos securely in the cloud.">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #ffffff;
+            --bg-alt: #fafafa;
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --accent: #000000;
+            --accent-hover: #374151;
+            --border-light: #e5e7eb;
+            --border-dark: #d1d5db;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* Typography */
+        h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--text-main); }
+        h1 { font-size: 4.5rem; margin-bottom: 24px; }
+        h2 { font-size: 3rem; margin-bottom: 20px; }
+        p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            z-index: 1000; padding: 16px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-main); }
+        .logo img { width: 32px; height: 32px; }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text-main); }
+        
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 28px; border-radius: 100px; font-weight: 600; font-size: 1rem;
+            text-decoration: none; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); cursor: pointer; border: none;
+        }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+        .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: var(--accent-hover); }
+        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border-dark); }
+        .btn-outline:hover { background: var(--bg-alt); transform: translateY(-2px); }
+        .btn-sm { padding: 8px 20px; font-size: 0.9rem; }
+
+        /* Animated Background Elements */
+        .bg-elements { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
+        .glow { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: float 15s infinite ease-in-out alternate; }
+        .glow-1 { background: #e0e7ff; width: 600px; height: 600px; top: -100px; left: -100px; }
+        .glow-2 { background: #fae8ff; width: 500px; height: 500px; top: 20%; right: -100px; animation-delay: -5s; }
+        .glow-3 { background: #fef08a; width: 400px; height: 400px; bottom: -100px; left: 20%; animation-delay: -10s; opacity: 0.3; }
+        
+        /* Grid overlay for texture */
+        .grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4;
+            background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(50px, 80px) scale(1.1) rotate(10deg); }
+        }
+
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 140px 24px; }
+        .text-center { text-align: center; }
+
+        /* Hero */
+        .hero { position: relative; padding: 180px 24px 100px; text-align: center; }
+        .hero h1 { max-width: 900px; margin: 0 auto 24px; background: linear-gradient(to right, #111827, #4b5563); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { max-width: 650px; margin: 0 auto 40px; font-size: 1.3rem; }
+        .hero-actions { display: flex; gap: 16px; justify-content: center; margin-bottom: 80px; }
+        
+        /* Creative User-Requested Bento Grid */
+        .hero-masonry {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; 
+            grid-template-columns: 1.2fr 0.9fr 1fr; /* Left column slightly wider */
+            grid-template-rows: 280px 280px;
+            gap: 20px;
+            perspective: 1000px;
+        }
+        .hero-masonry div {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            background: #f3f4f6;
+        }
+        .hero-masonry div::after {
+            content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.2), transparent 50%); opacity: 0; transition: opacity 0.3s;
+        }
+        .hero-masonry div:hover {
+            transform: translateY(-10px) scale(1.02) rotateX(2deg);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        .hero-masonry div:hover::after { opacity: 1; }
+        .hero-masonry div img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.7s ease; }
+        .hero-masonry div:hover img { transform: scale(1.05); }
+        
+        /* The specific layout from the reference image */
+        .hero-masonry div:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; } /* Left Tall (Fall Lake) */
+        .hero-masonry div:nth-child(2) { grid-column: 2; grid-row: 1; } /* Middle Top (Flowers) */
+        .hero-masonry div:nth-child(3) { grid-column: 2; grid-row: 2; } /* Middle Bottom (Architecture) */
+        .hero-masonry div:nth-child(4) { grid-column: 3; grid-row: 1 / span 2; } /* Right Tall (Portrait) */
+
+        /* Alternating Features */
+        .feature-row { display: flex; align-items: center; gap: 80px; margin-bottom: 160px; }
+        .feature-row:nth-child(even) { flex-direction: row-reverse; }
+        .feature-content { flex: 1; }
+        .feature-content h2 { font-size: 2.5rem; margin-bottom: 20px; }
+        .feature-image { flex: 1; border-radius: 24px; box-shadow: 0 24px 48px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .feature-image img { width: 100%; height: 450px; object-fit: cover; display: block; }
+        .feature-badge { display: inline-block; padding: 6px 12px; background: #f3f4f6; color: var(--accent); border-radius: 100px; font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.05em; }
+
+        /* Step by Step Section (NEW) */
+        .steps-section { background: var(--bg-alt); padding: 140px 24px; border-top: 1px solid var(--border-light); position: relative; overflow: hidden; }
+        .steps-header { text-align: center; max-width: 700px; margin: 0 auto 80px; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; }
+        .step-card { background: var(--bg-card); padding: 40px; border-radius: 24px; border: 1px solid var(--border-light); position: relative; z-index: 1; }
+        .step-number { font-size: 4rem; font-weight: 800; color: #f3f4f6; position: absolute; top: 20px; right: 20px; z-index: -1; line-height: 1; }
+        .step-card h3 { font-size: 1.5rem; margin-bottom: 16px; margin-top: 20px; }
+        .step-icon { width: 56px; height: 56px; background: var(--accent); color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        /* Privacy Section (NEW) */
+        .privacy-section { padding: 140px 24px; text-align: center; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); color: var(--text-main); }
+        .privacy-section h2 { color: var(--text-main); }
+        .privacy-section p { color: var(--text-muted); max-width: 700px; margin: 0 auto 60px; }
+        .privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1000px; margin: 0 auto; text-align: left; }
+        .privacy-card { background: rgba(255,255,255,0.6); padding: 32px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); backdrop-filter: blur(10px); }
+        .privacy-card i { font-size: 2rem; color: #3b82f6; margin-bottom: 20px; }
+        .privacy-card h3 { color: var(--text-main); font-size: 1.25rem; margin-bottom: 12px; }
+        .privacy-card p { color: var(--text-muted); font-size: 1rem; margin: 0; }
+
+        /* Bento Box Grid (Features) */
+        .bento-section { padding: 140px 24px; }
+        .bento-header { text-align: center; max-width: 600px; margin: 0 auto 60px; }
+        .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
+        .bento-card { background: var(--bg-alt); padding: 40px; border-radius: 20px; border: 1px solid var(--border-light); transition: all 0.3s; }
+        .bento-card:hover { transform: translateY(-4px); background: #f3f4f6; }
+        .bento-icon { width: 56px; height: 56px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 24px; color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .bento-card h3 { font-size: 1.35rem; margin-bottom: 12px; }
+
+        /* FAQ */
+        .faq-section { background: var(--bg-alt); padding: 140px 24px; border-top: 1px solid var(--border-light); }
+        .faq-container { max-width: 800px; margin: 0 auto; }
+        .faq-header { text-align: center; margin-bottom: 60px; }
+        .faq-item { background: white; border-radius: 16px; margin-bottom: 16px; padding: 24px; cursor: pointer; border: 1px solid var(--border-light); transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .faq-item:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .faq-question { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.15rem; color: var(--text-main); }
+        .faq-answer { margin-top: 0; max-height: 0; overflow: hidden; opacity: 0; color: var(--text-muted); line-height: 1.6; transition: all 0.3s ease; }
+        .faq-item.active .faq-answer { margin-top: 16px; max-height: 200px; opacity: 1; }
+        .faq-icon { transition: transform 0.3s; background: #f3f4f6; padding: 4px; border-radius: 50%; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); background: var(--accent); color: white; }
+
+        /* CTA */
+        .cta-section { text-align: center; padding: 140px 24px; position: relative; overflow: hidden; }
+        .cta-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); z-index: -1; }
+        .cta-section h2 { color: var(--text-main); font-size: 3.5rem; margin-bottom: 24px; }
+        .cta-section p { color: var(--text-muted); max-width: 600px; margin: 0 auto 40px; font-size: 1.25rem; }
+        .cta-section .btn-primary { background: var(--accent); color: #fff; padding: 16px 32px; font-size: 1.1rem; }
+        .cta-section .btn-primary:hover { background: #374151; transform: translateY(-4px) scale(1.05); }
+
+        /* Footer */
+        footer { background: var(--bg-base); padding: 80px 40px; text-align: center; }
+        .footer-logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; display: inline-flex; align-items: center; gap: 8px; }
+        .footer-logo img { width: 32px; height: 32px; }
+        .footer-links { display: flex; justify-content: center; gap: 32px; margin-bottom: 40px; flex-wrap: wrap; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 1rem; font-weight: 500; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--accent); }
+        .footer-copyright { color: #9ca3af; font-size: 0.9rem; }
+
+        /* Animations */
+        .animate { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .animate.in-view { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.15s; }
+        .delay-2 { transition-delay: 0.3s; }
+        .delay-3 { transition-delay: 0.45s; }
+
+        @media (max-width: 1024px) {
+            .hero-masonry { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+            .hero-masonry div:nth-child(1) { grid-column: span 2; grid-row: span 1; height: 400px; }
+            .hero-masonry div:nth-child(4) { grid-column: span 2; grid-row: span 1; height: 400px; }
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2.2rem; }
+            .feature-row { flex-direction: column !important; gap: 40px; text-align: left; margin-bottom: 100px; }
+            .bento-grid, .steps-grid, .privacy-grid { grid-template-columns: 1fr; }
+            nav { padding: 16px 24px; }
+            .nav-links { display: none; } /* Simplified for mobile */
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="OQENS">
+            Photos
+        </a>
+        <div class="nav-links">
+            <a href="/features">Features</a>
+            <a href="/galleries">Galleries</a>
+            <a href="/security">Security</a>
+            <a href="/faq">FAQ</a>
+            <a href="https://echo.oqens.me/login?app=photos" class="btn btn-outline btn-sm">Sign In</a>
+            <a href="https://echo.oqens.me/signup?app=photos" class="btn btn-primary btn-sm">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero with Animated Background -->
+    <header class="hero">
+        <div class="bg-elements">
+            <div class="grid-bg"></div>
+            <div class="glow glow-1"></div>
+            <div class="glow glow-2"></div>
+            <div class="glow glow-3"></div>
+        </div>
+        
+        <h1 class="animate">Your memories,<br/>uncompressed.</h1>
+        <p class="animate delay-1">Securely store, organize, and share your high-resolution photos. OQENS Photos protects your originals with zero quality loss and beautiful native galleries.</p>
+        <div class="hero-actions animate delay-2">
+            <a href="https://echo.oqens.me/signup?app=photos" class="btn btn-primary">Start Storing for Free <i class="ph-bold ph-arrow-right"></i></a>
+            <a href="/features" class="btn btn-outline">Explore the Vault</a>
+        </div>
+        
+        <!-- Creative 3-Column Bento Masonry matching the User's Image -->
+        <div class="hero-masonry animate delay-3">
+            <div><img src="https://i0.wp.com/picjumbo.com/wp-content/uploads/beautiful-fall-nature-scenery-free-image.jpeg?w=2210&quality=70" alt="Fall Nature Landscape"></div>
+            <div><img src="https://lazygardener.com/cdn/shop/articles/Loyalty_Club_1.jpg?v=1738740113" alt="Pink Flowers"></div>
+            <div><img src="https://www.ittenbrechbuehl.ch/media/filer_public_thumbnails/filer_public/45/0f/450f6875-e101-4d64-a3a0-d60c43fd8f6a/2236_ecotope_epfl_3xn_14.jpg__2000.0x1333.3333333333333_q85_crop-10_subsampling-2_upscale.jpg" alt="Modern Architecture"></div>
+            <div><img src="https://www.apple.com/newsroom/images/product/iphone/lifestyle/Apple_ShotoniPhone_NIKCHU_hero_011221_big.jpg.large.jpg" alt="Portrait Photography"></div>
+        </div>
+    </header>
+
+    <!-- New Step-by-Step Section -->
+    <section class="steps-section">
+        <div class="bg-elements" style="opacity:0.3;"><div class="grid-bg"></div></div>
+        <div class="steps-header animate">
+            <div class="feature-badge">HOW IT WORKS</div>
+            <h2>From camera to cloud in seconds.</h2>
+            <p>We designed the upload and organization process to be as frictionless as possible, so you can spend less time managing files and more time shooting.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card animate">
+                <div class="step-number">1</div>
+                <div class="step-icon"><i class="ph ph-cloud-arrow-up"></i></div>
+                <h3>Auto-Upload</h3>
+                <p>Drag and drop entire folders or connect your devices. We instantly ingest thousands of RAWs and JPEGs without throttling your bandwidth.</p>
+            </div>
+            <div class="step-card animate delay-1">
+                <div class="step-number">2</div>
+                <div class="step-icon"><i class="ph ph-folder-open"></i></div>
+                <h3>Smart Organize</h3>
+                <p>OQENS automatically extracts EXIF data, groups photos by location and date, and lets you create deeply nested Smart Albums.</p>
+            </div>
+            <div class="step-card animate delay-2">
+                <div class="step-number">3</div>
+                <div class="step-icon"><i class="ph ph-share-network"></i></div>
+                <h3>Client Delivery</h3>
+                <p>Generate a breathtaking, password-protected public gallery. Clients can view, favorite, and download zip files in one click.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Deep Dives -->
+    <section class="container">
+        <div class="feature-row animate">
+            <div class="feature-content">
+                <div class="feature-badge">ZERO COMPRESSION</div>
+                <h2>Pixel-perfect preservation.</h2>
+                <p>Unlike other cloud services that aggressively compress your images to save server costs, OQENS Photos stores every single pixel exactly as it came out of your camera sensor.</p>
+                <ul style="list-style: none; margin-top:32px;">
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Full RAW file support (.CR3, .ARW, .NEF)</li>
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Original EXIF & Location metadata preserved</li>
+                    <li style="display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Unlimited megapixel resolution uploads</li>
+                </ul>
+            </div>
+            <div class="feature-image">
+                <img src="https://nofilmschool.com/media-library/apples-latest-short-film-proves-the-iphone-16-pro-is-a-serious-camera.jpg?id=61078885&width=1245&height=700&quality=50&coordinates=0%2C0%2C0%2C0" alt="iPhone 16 Pro Camera Interface">
+            </div>
+        </div>
+
+        <div class="feature-row animate">
+            <div class="feature-content">
+                <div class="feature-badge">PUBLIC GALLERIES</div>
+                <h2>Share your portfolio instantly.</h2>
+                <p>Stop sending messy zip files over email. Curate your best shots into beautiful albums and generate a secure, high-performance public link to share with clients, agencies, or friends.</p>
+                <ul style="list-style: none; margin-top:32px;">
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Password-protected & expiring links</li>
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Global Edge CDN for instant loading</li>
+                    <li style="display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Custom client-proofing themes</li>
+                </ul>
+            </div>
+            <div class="feature-image">
+                <img src="https://www.apple.com/newsroom/images/product/iphone/lifestyle/Apple_ShotoniPhone_pieter_de_vries_011221_big.jpg.large.jpg" alt="Landscape shot on iPhone">
+            </div>
+        </div>
+    </section>
+
+    <!-- New Privacy & Security Section -->
+    <section class="privacy-section">
+        <div class="feature-badge">FORT KNOX SECURITY</div>
+        <h2 class="animate">Your photos. Nobody else's.</h2>
+        <p class="animate delay-1">We don't train AI on your photos. We don't sell your data to advertisers. OQENS Photos is built on a foundation of absolute privacy and enterprise-grade encryption.</p>
+        
+        <div class="privacy-grid animate delay-2">
+            <div class="privacy-card">
+                <i class="ph-fill ph-lock-key"></i>
+                <h3>AES-256 Encryption</h3>
+                <p>Every photo is encrypted at rest using military-grade AES-256 encryption. Not even our database administrators can view your private gallery files.</p>
+            </div>
+            <div class="privacy-card">
+                <i class="ph-fill ph-eye-closed"></i>
+                <h3>Zero AI Training</h3>
+                <p>Unlike massive tech conglomerates, we explicitly guarantee in our Terms of Service that your personal photos will never be used to train generative AI models.</p>
+            </div>
+            <div class="privacy-card">
+                <i class="ph-fill ph-shield-check"></i>
+                <h3>Data Residency</h3>
+                <p>Your data is stored securely in compliant Oracle Cloud infrastructure with strict segregation protocols ensuring tenant isolation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Box Grid (Features) -->
+    <section class="bento-section">
+        <div class="bento-header animate">
+            <div class="feature-badge">THE TOOLKIT</div>
+            <h2>The professional standard.</h2>
+            <p>OQENS Photos is packed with advanced features designed specifically for creators who care about image fidelity, organization, and speed.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-card animate">
+                <div class="bento-icon"><i class="ph ph-magnifying-glass"></i></div>
+                <h3>Advanced Search</h3>
+                <p>Search instantly by file name, date, extension type, or EXIF camera model.</p>
+            </div>
+            <div class="bento-card animate delay-1">
+                <div class="bento-icon"><i class="ph ph-tag"></i></div>
+                <h3>Custom Tagging</h3>
+                <p>Apply custom color-coded tags to instantly filter thousands of images for a specific project.</p>
+            </div>
+            <div class="bento-card animate delay-2">
+                <div class="bento-icon"><i class="ph ph-devices"></i></div>
+                <h3>Cross-Platform</h3>
+                <p>Access your entire high-res library from any web browser on Mac, Windows, iOS, or Android.</p>
+            </div>
+            <div class="bento-card animate">
+                <div class="bento-icon"><i class="ph ph-hard-drives"></i></div>
+                <h3>Redundant Storage</h3>
+                <p>Files are mirrored across multiple physical availability domains to prevent data loss.</p>
+            </div>
+            <div class="bento-card animate delay-1">
+                <div class="bento-icon"><i class="ph ph-link"></i></div>
+                <h3>Direct Hotlinking</h3>
+                <p>Generate direct image URLs to embed your photos seamlessly into blogs, forums, or websites.</p>
+            </div>
+            <div class="bento-card animate delay-2">
+                <div class="bento-icon"><i class="ph ph-download-simple"></i></div>
+                <h3>Bulk Zip Export</h3>
+                <p>Clients can download massive galleries as a single ZIP file with one click, saving hours.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="faq-header animate">
+                <h2>Frequently Asked Questions</h2>
+                <p>Everything you need to know about OQENS Photos.</p>
+            </div>
+            <div class="faq-list animate delay-1">
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Does OQENS Photos compress my images? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">No. OQENS Photos stores your images in their original, uncompressed resolution to ensure zero quality loss. We believe in pixel-perfect preservation.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Can I share albums publicly? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Yes, you can generate secure public links for any album. You can also add password protection and expiration dates to these links for client proofing.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Is my EXIF metadata preserved? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Absolutely. Your camera settings (aperture, shutter speed, ISO), location data, and original timestamps are kept fully intact and untouched.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Are RAW files supported? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Yes, we support uploading and storing all major RAW formats alongside standard JPEG, PNG, HEIC, and WebP files.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Who owns the rights to my photos? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">You do. You retain 100% copyright ownership of your images. We do not claim any rights to your work, nor do we use them to train AI models.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final Massive CTA -->
+    <section class="cta-section">
+        <div class="cta-bg"></div>
+        <div class="glow glow-1" style="opacity: 0.15; top: -200px;"></div>
+        <div class="glow glow-2" style="opacity: 0.15; bottom: -200px;"></div>
+        
+        <h2 class="animate">Start backing up today.</h2>
+        <p class="animate delay-1">Join thousands of photographers worldwide who trust OQENS Photos to protect their most valuable memories and professional portfolios.</p>
+        <a href="https://echo.oqens.me/signup?app=photos" class="btn btn-primary animate delay-2">Create Your Free Account <i class="ph-bold ph-arrow-right"></i></a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">
+            <img src="/static/logo.png" alt="OQENS"> OQENS
+        </div>
+        <div class="footer-links">
+            <a href="/features">Features</a>
+            <a href="/pricing">Pricing</a>
+            <a href="https://oqens.me/privacy">Privacy Policy</a>
+            <a href="https://oqens.me/terms">Terms of Service</a>
+            <a href="https://support.oqens.me">Support Hub</a>
+            <a href="https://oqens.me/docs">API Documentation</a>
+        </div>
+        <div class="footer-copyright">
+            &copy; 2026 OQENS Cloud Platform. All rights reserved. Designed for creators.
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

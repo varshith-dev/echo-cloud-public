@@ -1,0 +1,155 @@
+Found 154 routes:
+L1053-1054: @app.route('/') -> serve_root
+L1303-1304: @app.route('/login') -> serve_login
+L1340-1341: @app.route('/signup') -> serve_signup
+L1359-1360: @app.route('/selectplan') -> serve_selectplan
+L1506-1507: @app.route('/<tenant_id>/<path:file_path>') -> dl_route
+L1627-1628: @app.route('/dashboard/<path:path>') -> serve_dash
+L1636-1637: @app.route('/docs') -> serve_docs
+L1640-1641: @app.route('/support') -> serve_support
+L1647-1648: @app.route('/about') -> serve_about
+L1651-1652: @app.route('/data-segregation') -> serve_data_segregation
+L1655-1656: @app.route('/origin-protection') -> serve_origin_protection
+L1659-1660: @app.route('/compliance') -> serve_compliance
+L1663-1664: @app.route('/status') -> serve_status
+L1669-1670: @app.route('/setup-password') -> serve_setup_password
+L1756-1757: @app.route('/verify-email') -> verify_email
+L1804-1805: @app.route('/api/auth/resend-verification', methods=['POST']) -> resend_verification
+L1848-1849: @app.route('/api/login', methods=['POST']) -> login
+L2143-2144: @app.route('/api/auth/setup-details', methods=['GET']) -> get_setup_details
+L2180-2181: @app.route('/api/auth/setup-password', methods=['POST']) -> setup_password
+L2260-2261: @app.route('/api/auth/forgot-code', methods=['POST']) -> forgot_code
+L2326-2327: @app.route('/api/logout', methods=['POST']) -> logout
+L2331-2332: @app.route('/api/session', methods=['GET']) -> get_session
+L2395-2396: @app.route('/api/support/login', methods=['POST']) -> support_login
+L2436-2437: @app.route('/api/support/session', methods=['GET']) -> support_session
+L2469-2470: @app.route('/api/support/logout', methods=['POST']) -> support_logout
+L2477-2478: @app.route('/api/support/tickets', methods=['GET', 'POST']) -> support_tickets
+L2541-2542: @app.route('/api/support/tickets/<int:ticket_id>/messages', methods=['GET', 'POST']) -> support_ticket_messages
+L2582-2583: @app.route('/api/support/tickets/<int:ticket_id>/resolve', methods=['POST']) -> support_ticket_resolve
+L2608-2609: @app.route('/api/support/polls', methods=['GET', 'POST']) -> support_polls_api
+L2651-2652: @app.route('/api/support/polls/<int:poll_id>', methods=['GET']) -> get_support_poll
+L2688-2689: @app.route('/api/support/polls/<int:poll_id>/vote', methods=['POST']) -> vote_support_poll
+L2731-2732: @app.route('/api/tenant/generate-api', methods=['POST']) -> generate_api_key
+L2749-2750: @app.route('/api/admin/config', methods=['GET', 'POST']) -> admin_config
+L2774-2775: @app.route('/api/system/pricing', methods=['GET']) -> system_pricing
+L2797-2798: @app.route('/api/admin/plans', methods=['GET', 'POST']) -> admin_plans
+L2850-2851: @app.route('/api/admin/plans/<plan_id>', methods=['PUT', 'DELETE']) -> admin_plan_detail
+L2883-2884: @app.route('/api/enquiries/submit', methods=['POST']) -> submit_enquiry
+L2939-2940: @app.route('/api/admin/enquiries', methods=['GET', 'POST']) -> admin_enquiries
+L2986-2987: @app.route('/api/admin/enquiries/<int:id>/read', methods=['POST']) -> admin_enquiry_read
+L2997-2998: @app.route('/api/admin/enquiries/<int:id>', methods=['DELETE']) -> admin_enquiry_delete
+L3016-3017: @app.route('/api/admin/enquiries/<int:id>/reject', methods=['POST']) -> admin_enquiry_reject
+L3035-3036: @app.route('/api/admin/enquiries/<int:id>/accept', methods=['POST']) -> admin_enquiry_accept
+L3396-3397: @app.route('/api/admin/system-domains', methods=['GET', 'POST']) -> admin_system_domains_endpoint
+L3450-3451: @app.route('/api/admin/system-domains/verify-all', methods=['POST']) -> admin_verify_all_domains_endpoint
+L3462-3463: @app.route('/api/admin/system-domains/<int:domain_id>/verify', methods=['POST']) -> admin_verify_system_domain
+L3488-3489: @app.route('/api/admin/system-domains/<int:domain_id>', methods=['DELETE']) -> admin_delete_system_domain
+L3519-3520: @app.route('/api/admin/tenants', methods=['GET', 'POST']) -> admin_tenants
+L3617-3618: @app.route('/api/admin/tenants/<int:tenant_id>', methods=['DELETE']) -> admin_delete_tenant
+L3665-3666: @app.route('/api/admin/tenants/<int:tenant_id>/edit', methods=['POST']) -> admin_edit_tenant
+L3772-3773: @app.route('/api/admin/tenants/<int:tenant_id>/terminate', methods=['POST']) -> admin_terminate_tenant_service
+L3820-3821: @app.route('/api/admin/tenants/<int:tenant_id>/send-password-reset', methods=['POST']) -> admin_send_password_reset
+L3852-3853: @app.route('/api/admin/tenants/<int:tenant_id>/send-verification', methods=['POST']) -> admin_send_verification
+L3883-3884: @app.route('/api/admin/tenants/<int:tenant_id>/regenerate-api-key', methods=['POST']) -> admin_regenerate_api_key
+L3895-3896: @app.route('/api/admin/tenants/<int:tenant_id>/files') -> admin_tenant_files
+L3923-3924: @app.route('/api/bucket/list') -> list_files
+L3995-3996: @app.route('/api/bucket/upload', methods=['POST']) -> upload_file
+L4039-4040: @app.route('/api/bucket/delete', methods=['DELETE']) -> delete_file
+L4129-4130: @app.route('/api/bucket/fetch-url', methods=['POST']) -> bucket_fetch_url
+L4191-4192: @app.route('/api/bucket/tags', methods=['POST']) -> add_file_tag
+L4227-4228: @app.route('/api/bucket/tags/delete', methods=['POST']) -> delete_file_tag
+L4259-4260: @app.route('/api/bucket/download') -> download_file
+L4400-4401: @app.route('/api/tenant/custom-domain', methods=['POST']) -> set_custom_domain
+L4435-4436: @app.route('/api/tenant/custom-domain', methods=['DELETE']) -> delete_custom_domain
+L4462-4463: @app.route('/api/admin/custom-domains', methods=['GET', 'POST']) -> admin_custom_domains
+L4528-4529: @app.route('/api/tenant/custom-domain/verify', methods=['POST']) -> tenant_verify_custom_domain
+L4538-4539: @app.route('/api/admin/custom-domains/<int:tenant_id>/reset', methods=['POST']) -> admin_reset_custom_domain
+L4553-4554: @app.route('/api/admin/custom-domains/<int:tenant_id>/verify', methods=['POST']) -> admin_verify_custom_domain
+L4563-4564: @app.route('/api/admin/custom-domains/<int:tenant_id>', methods=['DELETE']) -> admin_delete_custom_domain
+L4590-4591: @app.route('/api/admin/support-team', methods=['GET', 'POST']) -> admin_support_team
+L4622-4623: @app.route('/api/admin/support-team/<int:member_id>', methods=['DELETE']) -> admin_delete_support_member
+L4633-4634: @app.route('/api/admin/mail/config', methods=['GET', 'POST']) -> admin_mail_config
+L4734-4735: @app.route('/api/admin/mail/templates', methods=['GET']) -> admin_get_mail_templates
+L4746-4747: @app.route('/api/admin/mail/templates', methods=['POST']) -> admin_create_mail_template
+L4776-4777: @app.route('/api/admin/mail/templates/<int:template_id>', methods=['DELETE']) -> admin_delete_mail_template
+L4787-4788: @app.route('/api/admin/mail/logs', methods=['GET']) -> admin_get_mail_logs
+L4799-4800: @app.route('/api/admin/mail/send', methods=['POST']) -> admin_mail_send
+L5008-5009: @app.route('/<path:file_path>') -> custom_domain_dl_route
+L5120-5121: @app.route('/pricing') -> serve_pricing
+L5128-5129: @app.route('/checkout') -> serve_checkout
+L5157-5158: @app.route('/privacy') -> serve_privacy
+L5161-5162: @app.route('/terms') -> serve_terms
+L5165-5166: @app.route('/api/auth/signup', methods=['POST']) -> tenant_signup
+L5295-5296: @app.route('/api/payments/checkout-details', methods=['GET']) -> payments_checkout_details
+L5335-5336: @app.route('/api/payments/create-order', methods=['POST']) -> payments_create_order
+L5552-5553: @app.route('/api/payments/upgrade-plan', methods=['POST']) -> payments_upgrade_plan
+L5594-5595: @app.route('/payment-callback') -> payment_callback
+L5839-5840: @app.route('/info/<int:tenant_id>') -> serve_tenant_info
+L5845-5846: @app.route('/api/tenant/billing/toggle-auto-renew', methods=['POST']) -> tenant_toggle_auto_renew
+L5864-5865: @app.route('/api/tenant/billing/transactions', methods=['GET']) -> tenant_transactions
+L5879-5880: @app.route('/api/admin/billing/run-cycle', methods=['POST']) -> admin_run_billing_cycle
+L5894-5895: @app.route('/api/admin/billing/transactions', methods=['GET']) -> admin_billing_transactions
+L5911-5912: @app.route('/api/admin/tenants/pending-payments', methods=['GET']) -> admin_pending_payments
+L5928-5929: @app.route('/api/admin/tenants/<int:tenant_id>/checkout-link', methods=['POST']) -> admin_generate_checkout_link
+L5962-5963: @app.route('/api/admin/coupons', methods=['GET']) -> admin_get_coupons
+L5974-5975: @app.route('/api/admin/coupons', methods=['POST']) -> admin_create_coupon
+L6014-6015: @app.route('/api/admin/coupons/<int:coupon_id>/toggle', methods=['POST']) -> admin_toggle_coupon
+L6031-6032: @app.route('/api/admin/coupons/<int:coupon_id>', methods=['DELETE']) -> admin_delete_coupon
+L6042-6043: @app.route('/api/admin/coupons/<int:coupon_id>/cancel-subscriptions', methods=['POST']) -> admin_cancel_coupon_subscriptions
+L6120-6121: @app.route('/api/payments/validate-coupon', methods=['GET']) -> payments_validate_coupon
+L6366-6367: @app.route('/api/health-check', methods=['GET']) -> system_health_check_endpoint
+L6370-6371: @app.route('/api/status', methods=['GET']) -> get_system_status_api
+L6597-6598: @app.route('/ref/<code>') -> referral_entry
+L6705-6706: @app.route('/api/admin/payments/<int:tenant_id>/approve', methods=['POST']) -> admin_payments_approve
+L6775-6776: @app.route('/api/admin/payments/transactions/<int:tx_id>/resend-invoice', methods=['POST']) -> admin_resend_invoice
+L6847-6848: @app.route('/api/admin/referrals', methods=['GET']) -> admin_referrals_list
+L6864-6865: @app.route('/api/admin/referrals', methods=['POST']) -> admin_referrals_create
+L6926-6927: @app.route('/api/admin/referrals/<int:ref_id>', methods=['PUT']) -> admin_referrals_update
+L6962-6963: @app.route('/api/admin/referrals/<int:ref_id>/toggle', methods=['POST']) -> admin_referrals_toggle
+L6980-6981: @app.route('/api/admin/referrals/<int:ref_id>', methods=['DELETE']) -> admin_referrals_delete
+L6991-6992: @app.route('/api/admin/referrals/<int:ref_id>/uses', methods=['GET']) -> admin_referrals_uses
+L7065-7066: @app.route('/api/payments/manual-order', methods=['POST']) -> payments_manual_order
+L7214-7215: @app.route('/api/pages', methods=['GET', 'POST']) -> pages_collection
+L7273-7274: @app.route('/api/pages/<int:page_id>', methods=['GET', 'PUT', 'DELETE']) -> pages_item
+L7507-7508: @app.route('/p/<username>/<slug>/edit', methods=['GET']) -> collaborative_edit_view
+L7702-7703: @app.route('/p/<username>/f/<filename>') -> public_file_view
+L7712-7713: @app.route('/api/pages/public/<username>/<slug>/comments', methods=['GET']) -> get_page_comments
+L7758-7759: @app.route('/api/pages/public/<username>/<slug>/comments', methods=['POST']) -> post_page_comment
+L7829-7830: @app.route('/p/<username>/col/<col_slug>') -> public_collection_view
+L7962-7963: @app.route('/p/<username>/<slug>') -> public_page_view
+L8549-8550: @app.route('/api/collections', methods=['GET', 'POST']) -> collections_collection
+L8623-8624: @app.route('/api/collections/<int:col_id>', methods=['PUT', 'DELETE']) -> collections_item
+L8704-8705: @app.route('/api/collections/auth/request-otp', methods=['POST']) -> collections_request_otp
+L8755-8756: @app.route('/api/collections/auth/verify-otp', methods=['POST']) -> collections_verify_otp
+L8812-8813: @app.route('/api/pages/public/<username>/<slug>', methods=['PUT']) -> collaborative_edit_page
+L8872-8873: @app.route('/api/admin/feature-allotment', methods=['GET']) -> admin_feature_allotment
+L8902-8903: @app.route('/api/admin/feature-allotment/add', methods=['POST']) -> admin_feature_allotment_add
+L8924-8925: @app.route('/api/admin/feature-allotment/remove', methods=['POST']) -> admin_feature_allotment_remove
+L8946-8947: @app.route('/api/admin/feature-flags', methods=['POST']) -> admin_create_feature_flag
+L8973-8974: @app.route('/api/admin/feature-flags/<int:flag_id>', methods=['DELETE']) -> admin_delete_feature_flag
+L9003-9004: @app.route('/api/photos/upload', methods=['POST']) -> photos_upload
+L9050-9051: @app.route('/api/photos/list', methods=['GET']) -> photos_list
+L9067-9068: @app.route('/api/photos/albums/create', methods=['POST']) -> create_album
+L9088-9089: @app.route('/api/photos/albums/list', methods=['GET']) -> list_albums
+L9161-9162: @app.route('/api/photos/albums/add', methods=['POST']) -> add_to_album
+L9189-9190: @app.route('/api/photos/albums/view/<slug>', methods=['GET']) -> view_album
+L9234-9235: @app.route('/api/photos/fetch-url', methods=['POST']) -> photos_fetch_url
+L9318-9319: @app.route('/api/photos/albums/share', methods=['POST']) -> share_album
+L9364-9365: @app.route('/api/photos/albums/shared', methods=['GET']) -> list_shared_albums
+L9398-9399: @app.route('/api/photos/albums/unshare', methods=['POST']) -> unshare_album
+L9418-9419: @app.route('/api/photos/albums/shared/view/<token>', methods=['GET']) -> view_shared_album_public
+L9494-9495: @app.route('/api/photos/albums/request-access', methods=['POST']) -> request_access
+L9559-9560: @app.route('/api/photos/albums/request-details', methods=['GET']) -> get_request_details
+L9583-9584: @app.route('/api/photos/albums/approve-request', methods=['POST']) -> approve_request
+L9655-9656: @app.route('/api/photos/albums/permissions', methods=['GET']) -> get_album_permissions
+L9695-9696: @app.route('/api/photos/albums/permissions/grant', methods=['POST']) -> grant_album_permission
+L9737-9738: @app.route('/api/photos/albums/permissions/revoke', methods=['POST']) -> revoke_album_permission
+L9797-9798: @app.route('/disclousers') -> serve_disclosures
+L9801-9802: @app.route('/api/analytics/collect', methods=['POST']) -> collect_analytics
+L9895-9896: @app.route('/api/admin/collections/datasets', methods=['GET']) -> admin_list_datasets
+L9915-9916: @app.route('/api/admin/collections/shared-albums', methods=['GET']) -> admin_list_shared_albums
+L9935-9936: @app.route('/api/admin/collections/datasets/create', methods=['POST']) -> admin_create_dataset
+L9965-9966: @app.route('/api/admin/collections/datasets/delete', methods=['POST']) -> admin_delete_dataset
+L9984-9985: @app.route('/api/admin/collections/datasets/analytics', methods=['GET']) -> admin_dataset_analytics
+L10154-10155: @app.route('/api/admin/collections/datasets/download', methods=['GET']) -> admin_download_dataset_csv

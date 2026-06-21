@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Secure Checkout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <!-- Cashfree SDK JS -->
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #111111;
+            --text-muted: #666666;
+            --border-color: #eeeeee;
+            --accent: #111111;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            min-height: 100vh; 
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Header */
+        header.checkout-header {
+            width: 100%;
+            text-align: center;
+            padding: 40px 0 25px 0;
+            border-bottom: 1px solid #eeeeee;
+        }
+        header.checkout-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #111111;
+            margin: 0;
+        }
+
+        /* Main Container */
+        .checkout-layout {
+            display: flex;
+            gap: 40px;
+            max-width: 1050px;
+            width: 90%;
+            margin: 40px 0 80px 0;
+        }
+
+        /* Left Column */
+        .left-col {
+            width: 62%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .section-box {
+            border: 1px solid #eeeeee;
+            background: #ffffff;
+        }
+        .section-header {
+            background: #111111;
+            color: #ffffff;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .section-body {
+            padding: 24px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .read-only-field {
+            padding: 12px;
+            background: #fcfcfc;
+            border: 1px solid #e5e7eb;
+            font-size: 0.88rem;
+            color: #111111;
+            font-weight: 500;
+        }
+
+        .coupon-section {
+            margin-bottom: 0;
+        }
+        .coupon-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .coupon-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .coupon-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0;
+            outline: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .coupon-input:focus {
+            border-color: #111111;
+        }
+        .btn-coupon-apply {
+            padding: 10px 20px;
+            background: #ffffff;
+            border: 1px solid #111111;
+            color: #111111;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.15s;
+        }
+        .btn-coupon-apply:hover {
+            background: #fafafa;
+        }
+        .coupon-message {
+            font-size: 0.75rem;
+            margin-top: 8px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+        .coupon-message.success { color: var(--success); }
+        .coupon-message.error { color: var(--error); }
+
+        .btn-pay {
+            width: auto;
+            align-self: flex-end;
+            padding: 14px 28px;
+            background: #ff5a00;
+            color: #ffffff;
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-pay:hover {
+            background: #e04f00;
+        }
+        .btn-pay:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .footer-note {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-note i { color: var(--success); }
+
+        /* Right Column */
+        .right-col {
+            width: 38%;
+        }
+
+        .summary-card {
+            border: 1px solid #eeeeee;
+            background: #ffffff;
+        }
+        .summary-header {
+            background: #f5f5f5;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .summary-header h2 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #111111;
+            margin: 0;
+        }
+        .summary-header a {
+            font-size: 0.75rem;
+            color: #666666;
+            text-decoration: underline;
+        }
+        .summary-body {
+            padding: 20px;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: #555555;
+            padding: 8px 0;
+        }
+        .cost-row.divider {
+            border-bottom: 1px solid #eeeeee;
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+        }
+        .cost-row.total-row {
+            border-top: 1px solid #eeeeee;
+            margin-top: 8px;
+            padding-top: 14px;
+            font-size: 0.88rem;
+            color: #111111;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .cost-row .discount {
+            color: var(--success);
+            font-weight: 600;
+        }
+        .cost-row.total-row .total-amount {
+            color: #ff5a00;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Included Product details */
+        .checkout-product {
+            border-top: 1.5px solid #eeeeee;
+            margin-top: 20px;
+            padding-top: 20px;
+            display: flex;
+            gap: 16px;
+        }
+        .product-icon-box {
+            width: 70px;
+            height: 70px;
+            background: #f9f9f9;
+            border: 1px solid #eeeeee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-icon-box i {
+            font-size: 2rem;
+            color: #111111;
+        }
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .product-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #111111;
+            text-transform: uppercase;
+        }
+        .product-desc {
+            font-size: 0.78rem;
+            color: #777777;
+        }
+        .product-spec {
+            font-size: 0.75rem;
+            color: #888888;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* Status card stylings */
+        .status-container {
+            text-align: center;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .status-icon.success { color: var(--success); }
+        .status-icon.error { color: var(--error); }
+        .status-container h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: #ffffff;
+            border: 1px solid #111111;
+            color: #111111;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: all 0.15s;
+        }
+        .btn-secondary:hover {
+            background: #fafafa;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .checkout-layout {
+                flex-direction: column;
+            }
+            .left-col, .right-col {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<body>
+
+    <header class="checkout-header">
+        <h1>Secure Checkout</h1>
+    </header>
+
+    <div class="checkout-layout">
+        <!-- Left Column: Checkout steps -->
+        <div class="left-col">
+            <!-- Step 1: Workspace info -->
+            <div class="section-box">
+                <div class="section-header">1. Workspace & Account Info</div>
+                <div class="section-body">
+                    <div class="form-group">
+                        <label>Account Workspace</label>
+                        <div class="read-only-field" id="lbl-username">Loading...</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Billing Contact Email</label>
+                        <div class="read-only-field" id="lbl-email">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Payment options -->
+            <div class="section-box">
+                <div class="section-header">2. Coupon & Payment Options</div>
+                <div class="section-body" id="checkout-form-section" style="display: flex; flex-direction: column;">
+                    <div class="coupon-section">
+                        <label class="coupon-label">Have a coupon code?</label>
+                        <div class="coupon-input-group">
+                            <input type="text" id="coupon-code" class="coupon-input" placeholder="e.g. SPECIAL50" autocomplete="off">
+                            <button type="button" id="btn-apply-coupon" class="btn-coupon-apply" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <div id="coupon-message" class="coupon-message"></div>
+                    </div>
+                    <div class="coupon-section" style="margin-bottom: 20px;">
+                        <label class="coupon-label">Payment Method</label>
+                        <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.9rem;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="payment_method" value="gateway" checked onchange="updatePayButton()">
+                                Cashfree Gateway
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="payment_method" value="manual" onchange="updatePayButton()">
+                                Manual / Cash Pay
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-pay" id="btn-pay-now" onclick="startPayment()" disabled>
+                        <span>Proceed to Payment</span> <i class="ph ph-shield-check"></i>
+                    </button>
+
+                    <div class="footer-note" id="footer-note-text">
+                        <i class="ph ph-lock-key"></i> Secured by Cashfree Payments
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Subscription summary -->
+        <div class="right-col">
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h2>In Your Plan</h2>
+                    <a id="btn-edit-plan" href="#">Edit</a>
+                </div>
+                <div class="summary-body">
+                    <div class="cost-row">
+                        <span>Base Subscription</span>
+                        <span id="lbl-base-rate">₹0.00</span>
+                    </div>
+                    <div class="cost-row" id="row-discount" style="display: none;">
+                        <span id="lbl-coupon-name">Discount (Coupon)</span>
+                        <span class="discount" id="lbl-discount-val">-₹0.00</span>
+                    </div>
+                    <div class="cost-row divider">
+                        <span>Estimated Tax</span>
+                        <span>₹0.00</span>
+                    </div>
+                    <div class="cost-row total-row">
+                        <span>Total Due</span>
+                        <span class="total-amount" id="lbl-amount">₹0.00</span>
+                    </div>
+
+                    <!-- Included Plan details -->
+                    <div class="checkout-product">
+                        <div class="product-icon-box">
+                            <i class="ph ph-hard-drive" id="plan-icon"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name" id="plan-name-title">Loading Plan...</div>
+                            <div class="product-desc">SaaS Object Storage Subscription</div>
+                            <div class="product-spec" id="plan-spec-details">
+                                Loading specs...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        
+        let originalRate = 0.0;
+        let finalAmount = 0.0;
+        let appliedCoupon = "";
+        let dashboardUrl = "https://dash.echo.oqens.me/";
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!token) {
+                showErrorCard("Invalid Session", "No secure checkout parameters were specified in this session. Please return to signup and try again.", "https://echo.oqens.me/signup", "Go back to Signup");
+                return;
+            }
+            
+            document.getElementById('btn-edit-plan').href = `https://echo.oqens.me/selectplan?token=${encodeURIComponent(token)}`;
+
+            try {
+                const res = await fetch(`/api/payments/checkout-details?token=${token}`);
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        const data = await res.json().catch(() => ({}));
+                        showErrorCard(
+                            "Account Mismatch",
+                            data.error || "This payment session belongs to a different tenant workspace. Please sign out and log in with the correct workspace account to complete payment.",
+                            "javascript:handleLogoutAndSwitch()",
+                            "Sign Out & Switch Account"
+                        );
+                        return;
+                    }
+                    if (res.status === 404 || res.status === 400) {
+                        const data = await res.json().catch(() => ({}));
+                        showErrorCard(
+                            "Payment Link Expired",
+                            data.error || "This payment link has already been used or has expired. Please check your dashboard status.",
+                            "https://echo.oqens.me/",
+                            "Go to Dashboard"
+                        );
+                        return;
+                    }
+                    throw new Error("Failed to load details");
+                }
+                const data = await res.json();
+                
+                if (data.dashboard_url) {
+                    dashboardUrl = data.dashboard_url;
+                }
+                
+                document.getElementById('lbl-username').innerText = data.username;
+                document.getElementById('lbl-email').innerText = data.email || 'N/A';
+                
+                originalRate = parseFloat(data.amount);
+                finalAmount = originalRate;
+                
+                document.getElementById('lbl-base-rate').innerText = `₹${originalRate.toFixed(2)}`;
+                document.getElementById('lbl-amount').innerText = `₹${originalRate.toFixed(2)}`;
+
+                // Dynamically display correct plan details
+                let planName = "Free Plan";
+                let planSpec = "";
+                let planIcon = "ph-hard-drive";
+                if (originalRate === 57.0) {
+                    planName = "Starter Plan";
+                    planIcon = "ph-rocket-launch";
+                    planSpec = `
+                        Storage: 5 GB Dedicated<br>
+                        Bandwidth: 10 GB Monthly<br>
+                        Edge Nodes: 2 Isolated<br>
+                        Custom Domain Mapping: Yes
+                    `;
+                } else if (originalRate === 137.0) {
+                    planName = "Pro Plan";
+                    planIcon = "ph-crown";
+                    planSpec = `
+                        Storage: 10 GB Dedicated<br>
+                        Bandwidth: 25 GB Monthly<br>
+                        Edge Nodes: All Delivery Nodes<br>
+                        Custom Domains: Multiple
+                    `;
+                } else {
+                    planSpec = `
+                        Storage: 100 MB limit<br>
+                        Bandwidth: 500 MB limit<br>
+                        Domain: Shared oqens.me
+                    `;
+                }
+                document.getElementById('plan-name-title').innerText = planName;
+                document.getElementById('plan-spec-details').innerHTML = planSpec;
+                
+                const iconEl = document.getElementById('plan-icon');
+                if (iconEl) {
+                    iconEl.className = `ph ${planIcon}`;
+                }
+
+                if (data.status === 'Active') {
+                    document.getElementById('checkout-form-section').innerHTML = `
+                        <div class="status-container">
+                            <div class="status-icon success">
+                                <i class="ph ph-check-circle"></i>
+                            </div>
+                            <h1>Workspace Already Active</h1>
+                            <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5; margin-bottom:20px;">
+                                This workspace is already active and healthy. No additional payment is required.
+                            </p>
+                            <a href="${dashboardUrl}" class="btn-secondary">Continue to Dashboard</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                document.getElementById('btn-pay-now').disabled = false;
+            } catch (e) {
+                console.error(e);
+                alert("Error loading tenant billing details.");
+            }
+        });
+
+        function showErrorCard(title, message, link, linkText) {
+            document.getElementById('checkout-form-section').innerHTML = `
+                <div class="status-container">
+                    <div class="status-icon error">
+                        <i class="ph ph-warning"></i>
+                    </div>
+                    <h1>${title}</h1>
+                    <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5; margin-bottom:20px;">
+                        ${message}
+                    </p>
+                    <a href="${link}" class="btn-secondary">${linkText}</a>
+                </div>
+            `;
+        }
+
+        async function handleLogoutAndSwitch() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.reload();
+            } catch(e) {
+                console.error(e);
+                alert("Failed to sign out. Please clear your browser cookies.");
+            }
+        }
+
+        async function applyCoupon() {
+            const codeInput = document.getElementById('coupon-code');
+            const code = codeInput.value.trim().toUpperCase();
+            const msgEl = document.getElementById('coupon-message');
+            const btnApply = document.getElementById('btn-apply-coupon');
+            
+            msgEl.style.display = 'none';
+            msgEl.className = 'coupon-message';
+            
+            if (!code) {
+                removeAppliedCoupon();
+                return;
+            }
+
+            btnApply.disabled = true;
+            btnApply.innerHTML = `<i class="ph ph-spinner spin"></i>`;
+
+            try {
+                const res = await fetch(`/api/payments/validate-coupon?code=${encodeURIComponent(code)}&token=${encodeURIComponent(token)}`);
+                if (!res.ok) throw new Error("Validation request failed");
+                const data = await res.json();
+                
+                if (data.valid) {
+                    appliedCoupon = data.code;
+                    finalAmount = parseFloat(data.final_amount);
+                    const discountAmt = parseFloat(data.discount_amount);
+                    
+                    document.getElementById('lbl-coupon-name').innerText = `Discount (${data.code})`;
+                    document.getElementById('lbl-discount-val').innerText = `-₹${discountAmt.toFixed(2)}`;
+                    document.getElementById('row-discount').style.display = 'flex';
+                    
+                    document.getElementById('lbl-amount').innerText = `₹${finalAmount.toFixed(2)}`;
+                    
+                    msgEl.innerText = `Coupon Applied: ₹${discountAmt.toFixed(2)} off!`;
+                    msgEl.classList.add('success');
+                    msgEl.style.display = 'flex';
+                    
+                    const payBtn = document.getElementById('btn-pay-now');
+                    if (finalAmount <= 0.0) {
+                        payBtn.innerHTML = `<span>Activate Workspace</span> <i class="ph ph-sparkle"></i>`;
+                        document.getElementById('footer-note-text').innerHTML = `<i class="ph ph-sparkle" style="color:var(--success)"></i> 100% Free activation applied`;
+                    } else {
+                        updatePayButton();
+                    }
+                } else {
+                    removeAppliedCoupon();
+                    msgEl.innerText = data.error || "Invalid coupon code.";
+                    msgEl.classList.add('error');
+                    msgEl.style.display = 'flex';
+                }
+            } catch (e) {
+                console.error(e);
+                removeAppliedCoupon();
+                msgEl.innerText = "Error validating coupon.";
+                msgEl.classList.add('error');
+                msgEl.style.display = 'flex';
+            } finally {
+                btnApply.disabled = false;
+                btnApply.innerHTML = "Apply";
+            }
+        }
+
+        function removeAppliedCoupon() {
+            appliedCoupon = "";
+            finalAmount = originalRate;
+            document.getElementById('row-discount').style.display = 'none';
+            document.getElementById('lbl-amount').innerText = `₹${originalRate.toFixed(2)}`;
+            updatePayButton();
+        }
+        
+        function updatePayButton() {
+            if (finalAmount <= 0.0) return;
+            const payBtn = document.getElementById('btn-pay-now');
+            const method = document.querySelector('input[name="payment_method"]:checked').value;
+            if (method === 'manual') {
+                payBtn.innerHTML = `<span>Submit Manual Payment</span> <i class="ph ph-hand-coins"></i>`;
+                document.getElementById('footer-note-text').innerHTML = `<i class="ph ph-clock"></i> Manual Approval Required`;
+            } else {
+                payBtn.innerHTML = `<span>Proceed to Payment</span> <i class="ph ph-shield-check"></i>`;
+                document.getElementById('footer-note-text').innerHTML = `<i class="ph ph-lock-key"></i> Secured by Cashfree Payments`;
+            }
+        }
+
+        async function startPayment() {
+            const btn = document.getElementById('btn-pay-now');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-spinner spin"></i> Processing...`;
+
+            try {
+                const method = finalAmount <= 0.0 ? 'gateway' : document.querySelector('input[name="payment_method"]:checked').value;
+                const endpoint = method === 'manual' ? '/api/payments/manual-order' : '/api/payments/create-order';
+                
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token, coupon: appliedCoupon })
+                });
+
+                const data = await res.json();
+                
+                if (method === 'manual' && data.status === 'pending_verification') {
+                    document.getElementById('checkout-form-section').innerHTML = `
+                        <div class="status-container">
+                            <div class="status-icon success" style="color: #f59e0b;">
+                                <i class="ph ph-clock"></i>
+                            </div>
+                            <h1>Payment Pending Verification</h1>
+                            <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5; margin-bottom:20px;">
+                                Your manual payment request has been received.<br>Your account will be fully activated once the administrator approves it.
+                            </p>
+                            <a href="${dashboardUrl}" class="btn-secondary">Go to Dashboard</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (data.status === 'free_activation') {
+                    document.getElementById('checkout-form-section').innerHTML = `
+                        <div class="status-container">
+                            <div class="status-icon success">
+                                <i class="ph ph-check-circle"></i>
+                            </div>
+                            <h1>Activation Successful</h1>
+                            <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5; margin-bottom:20px;">
+                                Your workspace has been activated for free using the applied coupon.
+                            </p>
+                            <a href="${dashboardUrl}" class="btn-secondary">Go to Dashboard</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (data.status === 'success' || data.payment_session_id) {
+                    if (data.cf_mode === 'sandbox' || data.mode === 'sandbox') {
+                        alert("TEST MODE: Cashfree Sandbox Environment");
+                    }
+                    try {
+                        const cashfree = Cashfree({ mode: (data.cf_mode || data.mode) === 'production' ? 'production' : 'sandbox' });
+                        cashfree.checkout({
+                            paymentSessionId: data.payment_session_id,
+                            returnUrl: `https://payments.oqens.me/payment-callback?order_id=${data.order_id}`
+                        });
+                    } catch (err) {
+                        console.error(err);
+                        alert(data.error || 'Failed to initialize payment.');
+                        resetPayButton();
+                    }
+                } else {
+                    alert(data.error || 'Failed to initialize payment.');
+                    resetPayButton();
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Network error connecting to payment gateway.");
+                resetPayButton();
+            }
+        }
+
+        function resetPayButton() {
+            const btn = document.getElementById('btn-pay-now');
+            btn.disabled = false;
+            updatePayButton();
+        }
+    </script>
+</body>
+</html>

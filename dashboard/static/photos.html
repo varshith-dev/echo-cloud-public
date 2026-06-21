@@ -1,0 +1,2602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS Photos</title>
+    <meta name="description" content="OQENS Photos – Your personal cloud photo library. Upload, organize, and share photos and videos.">
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <style>
+        /* ── Design Tokens ────────────────────────────────────────────── */
+        :root {
+            --bg:           #f8f9fa;
+            --surface:      #ffffff;
+            --border:       #e8eaed;
+            --border-dark:  #dadce0;
+            --primary:      #1a1a1a;
+            --primary-hover:#333333;
+            --accent:       #3b82f6;
+            --text-1:       #111827;
+            --text-2:       #6b7280;
+            --text-3:       #9ca3af;
+            --danger:       #ef4444;
+            --success:      #10b981;
+            --sidebar-w:    72px;
+            --sidebar-ex:   220px;
+            --topbar-h:     64px;
+            --shadow-xs:    0 1px 2px rgba(0,0,0,0.05);
+            --shadow-sm:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md:    0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-lg:    0 10px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+            --radius-sm:    6px;
+            --radius-md:    10px;
+            --radius-lg:    16px;
+            --transition:   0.22s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* ── Reset ────────────────────────────────────────────────────── */
+        *, *::before, *::after {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text-1);
+            min-height: 100vh;
+            display: flex;
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* ── Sidebar ──────────────────────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            transition: width var(--transition), box-shadow var(--transition), padding var(--transition);
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: var(--shadow-xs);
+        }
+        .sidebar:hover {
+            width: var(--sidebar-ex);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.06);
+            padding: 20px 14px;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            color: var(--text-1);
+            transition: background var(--transition);
+            cursor: pointer;
+        }
+        .logo:hover { background: rgba(0,0,0,0.04); }
+        .logo img { width: 48px; height: 48px; object-fit: contain; flex-shrink: 0; }
+        .logo-text {
+            font-size: 15px; font-weight: 700;
+            opacity: 0; transition: opacity var(--transition);
+            letter-spacing: -0.01em;
+        }
+        .sidebar:hover .logo-text { opacity: 1; }
+
+        /* Nav */
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .nav-link {
+            display: flex; align-items: center; gap: 14px;
+            padding: 11px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 13.5px; font-weight: 500;
+            transition: all 0.18s ease;
+            cursor: pointer;
+            position: relative;
+            white-space: nowrap;
+        }
+        .nav-link i {
+            font-size: 16px; flex-shrink: 0; width: 18px;
+            text-align: center; color: var(--text-2);
+            transition: color 0.18s, transform 0.18s;
+        }
+        .nav-link .nav-label {
+            opacity: 0; transition: opacity var(--transition);
+        }
+        .sidebar:hover .nav-link .nav-label { opacity: 1; }
+        .nav-link:hover {
+            background: rgba(0,0,0,0.04);
+            color: var(--text-1);
+        }
+        .nav-link:hover i { color: var(--text-1); transform: scale(1.05); }
+        .nav-link.active {
+            background: rgba(0,0,0,0.06);
+            color: var(--text-1); font-weight: 600;
+        }
+        .nav-link.active i { color: var(--primary); }
+        .nav-link.active::before {
+            content: '';
+            position: absolute; left: 0; top: 20%; height: 60%;
+            width: 3px; background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+        .nav-spacer { flex: 1; }
+
+        /* ── Main Content ─────────────────────────────────────────────── */
+        .main {
+            margin-left: var(--sidebar-w);
+            transition: margin-left var(--transition);
+            flex: 1; min-width: 0;
+            display: flex; flex-direction: column;
+        }
+        .sidebar:hover ~ .main { margin-left: var(--sidebar-ex); }
+
+        /* ── Top Bar ─────────────────────────────────────────────────── */
+        .topbar {
+            height: var(--topbar-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 90;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 0 28px;
+            gap: 16px;
+            box-shadow: var(--shadow-xs);
+        }
+        .topbar-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* Search */
+        .search-wrap {
+            display: flex; align-items: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 8px 16px; gap: 10px;
+            transition: border-color 0.18s, box-shadow 0.18s;
+            width: 340px;
+        }
+        .search-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+        }
+        .search-wrap i { color: var(--text-3); font-size: 13px; }
+        .search-wrap input {
+            background: none; border: none; outline: none;
+            color: var(--text-1); font-size: 13.5px; width: 100%;
+        }
+        .search-wrap input::placeholder { color: var(--text-3); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px; font-weight: 500;
+            cursor: pointer; border: 1px solid transparent;
+            transition: all 0.18s ease;
+            text-decoration: none; white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--primary); color: #fff;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-xs);
+        }
+        .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+        .btn-secondary {
+            background: var(--surface); color: var(--text-1);
+            border-color: var(--border);
+            box-shadow: var(--shadow-xs);
+        }
+        .btn-secondary:hover { background: var(--bg); border-color: var(--border-dark); }
+        .btn-danger { background: #fef2f2; color: var(--danger); border-color: rgba(239,68,68,0.2); }
+        .btn-danger:hover { background: #fee2e2; }
+
+        /* Old .btn alias for JS that references it */
+        .btn.btn { }
+
+        /* ── Page Content Area ────────────────────────────────────────── */
+        .page-body {
+            flex: 1;
+            padding: 28px 32px;
+            overflow-y: auto;
+        }
+
+        /* ── Sections ─────────────────────────────────────────────────── */
+        .section { display: none; animation: fade-up 0.25s ease forwards; }
+        .section.active { display: block; }
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section header */
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 22px; font-weight: 700;
+            letter-spacing: -0.02em; color: var(--text-1);
+        }
+        .section-header-actions { display: flex; gap: 10px; }
+
+        /* ── Photo Grid ───────────────────────────────────────────────── */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        /* Photo card */
+        .photo-card {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            background: #e8e8e8;
+            /* shimmer until image loads */
+            background: linear-gradient(90deg, #ebebeb 25%, #f5f5f5 50%, #ebebeb 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* Once media loaded, stop shimmer */
+        .photo-card.media-loaded {
+            background: #111;
+            animation: none;
+        }
+
+        .photo-card img,
+        .photo-card video {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            filter: blur(12px);
+            transform: scale(1.04);
+            transition: opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease;
+        }
+        .photo-card img.loaded,
+        .photo-card video.loaded {
+            opacity: 1; filter: none; transform: scale(1);
+        }
+
+        /* Hover overlay */
+        .card-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .photo-card:hover .card-overlay { opacity: 1; }
+
+        /* Selection checkbox */
+        .select-checkbox {
+            position: absolute; top: 10px; left: 10px;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            border: 1.5px solid rgba(0,0,0,0.12);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+            transition: all 0.2s ease;
+            z-index: 10; color: transparent; cursor: pointer; font-size: 10px;
+        }
+        .photo-card:hover .select-checkbox { opacity: 1; color: rgba(0,0,0,0.3); }
+        .photo-card.selected .select-checkbox {
+            opacity: 1; background: var(--primary);
+            border-color: var(--primary); color: #fff !important;
+        }
+        body.selection-mode .photo-card .select-checkbox { opacity: 1; color: rgba(0,0,0,0.3); }
+        body.selection-mode .photo-card.selected .select-checkbox { color: #fff !important; }
+
+        /* Video indicator badge */
+        .video-badge {
+            position: absolute; bottom: 8px; right: 8px;
+            background: rgba(0,0,0,0.55); color: #fff;
+            border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Skeleton cards */
+        .skeleton-card {
+            background: linear-gradient(90deg, #ebebeb 25%, #f5f5f5 50%, #ebebeb 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            aspect-ratio: 1/1;
+        }
+
+        /* ── Albums Grid ──────────────────────────────────────────────── */
+        .albums-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 20px;
+        }
+        .album-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-xs);
+        }
+        .album-card:hover {
+            border-color: var(--border-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .album-cover {
+            width: 100%; height: 140px;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            overflow: hidden;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .album-title {
+            font-size: 14px; font-weight: 600;
+            color: var(--text-1); margin-bottom: 3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .album-meta { font-size: 12px; color: var(--text-2); }
+
+        /* Album cover collage */
+        .album-cover-empty { width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--bg); color:#d1d5db; font-size:30px; }
+        .album-cover-grid { width:100%; height:100%; display:grid; gap:2px; overflow:hidden; }
+        .album-cover-grid.grid-1  { grid-template-columns:1fr; grid-template-rows:1fr; }
+        .album-cover-grid.grid-2  { grid-template-columns:1fr 1fr; grid-template-rows:1fr; }
+        .album-cover-grid.grid-3  { grid-template-columns:1.2fr 1fr; grid-template-rows:1fr 1fr; }
+        .album-cover-grid.grid-2x2{ grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+        .album-cover-grid img { width:100%; height:100%; object-fit:cover; border:none !important; display:block; }
+        .album-cover-empty-slot { background:rgba(0,0,0,0.06); }
+        .album-cover-more { 
+            background: rgba(0,0,0,0.6); 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 700; 
+            font-size: 18px; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        /* ── Context Menu ─────────────────────────────────────────────── */
+        .context-menu {
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: 6px 0;
+            min-width: 168px;
+            z-index: 5000;
+            display: none;
+        }
+        .ctx-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-1);
+            transition: background 0.15s;
+        }
+        .ctx-item:hover { background: var(--bg); }
+        .ctx-item.danger { color: var(--danger); }
+        .ctx-item.danger:hover { background: #fef2f2; }
+        .ctx-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+        /* ── Modals ───────────────────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 100%; max-width: 460px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(12px) scale(0.98);
+            transition: transform 0.22s ease;
+        }
+        .modal-overlay.active .modal { transform: translateY(0) scale(1); }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title { font-size: 17px; font-weight: 700; color: var(--text-1); }
+        .modal-close {
+            background: none; border: none;
+            color: var(--text-2); cursor: pointer;
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.18s;
+        }
+        .modal-close:hover { background: var(--bg); color: var(--text-1); }
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block; font-size: 12.5px; font-weight: 600;
+            color: var(--text-1); margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%; background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 10px 13px; border-radius: var(--radius-sm);
+            color: var(--text-1); font-size: 13.5px; outline: none;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+        }
+        select.form-input { cursor: pointer; }
+        .form-desc { font-size: 12px; color: var(--text-2); margin-bottom: 20px; }
+
+        /* ── Lightbox ─────────────────────────────────────────────────── */
+        #photoLightbox {
+            position: fixed; inset: 0;
+            background: rgba(8,8,10,0.90);
+            backdrop-filter: blur(14px);
+            z-index: 4000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.22s ease, right var(--transition);
+        }
+        #photoLightbox.active { opacity: 1; pointer-events: all; }
+        @media (min-width: 769px) {
+            body.info-panel-active #photoLightbox { right: 320px; }
+        }
+        #lightboxTitle {
+            position: absolute; top: 18px; left: 26px;
+            color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500;
+        }
+        .lb-btn {
+            position: absolute;
+            background: rgba(255,255,255,0.12);
+            border: none; color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.18s;
+        }
+        .lb-btn:hover { background: rgba(255,255,255,0.22); }
+        #lbClose  { top: 14px; right: 18px; width: 42px; height: 42px; font-size: 20px; }
+        #lbMenu   { top: 14px; right: 68px; width: 42px; height: 42px; font-size: 17px; }
+        #lightboxPrev { left: 20px;  top: 50%; transform: translateY(-50%); width: 48px; height: 48px; font-size: 20px; }
+        #lightboxNext { right: 20px; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; font-size: 20px; }
+        #lightboxMediaContainer {
+            max-width: 92%; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        /* ── Info Panel ───────────────────────────────────────────────── */
+        .info-panel {
+            position: fixed; top: 0; right: -320px; width: 320px; height: 100vh;
+            background: var(--surface); border-left: 1px solid var(--border);
+            box-shadow: -4px 0 20px rgba(0,0,0,0.08);
+            z-index: 4500; padding: 24px; overflow-y: auto;
+            transition: right var(--transition);
+        }
+        .info-panel.active { right: 0; }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 13px 0; border-bottom: 1px solid var(--border);
+            font-size: 13.5px;
+        }
+        .info-label { color: var(--text-2); font-weight: 500; }
+        .info-value { color: var(--text-1); font-weight: 500; text-align: right; word-break: break-all; max-width: 62%; }
+
+        /* ── Selection Bar ─────────────────────────────────────────────── */
+        .selection-bar {
+            position: fixed; bottom: -120px; left: 50%; transform: translateX(-50%);
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; padding: 14px 24px;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: var(--shadow-lg);
+            transition: bottom 0.28s cubic-bezier(0.4,0,0.2,1);
+            z-index: 2500;
+        }
+        .selection-bar.active { bottom: 28px; }
+        .selection-bar-divider { width: 1px; height: 22px; background: var(--border); }
+        #selectionCount { font-weight: 700; font-size: 13px; white-space: nowrap; }
+
+        /* ── Toast ────────────────────────────────────────────────────── */
+        .toast {
+            position: fixed; bottom: 22px; right: 22px;
+            background: var(--primary); color: #fff;
+            padding: 12px 20px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: var(--shadow-lg);
+            font-size: 13.5px; font-weight: 500;
+            transform: translateY(80px); opacity: 0;
+            transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
+            z-index: 9999;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        /* ── Empty State ──────────────────────────────────────────────── */
+        .empty-state {
+            padding: 64px 20px; text-align: center; color: var(--text-2);
+        }
+        .empty-state i { font-size: 44px; color: #d1d5db; display: block; margin-bottom: 14px; }
+        .empty-state h2 { font-size: 17px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; }
+
+        /* ── Settings ─────────────────────────────────────────────────── */
+        .settings-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 24px;
+            box-shadow: var(--shadow-xs); margin-bottom: 20px;
+        }
+        .settings-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--text-1); }
+        .progress-track {
+            height: 8px; background: #e5e7eb; border-radius: 4px;
+            overflow: hidden; margin: 10px 0 6px;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 4px;
+            background: var(--primary); width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* ── Upload Progress ──────────────────────────────────────────── */
+        #uploadProgressContainer {
+            position: fixed; bottom: 28px; right: 18px;
+            width: 300px; max-width: calc(100% - 36px);
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 16px;
+            box-shadow: var(--shadow-lg); z-index: 5500;
+            display: none; flex-direction: column; gap: 12px;
+        }
+
+        /* ── Add Photos to Album ──────────────────────────────────────── */
+        .photo-select-item {
+            position: relative; cursor: pointer;
+            border-radius: var(--radius-sm); overflow: hidden;
+            border: 2px solid transparent; height: 100px;
+            transition: all 0.18s ease;
+        }
+        .photo-select-item:hover { opacity: 0.88; }
+        .photo-select-item.selected { border-color: var(--primary); }
+        .photo-select-checkbox {
+            position: absolute; top: 5px; left: 5px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: transparent; transition: all 0.18s;
+        }
+        .photo-select-item.selected .photo-select-checkbox {
+            background: var(--primary); border-color: var(--primary); color: #fff;
+        }
+
+        /* ── Album detail header wrappers ─────────────────────────────── */
+        .album-detail-header-container {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; gap: 16px;
+        }
+        .album-detail-title-wrapper { display: flex; align-items: center; gap: 14px; }
+        .album-detail-actions-wrapper { display: flex; gap: 10px; }
+        .shared-album-header-container {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; gap: 14px;
+        }
+        .shared-album-owner { font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+
+        /* ── Icon Button ─────────────────────────────────────────────── */
+        .icon-btn {
+            background: none; border: none; color: var(--text-2);
+            width: 30px; height: 30px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.18s; font-size: 14px;
+        }
+        .icon-btn:hover { background: var(--bg); color: var(--text-1); }
+
+        /* ── Mobile Nav ──────────────────────────────────────────────── */
+        .mobile-nav {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0; height: 62px;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+            justify-content: space-around; align-items: center;
+        }
+        .mobile-nav-link {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; color: var(--text-2); font-size: 10.5px; font-weight: 500;
+            cursor: pointer; width: 25%; height: 100%;
+            justify-content: center; transition: color 0.18s;
+        }
+        .mobile-nav-link i { font-size: 19px; transition: transform 0.18s; }
+        .mobile-nav-link.active { color: var(--primary); font-weight: 700; }
+        .mobile-nav-link.active i { transform: scale(1.08); }
+
+        /* ── Request / Approve Access ────────────────────────────────── */
+        .access-card {
+            max-width: 500px; margin: 72px auto;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 40px;
+            box-shadow: var(--shadow-md); text-align: center;
+        }
+        .access-icon-wrap {
+            width: 74px; height: 74px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 22px;
+        }
+
+        /* ── Responsive ──────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar { display: none !important; }
+            .main { margin-left: 0 !important; }
+            .page-body { padding: 16px 14px 80px; }
+            .mobile-nav { display: flex; }
+            .topbar {
+                grid-template-columns: 1fr !important;
+                height: auto; padding: 12px 14px; gap: 10px;
+            }
+            .topbar > div:first-child { display: none; }
+            .search-wrap { width: 100% !important; }
+            .topbar-actions { width: 100%; justify-content: space-between; }
+            .topbar-actions .btn { flex: 1; justify-content: center; }
+            .photos-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 2px !important;
+            }
+            #lightboxPrev, #lightboxNext { display: none !important; }
+            .album-detail-header-container { flex-wrap: wrap; gap: 10px; }
+            .album-detail-actions-wrapper .btn-text { display: none !important; }
+            .shared-album-header-container { flex-wrap: wrap; gap: 8px; }
+            .selection-bar {
+                width: calc(100% - 20px) !important;
+                border-radius: 14px !important;
+                padding: 10px 14px !important;
+                gap: 8px !important;
+                justify-content: space-between !important;
+            }
+            .selection-bar.active { bottom: 72px !important; }
+            .selection-bar button span { display: none !important; }
+            .selection-bar-divider { display: none !important; }
+            #uploadProgressContainer { bottom: 72px !important; }
+            .albums-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 14px !important; }
+            .album-cover { height: 100px; }
+        }
+
+        @media (min-width: 769px) and (max-width: 1100px) {
+            .photos-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+    
+        /* Spin Animation for Phosphor Icons */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .ph-spin {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        /* ── Collaborator Avatars ─────────────────────────────────────── */
+        .avatar-stack {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+        .avatar-stack .avatar-circle {
+            margin-right: -8px;
+            border: 2px solid var(--surface);
+        }
+        .avatar-stack .avatar-circle:last-child {
+            margin-right: 0;
+        }
+        .avatar-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: var(--shadow-xs);
+            position: relative;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="appSidebar">
+        <a class="logo" onclick="event.preventDefault(); navigateTo('/')">
+            <img src="/static/logo.png" alt="OQENS">
+            <span class="logo-text">OQENS Photos</span>
+        </a>
+        <ul class="nav-list">
+            <li><a class="nav-link active" onclick="navigateTo('/')"><i class="ph ph-image"></i><span class="nav-label">All Photos</span></a></li>
+            <li><a class="nav-link" onclick="navigateTo('/album')"><i class="ph ph-folders"></i><span class="nav-label">Albums</span></a></li>
+            <li><a class="nav-link" onclick="navigateTo('/shared')"><i class="ph ph-users"></i><span class="nav-label">Shared</span></a></li>
+            <li><a class="nav-link" onclick="navigateTo('/manage')"><i class="ph ph-gear"></i><span class="nav-label">Settings</span></a></li>
+        </ul>
+        <div class="nav-spacer"></div>
+        <ul class="nav-list">
+            <li><a class="nav-link" href="https://dash.echo.oqens.me/"><i class="ph ph-arrow-left"></i><span class="nav-label">Dashboard</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Top Bar -->
+        <header class="topbar" id="appTopBar">
+            <div></div><!-- spacer -->
+            <div class="search-wrap">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" placeholder="Search photos..." id="searchInput" oninput="filterPhotos()" autocomplete="off">
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-secondary" onclick="openModal('downloadModal')">
+                    <i class="ph ph-link"></i> Fetch URL
+                </button>
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    <i class="ph ph-upload-simple"></i> Upload
+                </button>
+                <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display:none;" onchange="handleFileUpload(event)">
+            </div>
+        </header>
+
+        <!-- Page body -->
+        <main class="page-body">
+
+            <!-- All Photos -->
+            <section id="all-photos" class="section active">
+                <div class="section-header">
+                    <h1 class="section-title">All Photos</h1>
+                </div>
+                <div class="photos-grid" id="photoGrid"></div>
+            </section>
+
+            <!-- Albums -->
+            <section id="albums" class="section">
+                <div class="section-header">
+                    <h1 class="section-title">Albums</h1>
+                    <div class="section-header-actions">
+                        <button class="btn btn-primary" onclick="openModal('createAlbumModal')">
+                            <i class="ph ph-plus"></i> New Album
+                        </button>
+                    </div>
+                </div>
+                <div class="albums-grid" id="albumsGrid"></div>
+            </section>
+
+            <!-- Shared -->
+            <section id="shared" class="section">
+                <div class="section-header">
+                    <h1 class="section-title">Shared Albums</h1>
+                </div>
+                <div class="albums-grid" id="sharedAlbumsGrid"></div>
+            </section>
+
+            <!-- Settings -->
+            <section id="manage" class="section">
+                <div class="section-header">
+                    <h1 class="section-title">Settings</h1>
+                </div>
+                <div style="max-width:600px; display:flex; flex-direction:column; gap:0;">
+                    <div class="settings-card">
+                        <h3>Storage Usage</h3>
+                        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:500; margin-top:4px;">
+                            <span id="storageUsedLabel">Used 0 B of 100 MB</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="storageProgressBar"></div>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-2);">Delete photos to free up storage space.</p>
+                    </div>
+                    <div class="settings-card">
+                        <h3>Bandwidth Usage</h3>
+                        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:500; margin-top:4px;">
+                            <span id="bandwidthUsedLabel">Used 0 B of 500 MB</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="bandwidthProgressBar" style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);"></div>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-2);">Bandwidth resets at the end of each billing cycle.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Request Access -->
+            <section id="request-access" class="section">
+                <div class="access-card">
+                    <div class="access-icon-wrap" style="background:#fef3c7;">
+                        <i class="ph ph-folder" style="font-size:1.8rem; color:#d97706;"></i>
+                    </div>
+                    <h2 id="requestAlbumName" style="font-size:1.4rem; font-weight:700; margin-bottom:8px;">Private Album</h2>
+                    <p id="requestAlbumDesc" style="color:var(--text-2); margin-bottom:24px; font-size:14px;">This album is private. Request access from the owner to view it.</p>
+                    
+                    <div id="requestLoginPrompt" style="display:none; text-align:center;">
+                        <p style="color:var(--text-2); margin-bottom:20px; font-size:14px;">You must be logged in to request access to this album.</p>
+                        <button class="btn btn-primary" style="width:100%; justify-content:center; padding:13px;" onclick="redirectToLoginForAlbum()">
+                            <i class="ph ph-sign-in"></i> Login to Access
+                        </button>
+                    </div>
+
+                    <form id="requestAccessForm" onsubmit="submitAccessRequest(event)" style="text-align:left; display:none;">
+                        <input type="hidden" id="requestUsername">
+                        <input type="hidden" id="requestEmail">
+                        <div class="form-group">
+                            <label class="form-label">Message / Details (optional)</label>
+                            <textarea id="requestDetails" rows="3" class="form-input" style="resize:none; font-family:inherit;" placeholder="Why do you need access?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:13px;">
+                            <i class="ph ph-paper-plane"></i> Send Access Request
+                        </button>
+                    </form>
+                    <div id="requestSuccessMsg" style="display:none; color:var(--success); font-weight:500; margin-top:16px; font-size:14px;">
+                        <i class="ph ph-check-circle"></i> Request sent! You will be notified via email once approved.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Approve Access -->
+            <section id="approve-access" class="section">
+                <div class="access-card">
+                    <div class="access-icon-wrap" style="background:#e0f2fe;">
+                        <i class="ph ph-shield-check" style="font-size:1.8rem; color:#0284c7;"></i>
+                    </div>
+                    <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:8px;">Album Access Request</h2>
+                    <p id="approveAlbumInfo" style="color:var(--text-2); margin-bottom:22px; font-size:14px;">Request to view your private album</p>
+                    <div style="text-align:left; background:var(--bg); padding:18px; border-radius:var(--radius-md); border:1px solid var(--border); margin-bottom:24px;">
+                        <div style="margin-bottom:12px;">
+                            <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; font-weight:600; margin-bottom:2px;">Requester</div>
+                            <div id="approveRequesterName" style="font-size:15px; font-weight:600; color:var(--text-1);">Name</div>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; font-weight:600; margin-bottom:2px;">Email</div>
+                            <div id="approveRequesterEmail" style="font-size:14px; color:var(--text-1);">email@domain.com</div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; font-weight:600; margin-bottom:2px;">Message</div>
+                            <div id="approveRequesterDetails" style="font-size:14px; color:var(--text-2); line-height:1.5;">No message.</div>
+                        </div>
+                    </div>
+                    <div id="approvalActions" style="display:flex; gap:14px;">
+                        <button id="btnApproveAccess" onclick="respondToRequest('approve')" class="btn" style="flex:1; justify-content:center; padding:13px; background:#10b981; color:#fff; border-color:#10b981;">
+                            <i class="ph ph-check"></i> Accept
+                        </button>
+                        <button id="btnRejectAccess" onclick="respondToRequest('reject')" class="btn" style="flex:1; justify-content:center; padding:13px; background:#ef4444; color:#fff; border-color:#ef4444;">
+                            <i class="ph ph-x"></i> Reject
+                        </button>
+                    </div>
+                    <div id="approvalStatusMsg" style="display:none; padding:14px; border-radius:var(--radius-sm); font-weight:600; margin-top:18px; font-size:14px;">
+                        Status message
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div><!-- .main -->
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+        <a class="mobile-nav-link active" onclick="navigateTo('/')"><i class="ph ph-image"></i><span>Photos</span></a>
+        <a class="mobile-nav-link" onclick="navigateTo('/album')"><i class="ph ph-folders"></i><span>Albums</span></a>
+        <a class="mobile-nav-link" onclick="navigateTo('/shared')"><i class="ph ph-users"></i><span>Shared</span></a>
+        <a class="mobile-nav-link" onclick="navigateTo('/manage')"><i class="ph ph-gear"></i><span>Settings</span></a>
+    </div>
+
+    <!-- ── MODALS ──────────────────────────────────────────────────────── -->
+
+    <!-- Fetch URL Modal -->
+    <div class="modal-overlay" id="downloadModal" onclick="closeModal(event,'downloadModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">Fetch Image from URL</h2>
+                <button class="modal-close" onclick="closeModal(event,'downloadModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <p class="form-desc">Paste an image address below to save it directly to your cloud storage.</p>
+            <div class="form-group">
+                <label class="form-label">Image URL</label>
+                <input type="url" id="imageUrlInput" class="form-input" placeholder="https://example.com/image.jpg" oninput="previewFetchUrl()">
+            </div>
+            <div id="fetchPreviewContainer" style="display:none; margin-bottom:18px; text-align:center; background:var(--bg); border-radius:var(--radius-sm); padding:10px; border:1px solid var(--border);">
+                <img id="fetchPreviewImg" style="max-width:100%; max-height:180px; border-radius:4px; object-fit:contain;">
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="fetchFromUrl()">
+                <i class="ph ph-cloud-arrow-down"></i> Download to Cloud
+            </button>
+        </div>
+    </div>
+
+    <!-- Create Album Modal -->
+    <div class="modal-overlay" id="createAlbumModal" onclick="closeModal(event,'createAlbumModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">Create Album</h2>
+                <button class="modal-close" onclick="closeModal(event,'createAlbumModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Album Name</label>
+                <input type="text" id="albumNameInput" class="form-input" placeholder="e.g. Summer Vacation">
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="createAlbum()">
+                <i class="ph ph-plus"></i> Create Album
+            </button>
+        </div>
+    </div>
+
+    <!-- Share Album Modal -->
+    <div class="modal-overlay" id="shareAlbumModal" onclick="closeModal(event,'shareAlbumModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">Share Album</h2>
+                <button class="modal-close" onclick="closeModal(event,'shareAlbumModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <p class="form-desc">Configure visibility and copy the share link.</p>
+            <div class="form-group">
+                <label class="form-label">Sharing Type</label>
+                <select id="shareTypeSelect" class="form-input">
+                    <option value="public">Public (Anyone with link can view)</option>
+                    <option value="private">Private (Requires owner approval)</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" style="width:100%; justify-content:center; margin-bottom:18px;" onclick="updateSharingType()">Save Visibility</button>
+            <div class="form-group">
+                <label class="form-label">Share Link</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="shareLinkInput" readonly class="form-input" style="flex:1; cursor:text; background:#f8f9fa;">
+                    <button class="btn btn-secondary" onclick="copyShareLink()"><i class="ph ph-copy"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Permissions Modal -->
+    <div class="modal-overlay" id="managePermissionsModal" onclick="closeModal(event,'managePermissionsModal')">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width:480px; width:92%;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="managePermsTitle">Manage Permissions</h2>
+                <button class="modal-close" onclick="closeModal(null,'managePermissionsModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <p class="form-desc">Granted users can view this private album when logged in.</p>
+            
+            <!-- Grant direct access form -->
+            <form id="grantAccessForm" onsubmit="grantAccessSubmit(event)" style="margin-bottom: 20px;">
+                <div style="display:flex; gap:8px; align-items:flex-end;">
+                    <div style="flex:1;">
+                        <label class="form-label">Add email address</label>
+                        <input type="email" id="grantEmailInput" class="form-input" placeholder="user@domain.com" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 16px;">
+                        Add
+                    </button>
+                </div>
+            </form>
+
+            <label class="form-label" style="margin-bottom: 8px;">Who has access</label>
+            <div id="grantedUsersList" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding:2px; margin-bottom: 10px;">
+                <!-- List of users with access -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Photos to Album Modal -->
+    <div class="modal-overlay" id="addPhotosToAlbumModal" onclick="closeModal(event,'addPhotosToAlbumModal')">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width:580px; width:92%;">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Photos to Album</h2>
+                <button class="modal-close" onclick="closeModal(null,'addPhotosToAlbumModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <p class="form-desc">Select photos to add to this album.</p>
+            <div id="albumPhotosListGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); gap:8px; max-height:380px; overflow-y:auto; padding:2px;"></div>
+            <div style="margin-top:18px; display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal(null,'addPhotosToAlbumModal',true)">Cancel</button>
+                <button class="btn btn-primary" onclick="submitAddPhotosToAlbum()">Add Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Album Modal (from selection bar) -->
+    <div class="modal-overlay" id="addToAlbumModal" onclick="closeModal(event,'addToAlbumModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">Add to Album</h2>
+                <button class="modal-close" onclick="closeModal(null,'addToAlbumModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <div id="addToAlbumList" style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirmModal" onclick="closeModal(event,'confirmModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm</h2>
+                <button class="modal-close" onclick="closeModal(null,'confirmModal',true)"><i class="ph ph-x"></i></button>
+            </div>
+            <p id="confirmMessage" style="color:var(--text-2); margin-bottom:24px; line-height:1.6;">Are you sure?</p>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal(null,'confirmModal',true)">Cancel</button>
+                <button class="btn" id="confirmOkBtn" style="background:#ef4444; color:#fff; border-color:#ef4444;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Lightbox -->
+    <div id="photoLightbox" onclick="closeLightbox()">
+        <div id="lightboxTitle"></div>
+        <button class="lb-btn" id="lbClose" onclick="closeLightbox()"><i class="ph ph-x"></i></button>
+        <button class="lb-btn" id="lbMenu" onclick="openLightboxMenu(event)"><i class="ph ph-dots-three-vertical"></i></button>
+        <button class="lb-btn" id="lightboxPrev" onclick="prevPhoto(event)"><i class="ph ph-caret-left"></i></button>
+        <button class="lb-btn" id="lightboxNext" onclick="nextPhoto(event)"><i class="ph ph-caret-right"></i></button>
+        <div id="lightboxMediaContainer" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="ctx-item" onclick="contextAction('copy')"><i class="ph ph-link"></i> Copy Link</div>
+        <div class="ctx-item" onclick="contextAction('download')"><i class="ph ph-download-simple"></i> Download</div>
+        <div class="ctx-item" onclick="contextAction('info')"><i class="ph ph-info"></i> Photo Info</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item danger" onclick="contextAction('delete')"><i class="ph ph-trash"></i> Delete</div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:22px;">
+            <h3 style="font-size:17px; font-weight:700;">Metadata</h3>
+            <button class="icon-btn" onclick="document.getElementById('infoPanel').classList.remove('active'); document.body.classList.remove('info-panel-active');"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="infoName"></span></div>
+        <div class="info-row"><span class="info-label">Size</span><span class="info-value" id="infoSize"></span></div>
+        <div class="info-row"><span class="info-label">Uploaded</span><span class="info-value" id="infoDate"></span></div>
+    </div>
+
+    <!-- Selection Bar -->
+    <div class="selection-bar" id="selectionBar">
+        <span id="selectionCount">0 selected</span>
+        <div class="selection-bar-divider"></div>
+        <button class="btn btn-secondary" onclick="bulkShare()"><i class="ph ph-share-network"></i> <span>Share</span></button>
+        <button class="btn btn-secondary" onclick="openAddToAlbum()"><i class="ph ph-folder-plus"></i> <span>Add to Album</span></button>
+        <button class="btn btn-secondary btn-danger" onclick="bulkDelete()"><i class="ph ph-trash"></i> <span>Delete</span></button>
+        <button class="btn btn-primary" onclick="exitSelectionMode()"><i class="ph ph-x"></i> <span>Cancel</span></button>
+    </div>
+
+    <!-- Upload Progress -->
+    <div id="uploadProgressContainer">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px;">
+            <span style="font-weight:700; font-size:13px;" id="uploadProgressTitle">Uploading files...</span>
+            <button class="modal-close" onclick="document.getElementById('uploadProgressContainer').style.display='none'"><i class="ph ph-x"></i></button>
+        </div>
+        <div id="uploadProgressList" style="display:flex; flex-direction:column; gap:10px; max-height:200px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"><span id="toastMsg">Done</span></div>
+
+    <script>
+        // ── Routing ───────────────────────────────────────────────────────
+        const PATH_MAP = {
+            '/': 'all-photos',
+            '/album': 'albums',
+            '/shared': 'shared',
+            '/manage': 'manage'
+        };
+
+        function navigateTo(path) {
+            history.pushState(null, '', path);
+            handleRouting();
+        }
+
+        async function checkSessionAndAdjustSidebar() {
+            if (!currentUserSession) {
+                try {
+                    const res = await fetch('/api/session');
+                    if (res.ok) {
+                        currentUserSession = await res.json();
+                    }
+                } catch(e) {
+                    console.error("Error fetching session:", e);
+                }
+            }
+
+            const path = window.location.pathname;
+            const isSharedView = path.startsWith('/shared/');
+            const isApproveRequestView = path.startsWith('/album-request');
+            const isLoggedIn = currentUserSession && currentUserSession.role === 'tenant';
+
+            if (isSharedView || isApproveRequestView) {
+                if (isLoggedIn) {
+                    const isMobile = window.innerWidth <= 768;
+                    document.getElementById('appSidebar').style.display = isMobile ? 'none' : 'flex';
+                    const mn = document.getElementById('mobileNav');
+                    if (mn) mn.style.display = isMobile ? 'flex' : 'none';
+                    document.querySelector('.main').style.marginLeft = isMobile ? '0' : 'var(--sidebar-w)';
+                } else {
+                    document.getElementById('appSidebar').style.display = 'none';
+                    const mn = document.getElementById('mobileNav');
+                    if (mn) mn.style.display = 'none';
+                    document.querySelector('.main').style.marginLeft = '0';
+                }
+            } else {
+                const isMobile = window.innerWidth <= 768;
+                document.getElementById('appSidebar').style.display = isMobile ? 'none' : 'flex';
+                const mn = document.getElementById('mobileNav');
+                if (mn) mn.style.display = isMobile ? 'flex' : 'none';
+                document.querySelector('.main').style.marginLeft = isMobile ? '0' : 'var(--sidebar-w)';
+            }
+        }
+
+        function handleRouting() {
+            const path = window.location.pathname;
+
+            // Shared public view
+            if (path.startsWith('/shared/')) {
+                isPublicView = true;
+                publicShareToken = path.split('/shared/')[1];
+                setNavActive('');
+                checkSessionAndAdjustSidebar();
+                const tb = document.getElementById('appTopBar');
+                tb.style.gridTemplateColumns = '1fr auto 1fr';
+                document.querySelector('.topbar-actions').style.display = 'none';
+                loadSharedAlbumPublicly(publicShareToken);
+                return;
+            }
+
+            // Approve-access route
+            if (path.startsWith('/album-request')) {
+                setNavActive('');
+                checkSessionAndAdjustSidebar();
+                const tb = document.getElementById('appTopBar');
+                tb.style.gridTemplateColumns = '1fr auto 1fr';
+                document.querySelector('.topbar-actions').style.display = 'none';
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('approve-access').classList.add('active');
+                const urlParams = new URLSearchParams(window.location.search);
+                loadRequestDetails(urlParams.get('token'));
+                return;
+            }
+
+            // Standard private view
+            isPublicView = false;
+            publicShareToken = '';
+            checkSessionAndAdjustSidebar();
+            document.getElementById('appTopBar').style.gridTemplateColumns = '1fr auto 1fr';
+            document.querySelector('.topbar-actions').style.display = 'flex';
+
+            if (path.startsWith('/album/')) {
+                const slug = path.split('/album/')[1];
+                setNavActive('/album');
+                viewAlbum(slug, false);
+                return;
+            }
+
+            const sectionId = PATH_MAP[path] || 'all-photos';
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const el = document.getElementById(sectionId);
+            if (el) el.classList.add('active');
+
+            let targetPath = '/';
+            if (path.startsWith('/album')) targetPath = '/album';
+            else if (path.startsWith('/shared')) targetPath = '/shared';
+            else if (path.startsWith('/manage')) targetPath = '/manage';
+            setNavActive(targetPath);
+
+            if (sectionId === 'all-photos') {
+                document.querySelector('#all-photos .section-title').innerHTML = 'All Photos';
+                loadPhotos();
+            } else if (sectionId === 'albums') {
+                loadAlbums();
+            } else if (sectionId === 'shared') {
+                loadSharedAlbums();
+            } else if (sectionId === 'manage') {
+                loadSettings();
+            }
+        }
+
+        function setNavActive(targetPath) {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const activeLink = Array.from(document.querySelectorAll('.nav-link')).find(l => {
+                const oc = l.getAttribute('onclick') || '';
+                return oc.includes(`navigateTo('${targetPath}')`) || oc.includes(`navigateTo("${targetPath}")`);
+            });
+            if (activeLink) activeLink.classList.add('active');
+
+            document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+            const activeMobile = Array.from(document.querySelectorAll('.mobile-nav-link')).find(l => {
+                const oc = l.getAttribute('onclick') || '';
+                return oc.includes(`navigateTo('${targetPath}')`) || oc.includes(`navigateTo("${targetPath}")`);
+            });
+            if (activeMobile) activeMobile.classList.add('active');
+        }
+
+        window.addEventListener('popstate', handleRouting);
+
+        // ── Modal Helpers ─────────────────────────────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+
+        function closeModal(e, id, force = false) {
+            if (force || (e && e.target.id === id)) {
+                document.getElementById(id).classList.remove('active');
+                if (id === 'downloadModal') {
+                    document.getElementById('imageUrlInput').value = '';
+                    document.getElementById('fetchPreviewContainer').style.display = 'none';
+                    document.getElementById('fetchPreviewImg').src = '';
+                }
+            }
+        }
+
+        // ── Toast ─────────────────────────────────────────────────────────
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ── Confirm Dialog ────────────────────────────────────────────────
+        function customConfirm(msg, cb) {
+            document.getElementById('confirmMessage').innerText = msg;
+            const btn = document.getElementById('confirmOkBtn');
+            btn.onclick = () => { closeModal(null, 'confirmModal', true); cb(); };
+            openModal('confirmModal');
+        }
+
+        // ── State ─────────────────────────────────────────────────────────
+        let currentUserSession = null;
+        let activeManageShareToken = null;
+        let activeManageAlbumName = '';
+        let cachedPhotos = [];
+        let currentPhotoIndex = -1;
+        let currentZoom = 1, translateX = 0, translateY = 0;
+        let isDragging = false, startX = 0, startY = 0;
+        let selectionMode = false;
+        let selectedPhotos = new Set();
+        let isPublicView = false;
+        let publicShareToken = '';
+
+        // ── Selection ──────────────────────────────────────────────────────
+        function toggleSelectionBtn(e, index) {
+            e.stopPropagation();
+            if (!selectionMode) enterSelectionMode(index);
+            else toggleSelection(index);
+        }
+        function handleCardClick(e, index) {
+            if (selectionMode) toggleSelection(index);
+            else openLightbox(index);
+        }
+        function enterSelectionMode(index) {
+            if (isPublicView) return;
+            selectionMode = true;
+            document.body.classList.add('selection-mode');
+            document.getElementById('selectionBar').classList.add('active');
+            toggleSelection(index);
+            if (navigator.vibrate) navigator.vibrate(40);
+        }
+        function toggleSelection(index) {
+            if (isPublicView) return;
+            const card = document.querySelector(`.photo-card[data-index="${index}"]`);
+            if (!card) return;
+            if (selectedPhotos.has(index)) {
+                selectedPhotos.delete(index); card.classList.remove('selected');
+            } else {
+                selectedPhotos.add(index); card.classList.add('selected');
+            }
+            document.getElementById('selectionCount').innerText = `${selectedPhotos.size} selected`;
+            if (selectedPhotos.size === 0) exitSelectionMode();
+        }
+        function exitSelectionMode() {
+            selectionMode = false; selectedPhotos.clear();
+            document.body.classList.remove('selection-mode');
+            document.getElementById('selectionBar').classList.remove('active');
+            document.querySelectorAll('.photo-card').forEach(c => c.classList.remove('selected'));
+        }
+        function bulkShare() {
+            if (selectedPhotos.size === 0) return;
+            const links = Array.from(selectedPhotos).map(i => window.location.origin + `/api/bucket/download?key=${cachedPhotos[i].filename}`);
+            navigator.clipboard.writeText(links.join('\n'));
+            showToast(`Copied ${links.length} share link(s)!`);
+            exitSelectionMode();
+        }
+        function bulkDelete() {
+            if (selectedPhotos.size === 0) return;
+            customConfirm(`Delete ${selectedPhotos.size} selected photo(s)?`, async () => {
+                const results = await Promise.all(Array.from(selectedPhotos).map(async i => {
+                    const p = cachedPhotos[i];
+                    try {
+                        const r = await fetch('/api/bucket/delete', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({key:p.filename}) });
+                        return r.ok;
+                    } catch { return false; }
+                }));
+                showToast(`Deleted ${results.filter(Boolean).length} photo(s)`);
+                exitSelectionMode();
+                loadPhotos(true);
+            });
+        }
+
+        // ── Lightbox helpers ──────────────────────────────────────────────
+        function updateTransform() {
+            const img = document.getElementById('lightboxImg');
+            if (img) img.style.transform = `scale(${currentZoom}) translate(${translateX}px,${translateY}px)`;
+        }
+        window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+
+        // ── Premium Video Player ──────────────────────────────────────────
+        let _vpKeyHandler = null;
+
+        function initCustomVideoPlayer() {
+            const video   = document.getElementById('lightboxImg');
+            const controls= document.getElementById('videoControls');
+            const playBtn = document.getElementById('videoPlayBtn');
+            const muteBtn = document.getElementById('videoMuteBtn');
+            const timeline= document.getElementById('videoTimeline');
+            const progFill= document.getElementById('videoProgress');
+            const thumb   = document.getElementById('videoThumb');
+            const timeCur = document.getElementById('videoTimeCurrent');
+            const timeDur = document.getElementById('videoTimeDuration');
+            const volSlider= document.getElementById('videoVolSlider');
+            const fsBtn   = document.getElementById('videoFsBtn');
+            const bigPlay = document.getElementById('videoBigPlay');
+            const wrap    = document.getElementById('videoPlayerWrap');
+
+            if (!video || !controls) return;
+
+            function fmt(s) {
+                if (!s || isNaN(s)) return '0:00';
+                const m = Math.floor(s/60), sec = Math.floor(s%60);
+                return `${m}:${sec<10?'0':''}${sec}`;
+            }
+            function setPlayIcon(paused) {
+                playBtn.innerHTML = paused ? '<i class="ph ph-play"></i>' : '<i class="ph ph-pause"></i>';
+            }
+            function setVolIcon() {
+                const v = video.volume, m = video.muted;
+                muteBtn.innerHTML = (m||v===0) ? '<i class="ph ph-speaker-x"></i>'
+                    : v<0.5 ? '<i class="ph ph-speaker-low"></i>'
+                    : '<i class="ph ph-speaker-high"></i>';
+            }
+            function updateProgress() {
+                if (!video.duration) return;
+                const pct = (video.currentTime/video.duration)*100;
+                progFill.style.width = pct+'%';
+                thumb.style.left = pct+'%';
+                timeCur.textContent = fmt(video.currentTime);
+            }
+            let hideTimer;
+            function showControls() {
+                controls.style.opacity = '1'; wrap.style.cursor = 'default';
+                clearTimeout(hideTimer);
+                if (!video.paused) {
+                    hideTimer = setTimeout(() => { controls.style.opacity='0'; wrap.style.cursor='none'; }, 3000);
+                }
+            }
+            wrap.addEventListener('mousemove', showControls);
+            wrap.addEventListener('touchstart', showControls, {passive:true});
+            controls.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+            controls.addEventListener('mouseleave', () => {
+                if (!video.paused) hideTimer = setTimeout(() => { controls.style.opacity='0'; wrap.style.cursor='none'; }, 1500);
+            });
+            function togglePlay() { video.paused ? video.play() : video.pause(); showControls(); }
+            video.addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
+            bigPlay.addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
+            playBtn.addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
+            video.addEventListener('play',  () => { setPlayIcon(false); bigPlay.style.opacity='0'; bigPlay.style.pointerEvents='none'; showControls(); });
+            video.addEventListener('pause', () => { setPlayIcon(true);  bigPlay.style.opacity='1'; bigPlay.style.pointerEvents='auto'; showControls(); });
+            video.addEventListener('ended', () => { setPlayIcon(true);  bigPlay.style.opacity='1'; bigPlay.style.pointerEvents='auto'; });
+            video.addEventListener('loadedmetadata', () => { timeDur.textContent = fmt(video.duration); });
+            video.addEventListener('timeupdate', updateProgress);
+
+            let isScrubbing = false;
+            function scrubTo(e) {
+                const rect = timeline.getBoundingClientRect();
+                const raw = e.touches ? e.touches[0].clientX : e.clientX;
+                const pos = Math.max(0, Math.min(1, (raw-rect.left)/rect.width));
+                video.currentTime = pos * video.duration;
+                updateProgress();
+            }
+            timeline.addEventListener('mousedown', e => { e.stopPropagation(); isScrubbing=true; scrubTo(e); });
+            timeline.addEventListener('touchstart', e => { isScrubbing=true; scrubTo(e); }, {passive:true});
+            document.addEventListener('mousemove', e => { if (isScrubbing) scrubTo(e); });
+            document.addEventListener('touchmove', e => { if (isScrubbing) scrubTo(e); }, {passive:true});
+            document.addEventListener('mouseup',  () => { isScrubbing=false; });
+            document.addEventListener('touchend', () => { isScrubbing=false; });
+
+            muteBtn.addEventListener('click', e => {
+                e.stopPropagation(); video.muted = !video.muted;
+                if (!video.muted && video.volume===0) video.volume=0.5;
+                volSlider.value = video.muted ? 0 : video.volume;
+                setVolIcon(); showControls();
+            });
+            volSlider.addEventListener('input', e => {
+                e.stopPropagation(); video.volume = parseFloat(volSlider.value);
+                video.muted = video.volume===0; setVolIcon();
+            });
+            volSlider.value = video.volume;
+
+            fsBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                if (!document.fullscreenElement) { wrap.requestFullscreen && wrap.requestFullscreen(); fsBtn.innerHTML='<i class="ph ph-corners-in"></i>'; }
+                else { document.exitFullscreen && document.exitFullscreen(); fsBtn.innerHTML='<i class="ph ph-corners-out"></i>'; }
+                showControls();
+            });
+            document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) fsBtn.innerHTML='<i class="ph ph-corners-out"></i>'; });
+
+            if (_vpKeyHandler) document.removeEventListener('keydown', _vpKeyHandler);
+            _vpKeyHandler = e => {
+                const lb = document.getElementById('photoLightbox');
+                if (!lb || !lb.classList.contains('active')) return;
+                const vid = document.getElementById('lightboxImg');
+                if (!vid || vid.tagName !== 'VIDEO') return;
+                switch(e.key) {
+                    case ' ': case 'k': e.preventDefault(); togglePlay(); break;
+                    case 'ArrowRight': e.preventDefault(); video.currentTime = Math.min(video.duration, video.currentTime+5); break;
+                    case 'ArrowLeft':  e.preventDefault(); video.currentTime = Math.max(0, video.currentTime-5); break;
+                    case 'ArrowUp':    e.preventDefault(); video.volume=Math.min(1,video.volume+0.1); volSlider.value=video.volume; setVolIcon(); break;
+                    case 'ArrowDown':  e.preventDefault(); video.volume=Math.max(0,video.volume-0.1); volSlider.value=video.volume; setVolIcon(); break;
+                    case 'm': case 'M': video.muted=!video.muted; volSlider.value=video.muted?0:video.volume; setVolIcon(); break;
+                    case 'f': case 'F': fsBtn.click(); break;
+                }
+            };
+            document.addEventListener('keydown', _vpKeyHandler);
+            setVolIcon(); showControls();
+        }
+
+        // ── Touch Gestures ────────────────────────────────────────────────
+        let initialDistance=0, initialZoom=1, initialCenterX=0, initialCenterY=0, lastTap=0;
+
+        function initLightboxTouchGestures() {
+            const mc = document.getElementById('lightboxMediaContainer');
+            const media = document.getElementById('lightboxImg');
+            if (!media || media.tagName==='VIDEO' || !mc) return;
+            mc.addEventListener('touchstart', e => {
+                if (e.touches.length===1) {
+                    const now = Date.now(), span = now - lastTap;
+                    if (span<300 && span>0) {
+                        e.preventDefault();
+                        if (currentZoom>1) { currentZoom=1; translateX=0; translateY=0; }
+                        else {
+                            currentZoom=2.5;
+                            const rect=media.getBoundingClientRect();
+                            translateX = -(e.touches[0].clientX - rect.left - rect.width/2)/2.5;
+                            translateY = -(e.touches[0].clientY - rect.top - rect.height/2)/2.5;
+                        }
+                        updateTransform(); return;
+                    }
+                    lastTap = now;
+                    if (currentZoom>1) { isDragging=true; startX=e.touches[0].clientX-(translateX*currentZoom); startY=e.touches[0].clientY-(translateY*currentZoom); }
+                } else if (e.touches.length===2) {
+                    e.preventDefault(); isDragging=false;
+                    initialDistance = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+                    initialZoom = currentZoom;
+                    initialCenterX = (e.touches[0].clientX+e.touches[1].clientX)/2;
+                    initialCenterY = (e.touches[0].clientY+e.touches[1].clientY)/2;
+                }
+            }, {passive:false});
+            mc.addEventListener('touchmove', e => {
+                if (e.touches.length===1 && isDragging) {
+                    translateX=(e.touches[0].clientX-startX)/currentZoom;
+                    translateY=(e.touches[0].clientY-startY)/currentZoom;
+                    updateTransform();
+                } else if (e.touches.length===2) {
+                    e.preventDefault();
+                    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+                    if (initialDistance>0) {
+                        currentZoom = Math.max(0.8, Math.min(4, initialZoom*(d/initialDistance)));
+                        if (currentZoom<=1) { translateX=0; translateY=0; }
+                        else {
+                            const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+                            const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+                            translateX += (cx-initialCenterX)/currentZoom;
+                            translateY += (cy-initialCenterY)/currentZoom;
+                            initialCenterX=cx; initialCenterY=cy;
+                        }
+                        updateTransform();
+                    }
+                }
+            }, {passive:false});
+            mc.addEventListener('touchend', e => {
+                if (e.touches.length===0) {
+                    isDragging=false;
+                    if (currentZoom<1) { currentZoom=1; translateX=0; translateY=0; updateTransform(); }
+                }
+            }, {passive:true});
+        }
+
+        // ── Lightbox Open/Close ───────────────────────────────────────────
+        function openLightbox(index) {
+            if (index<0 || index>=cachedPhotos.length) return;
+            currentPhotoIndex = index; currentZoom=1; translateX=0; translateY=0;
+            const p = cachedPhotos[index];
+            const lb = document.getElementById('photoLightbox');
+            const container = document.getElementById('lightboxMediaContainer');
+            const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(p.filename);
+            const tokenParam = isPublicView ? `&share_token=${publicShareToken}` : '';
+
+            if (isVideo) {
+                container.innerHTML = `
+                    <div id="videoPlayerWrap" style="position:relative;width:100%;height:85vh;max-height:85vh;background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+                        <video id="lightboxImg" src="/api/bucket/download?key=${p.filename}${tokenParam}" autoplay style="width:100%;height:100%;object-fit:contain;display:block;"></video>
+                        <div id="videoBigPlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.25s;pointer-events:none;border:2px solid rgba(255,255,255,0.3);">
+                            <i class="ph ph-play" style="color:#fff;font-size:26px;margin-left:4px;"></i>
+                        </div>
+                        <div id="videoControls" style="position:absolute;bottom:0;left:0;right:0;padding:40px 18px 14px;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);opacity:1;transition:opacity 0.3s;user-select:none;">
+                            <div id="videoTimeline" style="width:100%;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;position:relative;cursor:pointer;margin-bottom:12px;transition:height 0.15s;" onmouseenter="this.style.height='6px'" onmouseleave="this.style.height='4px'">
+                                <div id="videoProgress" style="height:100%;width:0%;background:#3b82f6;border-radius:2px;pointer-events:none;"></div>
+                                <div id="videoThumb" style="position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(0,0,0,0.5);pointer-events:none;transition:transform 0.1s;"></div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <button id="videoPlayBtn" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.9;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.9'">
+                                    <i class="ph ph-pause"></i>
+                                </button>
+                                <span id="videoTimeCurrent" style="color:rgba(255,255,255,0.9);font-size:12px;font-family:monospace;flex-shrink:0;">0:00</span>
+                                <span style="color:rgba(255,255,255,0.4);font-size:12px;flex-shrink:0;">/</span>
+                                <span id="videoTimeDuration" style="color:rgba(255,255,255,0.5);font-size:12px;font-family:monospace;flex-shrink:0;">0:00</span>
+                                <div style="flex:1;"></div>
+                                <button id="videoMuteBtn" style="background:none;border:none;color:#fff;font-size:15px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.85;">
+                                    <i class="ph ph-speaker-high"></i>
+                                </button>
+                                <input id="videoVolSlider" type="range" min="0" max="1" step="0.02" value="1" style="width:72px;height:4px;accent-color:#3b82f6;cursor:pointer;flex-shrink:0;">
+                                <button id="videoFsBtn" style="background:none;border:none;color:#fff;font-size:15px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.85;">
+                                    <i class="ph ph-corners-out"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                initCustomVideoPlayer();
+            } else {
+                container.innerHTML = `<img id="lightboxImg" src="/api/bucket/download?key=${p.filename}${tokenParam}&preview=2" style="max-width:100%;max-height:85vh;object-fit:contain;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,0.4);transition:transform 0.2s ease-out;transform-origin:center center;cursor:grab;" draggable="false">`;
+                initLightboxTouchGestures();
+            }
+
+            const mediaEl = document.getElementById('lightboxImg');
+            container.onmousedown = e => {
+                if (currentZoom>1) {
+                    isDragging=true; startX=e.clientX-(translateX*currentZoom); startY=e.clientY-(translateY*currentZoom);
+                    if (mediaEl) mediaEl.style.cursor='grabbing';
+                }
+            };
+            document.getElementById('lightboxTitle').innerText = p.filename;
+            lb.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
+            lb.onwheel = e => {
+                e.preventDefault();
+                currentZoom += e.deltaY<0 ? 0.15 : -0.15;
+                currentZoom = Math.max(0.5, Math.min(4, currentZoom));
+                if (currentZoom<=1) { translateX=0; translateY=0; }
+                if (mediaEl) mediaEl.style.cursor = currentZoom>1 ? 'grab' : 'default';
+                updateTransform();
+            };
+        }
+
+        window.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            translateX = (e.clientX-startX)/currentZoom;
+            translateY = (e.clientY-startY)/currentZoom;
+            updateTransform();
+        });
+        window.addEventListener('mouseup', () => {
+            isDragging=false;
+            const m = document.getElementById('lightboxImg');
+            if (m) m.style.cursor = currentZoom>1 ? 'grab' : 'default';
+        });
+
+        function closeLightbox() {
+            const lb = document.getElementById('photoLightbox');
+            lb.classList.remove('active');
+            document.getElementById('infoPanel').classList.remove('active');
+            document.body.classList.remove('info-panel-active');
+            document.body.style.overflow = 'auto';
+            document.body.style.touchAction = 'auto';
+            lb.onwheel = null;
+            document.getElementById('lightboxMediaContainer').onmousedown = null;
+            currentPhotoIndex=-1; currentZoom=1; translateX=0; translateY=0;
+            const media = document.getElementById('lightboxImg');
+            if (media && media.tagName==='VIDEO') media.pause();
+        }
+        function nextPhoto(e) { if(e) e.stopPropagation(); if(currentPhotoIndex<cachedPhotos.length-1) openLightbox(currentPhotoIndex+1); }
+        function prevPhoto(e) { if(e) e.stopPropagation(); if(currentPhotoIndex>0) openLightbox(currentPhotoIndex-1); }
+
+        document.addEventListener('keydown', e => {
+            if (document.getElementById('photoLightbox').classList.contains('active')) {
+                if (e.key==='ArrowRight') nextPhoto();
+                if (e.key==='ArrowLeft')  prevPhoto();
+                if (e.key==='Escape')     closeLightbox();
+            }
+        });
+
+        // ── Context Menu ──────────────────────────────────────────────────
+        let contextTarget = null;
+        document.addEventListener('contextmenu', e => {
+            if (isPublicView) return;
+            const card = e.target.closest('.photo-card');
+            if (card) {
+                e.preventDefault();
+                const index = parseInt(card.dataset.index);
+                contextTarget = cachedPhotos[index];
+                const menu = document.getElementById('contextMenu');
+                menu.style.display = 'block';
+                let x=e.clientX, y=e.clientY;
+                if (x+170>window.innerWidth) x=window.innerWidth-170;
+                if (y+140>window.innerHeight) y=window.innerHeight-140;
+                menu.style.left=`${x}px`; menu.style.top=`${y}px`;
+            } else {
+                document.getElementById('contextMenu').style.display='none';
+            }
+        });
+        function openLightboxMenu(e) {
+            e.stopPropagation();
+            if (currentPhotoIndex===-1 || isPublicView) return;
+            contextTarget = cachedPhotos[currentPhotoIndex];
+            const menu = document.getElementById('contextMenu');
+            menu.style.display='block'; menu.style.right='20px'; menu.style.top='64px'; menu.style.left='auto';
+        }
+        document.addEventListener('click', () => { const m=document.getElementById('contextMenu'); if(m) m.style.display='none'; });
+
+        function formatBytes(b, d=2) {
+            if (!+b) return '0 Bytes';
+            const k=1024, sizes=['Bytes','KB','MB','GB','TB'], i=Math.floor(Math.log(b)/Math.log(k));
+            return `${parseFloat((b/Math.pow(k,i)).toFixed(d<0?0:d))} ${sizes[i]}`;
+        }
+        function populateInfoPanel(p) {
+            document.getElementById('infoName').innerText = p.filename;
+            document.getElementById('infoSize').innerText = p.size_bytes ? formatBytes(p.size_bytes) : 'Unknown';
+            document.getElementById('infoDate').innerText = p.created_at ? new Date(p.created_at).toLocaleString() : 'Unknown';
+        }
+        async function contextAction(action) {
+            if (!contextTarget || isPublicView) return;
+            const p = contextTarget;
+            if (action==='info') {
+                populateInfoPanel(p);
+                document.getElementById('infoPanel').classList.add('active');
+                document.body.classList.add('info-panel-active');
+            } else if (action==='copy') {
+                navigator.clipboard.writeText(window.location.origin+`/api/bucket/download?key=${p.filename}`);
+                showToast('Link copied!');
+            } else if (action==='download') {
+                window.open(`/api/bucket/download?key=${p.filename}&attachment=true`,'_blank');
+            } else if (action==='delete') {
+                customConfirm(`Delete ${p.filename}?`, async () => {
+                    const r = await fetch('/api/bucket/delete',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:p.filename})});
+                    if (r.ok) { showToast('Photo deleted'); closeLightbox(); loadPhotos(true); }
+                    else showToast('Failed to delete photo');
+                });
+            }
+        }
+
+        // ── Load Photos ───────────────────────────────────────────────────
+        async function loadPhotos(forceRefresh=false) {
+            try {
+                if (!forceRefresh && cachedPhotos.length>0 && !isPublicView) { renderPhotos(cachedPhotos); return; }
+                const grid = document.getElementById('photoGrid');
+                if (grid) grid.innerHTML = Array(16).fill(0).map(()=>`<div class="skeleton-card"></div>`).join('');
+                const res = await fetch('/api/photos/list');
+                const data = await res.json();
+                if (data.photos) { cachedPhotos=data.photos; renderPhotos(cachedPhotos); }
+            } catch(err) { console.error(err); }
+        }
+
+        function renderPhotos(photos) {
+            const grid = document.getElementById('photoGrid');
+            if (!grid) return;
+            if (photos && photos.length>0) {
+                grid.innerHTML = photos.map((p,i) => {
+                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(p.filename);
+                    const tokenParam = isPublicView ? `&share_token=${publicShareToken}` : '';
+                    const tokenFirst = isPublicView ? `?key=${p.filename}&share_token=${publicShareToken}` : `?key=${p.filename}`;
+                    let mediaTag = '';
+                    if (isVideo) {
+                        mediaTag = `<video src="/api/bucket/download${tokenFirst}" style="width:100%;height:100%;object-fit:cover;" onloadeddata="this.classList.add('loaded');this.closest('.photo-card').classList.add('media-loaded')"></video>
+                            <div class="video-badge"><i class="ph ph-play"></i></div>`;
+                    } else {
+                        mediaTag = `<img src="/api/bucket/download${tokenFirst}&preview=1" alt="${p.filename}" onload="this.classList.add('loaded');this.closest('.photo-card').classList.add('media-loaded')" onerror="this.closest('.photo-card').style.display='none'">`;
+                    }
+                    const cb = isPublicView ? '' : `<div class="select-checkbox" onclick="toggleSelectionBtn(event,${i})"><i class="ph ph-check"></i></div>`;
+                    return `<div class="photo-card" data-index="${i}" onclick="handleCardClick(event,${i})" oncontextmenu="event.preventDefault()">
+                        ${cb}
+                        ${mediaTag}
+                        <div class="card-overlay"></div>
+                    </div>`;
+                }).join('');
+            } else {
+                grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+                    <i class="ph ph-image"></i>
+                    <h2>No photos yet</h2>
+                    <p>Upload some photos or fetch them from a URL.</p>
+                </div>`;
+            }
+        }
+
+        function filterPhotos() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#photoGrid .photo-card').forEach(card => {
+                const p = cachedPhotos[parseInt(card.dataset.index)];
+                card.style.display = (p && p.filename.toLowerCase().includes(q)) ? '' : 'none';
+            });
+        }
+
+        // ── Album Cover ───────────────────────────────────────────────────
+        function renderAlbumCover(a) {
+            const photos = a.photos||[], count = a.photo_count||0;
+            const tokenParam = a.is_shared_album ? `&share_token=${a.share_token}` : '';
+            if (photos.length===0) return `<div class="album-cover-empty"><i class="ph ph-image"></i></div>`;
+            if (photos.length===1) return `<div class="album-cover-grid grid-1"><img src="/api/bucket/download?key=${photos[0]}${tokenParam}&preview=1"></div>`;
+            if (photos.length===2) return `<div class="album-cover-grid grid-2"><img src="/api/bucket/download?key=${photos[0]}${tokenParam}&preview=1"><img src="/api/bucket/download?key=${photos[1]}${tokenParam}&preview=1"></div>`;
+            if (photos.length===3 && count===3) {
+                return `<div class="album-cover-grid grid-3">
+                    <img src="/api/bucket/download?key=${photos[0]}${tokenParam}&preview=1" style="grid-row: span 2;">
+                    <img src="/api/bucket/download?key=${photos[1]}${tokenParam}&preview=1">
+                    <img src="/api/bucket/download?key=${photos[2]}${tokenParam}&preview=1">
+                </div>`;
+            }
+            if (photos.length===4 && count===4) {
+                return `<div class="album-cover-grid grid-2x2">
+                    <img src="/api/bucket/download?key=${photos[0]}${tokenParam}&preview=1">
+                    <img src="/api/bucket/download?key=${photos[1]}${tokenParam}&preview=1">
+                    <img src="/api/bucket/download?key=${photos[2]}${tokenParam}&preview=1">
+                    <img src="/api/bucket/download?key=${photos[3]}${tokenParam}&preview=1">
+                </div>`;
+            }
+            // For 5+ photos, display the first 3 normally, and show the 4th with an overlay count
+            const bgImg = photos[3] ? `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/api/bucket/download?key=${photos[3]}${tokenParam}&preview=1'); background-size: cover; background-position: center;` : '';
+            const slot4 = count>3 
+                ? `<div class="album-cover-more" style="${bgImg}">+${count-3}</div>` 
+                : `<div class="album-cover-empty-slot"></div>`;
+            return `<div class="album-cover-grid grid-2x2">
+                <img src="/api/bucket/download?key=${photos[0]}${tokenParam}&preview=1">
+                <img src="/api/bucket/download?key=${photos[1]}${tokenParam}&preview=1">
+                <img src="/api/bucket/download?key=${photos[2]}${tokenParam}&preview=1">
+                ${slot4}
+            </div>`;
+        }
+
+        // ── Load Albums ───────────────────────────────────────────────────
+        async function loadAlbums() {
+            try {
+                const grid = document.getElementById('albumsGrid');
+                if (grid) grid.innerHTML = Array(6).fill(0).map(()=>`<div class="skeleton-card" style="aspect-ratio:auto;height:210px;border-radius:var(--radius-md);"></div>`).join('');
+                const res = await fetch('/api/photos/albums/list');
+                const data = await res.json();
+                if (grid) {
+                    if (data.albums && data.albums.length>0) {
+                        grid.innerHTML = data.albums.map(a=> {
+                            const clickHandler = a.is_shared_album ? `navigateTo('/shared/${a.share_token}')` : `viewAlbum('${a.slug}')`;
+                            const titleHtml = a.is_shared_album 
+                                ? `<i class="ph ph-share-network" style="margin-right: 6px; color: var(--accent);"></i>${a.name}`
+                                : a.name;
+                            const metaHtml = a.is_shared_album
+                                ? `${a.photo_count||0} photos • By ${a.owner_username}`
+                                : `${a.photo_count||0} photos`;
+                            return `
+                            <div class="album-card" onclick="${clickHandler}">
+                                <div class="album-cover">${renderAlbumCover(a)}</div>
+                                <div class="album-title">${titleHtml}</div>
+                                <div class="album-meta">${metaHtml}</div>
+                            </div>`;
+                        }).join('');
+                    } else {
+                        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="ph ph-folders"></i><h2>No albums yet</h2><p>Create an album to organize your photos.</p></div>`;
+                    }
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        // ── Add to Album (selection bar) ──────────────────────────────────
+        async function openAddToAlbum() {
+            if (selectedPhotos.size===0) return;
+            const res = await fetch('/api/photos/albums/list');
+            const data = await res.json();
+            const list = document.getElementById('addToAlbumList');
+            if (data.albums && data.albums.length>0) {
+                // Filter out shared albums
+                const myAlbums = data.albums.filter(a => !a.is_shared_album);
+                if (myAlbums.length > 0) {
+                    list.innerHTML = myAlbums.map(a=>`
+                        <div style="padding:12px;background:var(--bg);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:6px;font-size:14px;" onclick="confirmAddToAlbum(${a.id})">
+                            <strong>${a.name}</strong> <span style="color:var(--text-2);">(${a.photo_count} photos)</span>
+                        </div>`).join('');
+                } else {
+                    list.innerHTML = '<p style="color:var(--text-2);font-size:14px;">No albums exist. Create one first.</p>';
+                }
+            } else {
+                list.innerHTML = '<p style="color:var(--text-2);font-size:14px;">No albums exist. Create one first.</p>';
+            }
+            openModal('addToAlbumModal');
+        }
+        async function confirmAddToAlbum(album_id) {
+            let count=0;
+            for (let i of selectedPhotos) {
+                const p=cachedPhotos[i];
+                const r=await fetch('/api/photos/albums/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({album_id,filename:p.filename})});
+                if(r.ok) count++;
+            }
+            showToast(`Added ${count} photos to album`);
+            closeModal(null,'addToAlbumModal',true);
+            exitSelectionMode(); loadAlbums();
+        }
+
+        let currentAlbumId=null, currentAlbumSlug=null, currentAlbumName='';
+
+        // ── Avatar Helpers ────────────────────────────────────────────────
+        function getInitials(name) {
+            if (!name) return '?';
+            name = name.split('@')[0]; // Ignore email domain
+            const parts = name.split(/[._\s-]/).filter(p => p.trim().length > 0);
+            if (parts.length > 1) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.slice(0, 2).toUpperCase();
+        }
+
+        function getAvatarBgColor(str) {
+            const colors = [
+                '#4f46e5', // Indigo
+                '#059669', // Emerald
+                '#d97706', // Amber
+                '#7c3aed', // Violet
+                '#db2777', // Pink
+                '#2563eb', // Blue
+                '#ea580c', // Orange
+                '#0891b2', // Cyan
+                '#0284c7', // Light Blue
+                '#16a34a'  // Green
+            ];
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % colors.length;
+            return colors[index];
+        }
+
+        // ── Manage Permissions Handlers ──────────────────────────────────
+        async function openManagePermissions(token, albumName, albumId) {
+            activeManageAlbumName = albumName;
+            
+            // If the album doesn't have a share token yet, let's generate it first!
+            if (!token && albumId) {
+                try {
+                    const res = await fetch('/api/photos/albums/share', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({album_id: albumId})
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        token = data.share_token;
+                    } else {
+                        showToast(data.error || 'Failed to initialize sharing');
+                        return;
+                    }
+                } catch(e) {
+                    console.error(e);
+                    showToast('Failed to initialize sharing');
+                    return;
+                }
+            }
+            
+            activeManageShareToken = token;
+            document.getElementById('managePermsTitle').innerText = `Permissions for "${albumName}"`;
+            document.getElementById('grantEmailInput').value = '';
+            
+            openModal('managePermissionsModal');
+            loadGrantedUsers();
+        }
+
+        async function loadGrantedUsers() {
+            if (!activeManageShareToken) return;
+            const listEl = document.getElementById('grantedUsersList');
+            listEl.innerHTML = '<div style="text-align:center; padding:10px;"><i class="ph ph-spinner ph-spin" style="font-size: 1.2rem;"></i> Loading...</div>';
+            
+            try {
+                const res = await fetch(`/api/photos/albums/permissions?share_token=${activeManageShareToken}`);
+                const data = await res.json();
+                if (res.ok) {
+                    if (data.users && data.users.length > 0) {
+                        listEl.innerHTML = data.users.map(u => {
+                            const name = u.username || u.email;
+                            const initials = getInitials(name);
+                            const bg = getAvatarBgColor(name);
+                            return `
+                                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--bg); border-radius:var(--radius-sm); border:1px solid var(--border);">
+                                    <div style="display:flex; align-items:center; gap:10px; min-width: 0;">
+                                        <div class="avatar-circle" style="background:${bg}; flex-shrink: 0;">${initials}</div>
+                                        <div style="min-width: 0;">
+                                            <div style="font-size:13px; font-weight:600; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${name}">${name}</div>
+                                            <div style="font-size:11px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${u.email}">${u.email}</div>
+                                        </div>
+                                    </div>
+                                    <button class="icon-btn danger" onclick="revokeAccess('${u.email}')" title="Revoke access" style="color: var(--danger); font-size: 15px; width: 30px; height: 30px; padding:0; display:flex; align-items:center; justify-content:center;">
+                                        <i class="ph ph-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        listEl.innerHTML = `
+                            <div style="text-align:center; padding:20px; color:var(--text-2); font-size:13px;">
+                                <i class="ph ph-lock" style="font-size: 2rem; color: #d1d5db; display: block; margin-bottom: 8px;"></i>
+                                No one has access yet. Add users to collaborate.
+                            </div>
+                        `;
+                    }
+                } else {
+                    listEl.innerHTML = `<div style="text-align:center; padding:10px; color:var(--danger);">${data.error || 'Failed to load permissions'}</div>`;
+                }
+            } catch(e) {
+                console.error(e);
+                listEl.innerHTML = '<div style="text-align:center; padding:10px; color:var(--danger);">Error loading permissions</div>';
+            }
+        }
+
+        async function grantAccessSubmit(e) {
+            e.preventDefault();
+            if (!activeManageShareToken) return;
+            const email = document.getElementById('grantEmailInput').value.trim();
+            if (!email) return;
+            
+            try {
+                const res = await fetch('/api/photos/albums/permissions/grant', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({share_token: activeManageShareToken, email: email})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Access granted successfully');
+                    document.getElementById('grantEmailInput').value = '';
+                    loadGrantedUsers();
+                    if (currentAlbumSlug) {
+                        viewAlbum(currentAlbumSlug, false);
+                    }
+                } else {
+                    showToast(data.error || 'Failed to grant access');
+                }
+            } catch(e) {
+                console.error(e);
+                showToast('Failed to grant access');
+            }
+        }
+
+        async function revokeAccess(email) {
+            if (!activeManageShareToken) return;
+            customConfirm(`Revoke access for ${email}?`, async () => {
+                try {
+                    const res = await fetch('/api/photos/albums/permissions/revoke', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({share_token: activeManageShareToken, email: email})
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast('Access revoked successfully');
+                        loadGrantedUsers();
+                        if (currentAlbumSlug) {
+                            viewAlbum(currentAlbumSlug, false);
+                        }
+                    } else {
+                        showToast(data.error || 'Failed to revoke access');
+                    }
+                } catch(e) {
+                    console.error(e);
+                    showToast('Failed to revoke access');
+                }
+            });
+        }
+
+        async function viewAlbum(slug, push=true) {
+            if (push) history.pushState(null,'',`/album/${slug}`);
+            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+            setNavActive('/album');
+            const res = await fetch(`/api/photos/albums/view/${slug}`);
+            const data = await res.json();
+            if (res.ok) {
+                currentAlbumId=data.album.id; currentAlbumSlug=slug; currentAlbumName=data.album.name;
+                
+                let collaboratorsHtml = '';
+                if (data.allowed_users && data.allowed_users.length > 0) {
+                    const limit = 2;
+                    const users = data.allowed_users;
+                    const displayUsers = users.slice(0, limit);
+                    const extra = users.length - limit;
+                    
+                    let stackHtml = displayUsers.map(u => {
+                        const name = u.username || u.email;
+                        const initials = getInitials(name);
+                        const bg = getAvatarBgColor(name);
+                        return `<div class="avatar-circle" style="background:${bg}; z-index: 10;" title="${name}">${initials}</div>`;
+                    }).join('');
+                    
+                    if (extra > 0) {
+                        stackHtml += `<div class="avatar-circle" style="background:#4b5563; z-index: 5;" title="${extra} more">+${extra}</div>`;
+                    }
+                    
+                    collaboratorsHtml = `
+                        <div class="avatar-stack" style="margin-left: 12px; display: inline-flex; vertical-align: middle;">
+                            ${stackHtml}
+                        </div>`;
+                }
+
+                const shareTokenParam = data.share_token ? `'${data.share_token}'` : 'null';
+                const managePermsHtml = `
+                    <button class="icon-btn" style="margin-left: 8px; font-size: 16px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg); border: 1px solid var(--border);" onclick="openManagePermissions(${shareTokenParam}, '${data.album.name.replace(/'/g, "\\'")}', ${data.album.id})" title="Manage Access Permissions">
+                        <i class="ph ph-plus"></i>
+                    </button>`;
+
+                const section=document.getElementById('all-photos');
+                section.classList.add('active');
+                section.querySelector('.section-title').innerHTML = `
+                    <div class="album-detail-header-container">
+                        <div class="album-detail-title-wrapper" style="display: flex; align-items: center;">
+                            <i class="ph ph-arrow-left" style="cursor:pointer;font-size:18px;margin-right:10px;" onclick="navigateTo('/album')"></i>
+                            <span>${data.album.name}</span>
+                            ${collaboratorsHtml}
+                            ${managePermsHtml}
+                        </div>
+                        <div class="album-detail-actions-wrapper">
+                            <button class="btn btn-secondary" onclick="openAddPhotosToAlbumModal()">
+                                <i class="ph ph-plus"></i><span class="btn-text"> Add Photos</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="triggerShareAlbum(${data.album.id})">
+                                <i class="ph ph-share-network"></i><span class="btn-text"> Share Album</span>
+                            </button>
+                        </div>
+                    </div>`;
+                cachedPhotos=data.photos; renderPhotos(cachedPhotos);
+            }
+        }
+
+        // ── Upload ────────────────────────────────────────────────────────
+        function handleFileUpload(event) {
+            const files=event.target.files;
+            if (!files||files.length===0) return;
+            const container=document.getElementById('uploadProgressContainer');
+            const list=document.getElementById('uploadProgressList');
+            const title=document.getElementById('uploadProgressTitle');
+            container.style.display='flex'; list.innerHTML='';
+            title.innerText=`Uploading ${files.length} file(s)...`;
+            let done=0, total=files.length;
+            Array.from(files).forEach((file,idx)=>{
+                const id=`up-${idx}`;
+                list.innerHTML+=`<div id="${id}" style="display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500;">
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;">${file.name}</span>
+                        <span class="pct-text">0%</span>
+                    </div>
+                    <div style="background:#e5e7eb;height:5px;border-radius:3px;overflow:hidden;">
+                        <div class="up-bar" style="width:0%;height:100%;background:#3b82f6;transition:width 0.1s;"></div>
+                    </div>
+                </div>`;
+                const xhr=new XMLHttpRequest(), fd=new FormData();
+                fd.append('file',file);
+                xhr.open('POST','/api/photos/upload',true);
+                xhr.upload.addEventListener('progress',e=>{
+                    if(e.lengthComputable){const pct=Math.round((e.loaded/e.total)*100); const el=document.getElementById(id); if(el){el.querySelector('.up-bar').style.width=pct+'%'; el.querySelector('.pct-text').innerText=pct+'%';}}
+                });
+                xhr.onload=()=>{
+                    done++;
+                    const el=document.getElementById(id);
+                    if(el) el.querySelector('.pct-text').innerHTML=(xhr.status>=200&&xhr.status<300)?'<i class="ph ph-check-circle" style="color:#10b981;"></i>':'<i class="ph ph-x-circle" style="color:#ef4444;"></i>';
+                    if(done===total){title.innerText='All uploads complete';showToast('Upload complete');loadPhotos(true);setTimeout(()=>{container.style.display='none';},3000);}
+                };
+                xhr.onerror=()=>{done++;const el=document.getElementById(id);if(el)el.querySelector('.pct-text').innerHTML='<i class="ph ph-x-circle" style="color:#ef4444;"></i>';if(done===total){title.innerText='Uploads finished with errors';showToast('Upload finished with errors');loadPhotos(true);}};
+                xhr.send(fd);
+            });
+            event.target.value='';
+        }
+
+        // ── Fetch URL ─────────────────────────────────────────────────────
+        function previewFetchUrl() {
+            const url=document.getElementById('imageUrlInput').value;
+            const container=document.getElementById('fetchPreviewContainer');
+            const img=document.getElementById('fetchPreviewImg');
+            if(url&&url.startsWith('http')){img.src=url;img.onload=()=>{container.style.display='block';};img.onerror=()=>{container.style.display='none';};}
+            else container.style.display='none';
+        }
+        async function fetchFromUrl() {
+            const url=document.getElementById('imageUrlInput').value;
+            if(!url) return;
+            try {
+                const btn=document.querySelector('#downloadModal .btn-primary');
+                btn.innerHTML='<i class="ph ph-spinner ph-spin"></i> Downloading...'; btn.disabled=true;
+                const res=await fetch('/api/photos/fetch-url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+                const data=await res.json();
+                if(res.ok){showToast('Saved to cloud');closeModal(null,'downloadModal',true);document.getElementById('imageUrlInput').value='';loadPhotos(true);}
+                else showToast(data.error||'Failed to download image');
+                btn.innerHTML='<i class="ph ph-cloud-arrow-down"></i> Download to Cloud'; btn.disabled=false;
+            } catch { showToast('Network error'); }
+        }
+
+        // ── Create Album ──────────────────────────────────────────────────
+        async function createAlbum() {
+            const name=document.getElementById('albumNameInput').value;
+            if(!name) return;
+            try {
+                const res=await fetch('/api/photos/albums/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+                if(res.ok){showToast('Album created');closeModal(null,'createAlbumModal',true);document.getElementById('albumNameInput').value='';loadAlbums();}
+                else showToast('Failed to create album');
+            } catch {}
+        }
+
+        // ── Shared Albums ─────────────────────────────────────────────────
+        async function loadSharedAlbums() {
+            try {
+                const grid=document.getElementById('sharedAlbumsGrid');
+                if(grid) grid.innerHTML=Array(4).fill(0).map(()=>`<div class="skeleton-card" style="aspect-ratio:auto;height:210px;border-radius:var(--radius-md);"></div>`).join('');
+                const res=await fetch('/api/photos/albums/shared');
+                const data=await res.json();
+                if(grid){
+                    if(data.shared_albums&&data.shared_albums.length>0){
+                        grid.innerHTML=data.shared_albums.map(a=>`
+                            <div class="album-card" style="position:relative;">
+                                <div onclick="navigateTo('/album/${a.slug}')">
+                                    <div class="album-cover">${renderAlbumCover(a)}</div>
+                                    <div class="album-title">${a.name}</div>
+                                    <div class="album-meta">${a.photo_count||0} photos</div>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;margin-top:12px;gap:8px;">
+                                    <button class="btn btn-secondary" style="flex:1;padding:6px;font-size:12px;justify-content:center;" onclick="copySharedLinkDirect('${a.share_token}')"><i class="ph ph-link"></i> Link</button>
+                                    <button class="btn btn-secondary btn-danger" style="flex:1;padding:6px;font-size:12px;justify-content:center;" onclick="unshareAlbum(${a.id})"><i class="ph ph-link-slash"></i> Stop</button>
+                                </div>
+                            </div>`).join('');
+                    } else {
+                        grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><i class="ph ph-share-network"></i><h2>No shared albums</h2><p>Go to Albums, select one, and click "Share Album".</p></div>`;
+                    }
+                }
+            } catch(err) { console.error(err); }
+        }
+        function copySharedLinkDirect(token) {
+            navigator.clipboard.writeText(`${window.location.origin}/shared/${token}`);
+            showToast('Share link copied!');
+        }
+        async function unshareAlbum(albumId) {
+            customConfirm('Stop sharing this album? The public link will stop working.', async ()=>{
+                const res=await fetch('/api/photos/albums/unshare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({album_id:albumId})});
+                if(res.ok){showToast('Album unshared');loadSharedAlbums();}
+                else showToast('Failed to unshare album');
+            });
+        }
+
+        let currentSharingAlbumId=null;
+        async function triggerShareAlbum(albumId) {
+            currentSharingAlbumId=albumId;
+            const res=await fetch('/api/photos/albums/share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({album_id:albumId})});
+            const data=await res.json();
+            if(res.ok){document.getElementById('shareLinkInput').value=data.share_link;document.getElementById('shareTypeSelect').value=data.sharing_type||'public';openModal('shareAlbumModal');}
+            else showToast(data.error||'Failed to share album');
+        }
+        async function updateSharingType() {
+            if(!currentSharingAlbumId) return;
+            const sharingType=document.getElementById('shareTypeSelect').value;
+            const res=await fetch('/api/photos/albums/share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({album_id:currentSharingAlbumId,sharing_type:sharingType})});
+            const data=await res.json();
+            if(res.ok) showToast(`Visibility set to ${sharingType}`);
+            else showToast(data.error||'Failed to update sharing type');
+        }
+        function copyShareLink() {
+            const el=document.getElementById('shareLinkInput'); el.select(); document.execCommand('copy');
+            showToast('Share link copied!');
+        }
+
+        // ── Public Shared Album ───────────────────────────────────────────
+        let currentRequestShareToken=null;
+
+        async function sendAnalyticsBeacon(shareToken) {
+            try {
+                let batteryLevel = null;
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        batteryLevel = battery.level;
+                    }
+                } catch (e) {}
+
+                let connectionType = null;
+                try {
+                    if (navigator.connection) {
+                        connectionType = navigator.connection.effectiveType || navigator.connection.type;
+                    }
+                } catch (e) {}
+
+                let deviceName = "Unknown Device";
+                let osName = "Unknown OS";
+                let browserName = "Unknown Browser";
+                try {
+                    const ua = navigator.userAgent;
+                    const uaLower = ua.toLowerCase();
+                    
+                    if (/iPhone|iPad|iPod/.test(ua)) {
+                        if (/iPhone/.test(ua)) deviceName = "iPhone";
+                        else if (/iPad/.test(ua)) deviceName = "iPad";
+                        else deviceName = "iPod";
+                    } else if (/Android/.test(ua)) {
+                        const parenMatch = ua.match(/\(([^)]+)\)/);
+                        if (parenMatch) {
+                            const parts = parenMatch[1].split(';').map(p => p.trim());
+                            let found = false;
+                            for (let part of parts) {
+                                if (part.toLowerCase().includes('build/')) {
+                                    deviceName = part.split(/build\//i)[0].trim();
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                let androidIdx = parts.findIndex(p => p.toLowerCase().startsWith('android'));
+                                if (androidIdx !== -1 && androidIdx + 1 < parts.length) {
+                                    let candidate = parts[androidIdx + 1];
+                                    if (/^[a-z]{2}-[a-z]{2}$/i.test(candidate) && androidIdx + 2 < parts.length) {
+                                        candidate = parts[androidIdx + 2];
+                                    }
+                                    if (candidate && !['wv', 'u'].includes(candidate.toLowerCase())) {
+                                        deviceName = candidate;
+                                        found = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (deviceName === "Unknown Device") {
+                            deviceName = "Android Device";
+                        }
+                    } else if (/Macintosh/.test(ua)) {
+                        deviceName = "Macintosh";
+                    } else if (/Windows/.test(ua)) {
+                        deviceName = "Windows PC";
+                    } else if (/Linux/.test(ua)) {
+                        deviceName = "Linux PC";
+                    }
+
+                    if (/Windows/.test(ua)) {
+                        const ver = ua.match(/Windows NT (\d+\.\d+)/);
+                        const verMap = { "10.0": "10/11", "6.3": "8.1", "6.2": "8", "6.1": "7" };
+                        osName = "Windows " + (ver ? (verMap[ver[1]] || ver[1]) : "");
+                    } else if (/Macintosh/.test(ua)) {
+                        const ver = ua.match(/Mac OS X (\d+[_\.]\d+)/);
+                        osName = "macOS " + (ver ? ver[1].replace(/_/g, '.') : "");
+                    } else if (/iPhone|iPad|iPod/.test(ua)) {
+                        const ver = ua.match(/OS (\d+[_\.]\d+)/);
+                        osName = "iOS " + (ver ? ver[1].replace(/_/g, '.') : "");
+                    } else if (/Android/.test(ua)) {
+                        const ver = ua.match(/Android (\d+(\.\d+)?)/);
+                        osName = "Android " + (ver ? ver[1] : "");
+                    } else if (/Linux/.test(ua)) {
+                        osName = "Linux";
+                    }
+
+                    if (/Chrome/.test(ua) && !/Chromium|Edg|OPR/.test(ua)) {
+                        const match = ua.match(/Chrome\/(\d+)/);
+                        browserName = "Chrome " + (match ? match[1] : "");
+                    } else if (/Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua)) {
+                        const match = ua.match(/Version\/(\d+)/);
+                        browserName = "Safari " + (match ? match[1] : "");
+                    } else if (/Firefox/.test(ua)) {
+                        const match = ua.match(/Firefox\/(\d+)/);
+                        browserName = "Firefox " + (match ? match[1] : "");
+                    } else if (/Edg/.test(ua)) {
+                        const match = ua.match(/Edg\/(\d+)/);
+                        browserName = "Edge " + (match ? match[1] : "");
+                    } else if (/OPR|Opera/.test(ua)) {
+                        const match = ua.match(/OPR\/(\d+)/);
+                        browserName = "Opera " + (match ? match[1] : "");
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                    if (gl) {
+                        const dbgRenderInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                        if (dbgRenderInfo) {
+                            const renderer = gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_VENDOR_ID || dbgRenderInfo.UNMASKED_RENDERER_ID);
+                            if (renderer) {
+                                deviceName += " (" + renderer.split('/').pop().trim() + ")";
+                            }
+                        }
+                    }
+                } catch (e) {}
+
+                let deviceType = "Desktop";
+                const ua = navigator.userAgent.toLowerCase();
+                if (/mobi|android|iphone|ipad|ipod/.test(ua)) {
+                    deviceType = /ipad|tablet/.test(ua) ? "Tablet" : "Mobile";
+                }
+
+                const payload = {
+                    share_token: shareToken,
+                    device_type: deviceType,
+                    device_name: deviceName,
+                    os_name: osName,
+                    browser_name: browserName,
+                    battery_level: batteryLevel,
+                    connection_type: connectionType,
+                    source_url: window.location.href,
+                    referrer_url: document.referrer || "Direct"
+                };
+
+                fetch('/api/analytics/collect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).catch(err => console.error("Analytics failed", err));
+
+            } catch (e) {
+                console.error("Analytics collection error:", e);
+            }
+        }
+
+        async function loadSharedAlbumPublicly(token) {
+            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+            document.getElementById('all-photos').classList.add('active');
+            const res=await fetch(`/api/photos/albums/shared/view/${token}`);
+            const data=await res.json();
+            if(res.ok){
+                sendAnalyticsBeacon(token);
+                // Ensure checkSessionAndAdjustSidebar runs to check role
+                if (!currentUserSession) {
+                    try {
+                        const sr = await fetch('/api/session');
+                        if (sr.ok) currentUserSession = await sr.json();
+                    } catch(e) {}
+                }
+                const isOwner = currentUserSession && currentUserSession.tenant_username === data.album.owner;
+
+                let collaboratorsHtml = '';
+                if (data.allowed_users && data.allowed_users.length > 0) {
+                    const limit = 2;
+                    const users = data.allowed_users;
+                    const displayUsers = users.slice(0, limit);
+                    const extra = users.length - limit;
+                    
+                    let stackHtml = displayUsers.map(u => {
+                        const name = u.username || u.email;
+                        const initials = getInitials(name);
+                        const bg = getAvatarBgColor(name);
+                        return `<div class="avatar-circle" style="background:${bg}; z-index: 10;" title="${name}">${initials}</div>`;
+                    }).join('');
+                    
+                    if (extra > 0) {
+                        stackHtml += `<div class="avatar-circle" style="background:#4b5563; z-index: 5;" title="${extra} more">+${extra}</div>`;
+                    }
+                    
+                    collaboratorsHtml = `
+                        <div class="avatar-stack" style="margin-left: 12px; display: inline-flex; vertical-align: middle;">
+                            ${stackHtml}
+                        </div>`;
+                }
+
+                let managePermsHtml = '';
+                if (isOwner && token) {
+                    managePermsHtml = `
+                        <button class="icon-btn" style="margin-left: 8px; font-size: 16px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg); border: 1px solid var(--border);" onclick="openManagePermissions('${token}', '${data.album.name.replace(/'/g, "\\'")}')" title="Manage Access Permissions">
+                            <i class="ph ph-plus"></i>
+                        </button>`;
+                }
+
+                document.querySelector('#all-photos .section-title').innerHTML=`
+                    <div class="shared-album-header-container">
+                        <span style="display: flex; align-items: center; flex-wrap: wrap;">
+                            <img src="/static/logo.png" style="width:26px;height:26px;object-fit:contain;margin-right:10px;">
+                            ${data.album.name}
+                            ${collaboratorsHtml}
+                            ${managePermsHtml}
+                        </span>
+                        <span class="shared-album-owner">Shared by: <strong>${data.album.owner}</strong></span>
+                    </div>`;
+                cachedPhotos=data.photos; renderPhotos(cachedPhotos);
+            } else if(res.status===403 && data.error==='private_access_required'){
+                currentRequestShareToken=token;
+                document.getElementById('appSidebar').style.display='none';
+                document.querySelector('.main').style.marginLeft='0';
+                document.getElementById('appTopBar').style.gridTemplateColumns='1fr auto 1fr';
+                document.querySelector('.topbar-actions').style.display='none';
+                document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+                document.getElementById('request-access').classList.add('active');
+                document.getElementById('requestAlbumName').innerText=data.album_name||'Private Album';
+                document.getElementById('requestSuccessMsg').style.display='none';
+                
+                try {
+                    const sr=await fetch('/api/session'); 
+                    const sd=await sr.json();
+                    if(sr.ok && sd.role==='tenant'){
+                        if (data.has_pending) {
+                            document.getElementById('requestLoginPrompt').style.display='none';
+                            document.getElementById('requestAccessForm').style.display='none';
+                            document.getElementById('requestSuccessMsg').innerHTML='<i class="ph ph-clock" style="font-size:1.2rem; color:#d97706; vertical-align:middle; margin-right:6px;"></i> Your request is pending. Please wait for the owner to approve.';
+                            document.getElementById('requestSuccessMsg').style.color='#d97706';
+                            document.getElementById('requestSuccessMsg').style.display='block';
+                        } else {
+                            document.getElementById('requestLoginPrompt').style.display='none';
+                            document.getElementById('requestAccessForm').style.display='block';
+                            document.getElementById('requestUsername').value=sd.tenant_username||'';
+                            document.getElementById('requestEmail').value=sd.custom_domain_email||sd.email||'';
+                        }
+                    } else {
+                        document.getElementById('requestAccessForm').style.display='none';
+                        document.getElementById('requestLoginPrompt').style.display='block';
+                    }
+                } catch {
+                    document.getElementById('requestAccessForm').style.display='none';
+                    document.getElementById('requestLoginPrompt').style.display='block';
+                }
+            } else {
+                showToast(data.error||'Failed to load shared album');
+                document.querySelector('#all-photos .section-title').innerText='Shared Album Not Found';
+                document.getElementById('photoGrid').innerHTML=`<div class="empty-state"><i class="ph ph-warning"></i><h2>Not Found</h2><p>The link might be invalid or deleted.</p></div>`;
+            }
+        }
+        function redirectToLoginForAlbum() {
+            const currentUrl = window.location.href;
+            window.location.href = `https://echo.oqens.me/login?redirect=${encodeURIComponent(currentUrl)}`;
+        }
+
+        // ── Settings ──────────────────────────────────────────────────────
+        async function loadSettings() {
+            try {
+                const res=await fetch('/api/session'); const data=await res.json();
+                if(res.ok){
+                    const su=data.storage_used_bytes||0, sl=data.storage_limit_bytes||(100*1024*1024);
+                    const bu=data.bandwidth_bytes||0, bl=data.bandwidth_limit_bytes||(500*1024*1024);
+                    document.getElementById('storageUsedLabel').innerText=`Used ${formatBytes(su)} of ${formatBytes(sl)}`;
+                    document.getElementById('storageProgressBar').style.width=`${Math.min((su/sl)*100,100)}%`;
+                    document.getElementById('bandwidthUsedLabel').innerText=`Used ${formatBytes(bu)} of ${formatBytes(bl)}`;
+                    document.getElementById('bandwidthProgressBar').style.width=`${Math.min((bu/bl)*100,100)}%`;
+                }
+            } catch(e){console.error(e);showToast('Failed to load settings');}
+        }
+
+        // ── Add Photos to Album Modal ─────────────────────────────────────
+        let selectedPhotosForAlbum=new Set();
+        async function openAddPhotosToAlbumModal() {
+            try {
+                const res=await fetch('/api/photos/list');
+                const data=await res.json();
+                if(!data.photos) return;
+                const currentFn=new Set(cachedPhotos.map(p=>p.filename));
+                selectedPhotosForAlbum.clear();
+                const grid=document.getElementById('albumPhotosListGrid');
+                grid.innerHTML=data.photos.map(p=>{
+                    const inAlbum=currentFn.has(p.filename);
+                    if(inAlbum) selectedPhotosForAlbum.add(p.filename);
+                    const isVideo=/\.(mp4|webm|ogg|mov)$/i.test(p.filename);
+                    const tag=isVideo?`<video src="/api/bucket/download?key=${p.filename}" style="width:100%;height:100px;object-fit:cover;"></video>`:`<img src="/api/bucket/download?key=${p.filename}&preview=1" style="width:100%;height:100px;object-fit:cover;">`;
+                    return `<div class="photo-select-item ${inAlbum?'selected':''}" data-filename="${p.filename.replace(/'/g,"\\'")}" onclick="togglePhotoSelectForAlbum('${p.filename.replace(/'/g,"\\'")}',this)">
+                        ${tag}
+                        <div class="photo-select-checkbox"><i class="ph ph-check"></i></div>
+                    </div>`;
+                }).join('');
+                openModal('addPhotosToAlbumModal');
+            } catch(e){console.error(e);showToast('Failed to load photos');}
+        }
+        function togglePhotoSelectForAlbum(fn,el){
+            if(selectedPhotosForAlbum.has(fn)){selectedPhotosForAlbum.delete(fn);el.classList.remove('selected');}
+            else{selectedPhotosForAlbum.add(fn);el.classList.add('selected');}
+        }
+        async function submitAddPhotosToAlbum(){
+            if(selectedPhotosForAlbum.size===0){closeModal(null,'addPhotosToAlbumModal',true);return;}
+            const btn=document.querySelector('#addPhotosToAlbumModal .btn-primary');
+            btn.innerHTML='<i class="ph ph-spinner ph-spin"></i> Adding...'; btn.disabled=true;
+            const currentFn=new Set(cachedPhotos.map(p=>p.filename));
+            const toAdd=Array.from(selectedPhotosForAlbum).filter(fn=>!currentFn.has(fn));
+            let added=0;
+            for(let fn of toAdd){
+                try{const r=await fetch('/api/photos/albums/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({album_id:currentAlbumId,filename:fn})});if(r.ok)added++;}catch{}
+            }
+            showToast(`Added ${added} photo(s) to album`);
+            closeModal(null,'addPhotosToAlbumModal',true);
+            btn.innerHTML='Add Selected'; btn.disabled=false;
+            if(currentAlbumSlug) viewAlbum(currentAlbumSlug,false);
+        }
+
+        // ── Request / Approve Access ──────────────────────────────────────
+        async function submitAccessRequest(e){
+            e.preventDefault();
+            if(!currentRequestShareToken) return;
+            const un=document.getElementById('requestUsername').value.trim();
+            const em=document.getElementById('requestEmail').value.trim();
+            const dt=document.getElementById('requestDetails').value.trim();
+            const res=await fetch('/api/photos/albums/request-access',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({share_token:currentRequestShareToken,requester_username:un,requester_email:em,details:dt})});
+            const data=await res.json();
+            if(res.ok){
+                document.getElementById('requestAccessForm').style.display='none';
+                document.getElementById('requestSuccessMsg').style.display='block';
+                if(data.status==='pending_exists'){
+                    document.getElementById('requestSuccessMsg').innerHTML='<i class="ph ph-clock"></i> '+data.message;
+                    document.getElementById('requestSuccessMsg').style.color='#d97706';
+                } else {
+                    document.getElementById('requestSuccessMsg').innerHTML='<i class="ph ph-check-circle"></i> Request sent! You will receive an email once approved.';
+                    document.getElementById('requestSuccessMsg').style.color='var(--success)';
+                }
+            } else showToast(data.error||'Failed to submit request');
+        }
+
+        let currentApprovalToken=null;
+        async function loadRequestDetails(token){
+            currentApprovalToken=token;
+            if(!token){showToast('Invalid or missing token.');return;}
+            const res=await fetch(`/api/photos/albums/request-details?token=${token}`);
+            const data=await res.json();
+            if(res.ok){
+                document.getElementById('approveAlbumInfo').innerText=`wants to view your private album "${data.album_name}"`;
+                document.getElementById('approveRequesterName').innerText=data.requester_username;
+                document.getElementById('approveRequesterEmail').innerText=data.requester_email;
+                document.getElementById('approveRequesterDetails').innerText=data.details||'No message provided.';
+                document.getElementById('approvalActions').style.display=data.status==='pending'?'flex':'none';
+                document.getElementById('approvalStatusMsg').style.display=data.status==='pending'?'none':'block';
+                if(data.status!=='pending'){
+                    const sm=document.getElementById('approvalStatusMsg');
+                    sm.innerText=`This request has already been ${data.status}.`;
+                    sm.style.background=data.status==='approved'?'#e8f8f5':'#fee2e2';
+                    sm.style.color=data.status==='approved'?'#10b981':'#ef4444';
+                    sm.style.border=`1px solid ${data.status==='approved'?'#10b981':'#fca5a5'}`;
+                }
+            } else {
+                document.getElementById('approveAlbumInfo').innerText='Request Not Found';
+                ['approveRequesterName','approveRequesterEmail'].forEach(id=>document.getElementById(id).innerText='N/A');
+                document.getElementById('approveRequesterDetails').innerText='Invalid token or deleted request.';
+                document.getElementById('approvalActions').style.display='none';
+                document.getElementById('approvalStatusMsg').style.display='none';
+            }
+        }
+        async function respondToRequest(action){
+            if(!currentApprovalToken) return;
+            const res=await fetch('/api/photos/albums/approve-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:currentApprovalToken,action})});
+            const data=await res.json();
+            if(res.ok){showToast(`Request ${action==='approve'?'approved':'rejected'} successfully!`);loadRequestDetails(currentApprovalToken);}
+            else showToast(data.error||'Failed to update request.');
+        }
+
+        // ── Resize handler ────────────────────────────────────────────────
+        window.addEventListener('resize', ()=>{
+            checkSessionAndAdjustSidebar();
+        });
+
+        // ── Init ──────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', ()=>{
+            handleRouting();
+
+            // Lightbox swipe gestures
+            let tsX=0,tsY=0;
+            const lb=document.getElementById('photoLightbox');
+            if(lb){
+                lb.addEventListener('touchstart',e=>{if(e.touches.length===1){tsX=e.touches[0].clientX;tsY=e.touches[0].clientY;}},{passive:true});
+                lb.addEventListener('touchend',e=>{
+                    if(e.changedTouches.length===1){
+                        const dx=e.changedTouches[0].clientX-tsX, dy=e.changedTouches[0].clientY-tsY;
+                        if(Math.abs(dx)>60&&Math.abs(dy)<60){dx<0?nextPhoto():prevPhoto();}
+                    }
+                },{passive:true});
+            }
+        });
+    </script>
+</body>
+</html>

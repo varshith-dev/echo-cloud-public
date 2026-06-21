@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Bandwidth Limit Exceeded</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --ticket-bg: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --accent-red: #dc2626;
+            --accent-red-faded: rgba(220, 38, 38, 0.05);
+            --border-color: #eaeaea;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle, #e5e5e5 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            text-align: center;
+        }
+
+        /* The Ticket Container */
+        .ticket-wrapper {
+            position: relative;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.03));
+            width: 100%;
+        }
+
+        .ticket {
+            position: relative;
+            background-color: var(--ticket-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 35px 30px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            text-align: left;
+            transform: rotate(-0.5deg);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .ticket:hover {
+            transform: rotate(0deg) scale(1.01);
+            border-color: #d1d5db;
+        }
+
+        /* Notches / Cutouts */
+        .ticket::before, .ticket::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        .ticket::before {
+            left: -13px;
+        }
+
+        .ticket::after {
+            right: -13px;
+        }
+
+        /* Header block */
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 18px;
+        }
+
+        .ticket-logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ticket-id {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-red);
+            background: var(--accent-red-faded);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Info rows */
+        .ticket-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ticket-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .ticket-desc {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .admin-contact {
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-contact i {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .admin-contact-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-contact-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .admin-contact-value {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .admin-contact-value:hover {
+            color: var(--accent-red);
+        }
+
+        /* Barcode section */
+        .ticket-footer {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .barcode {
+            display: flex;
+            height: 35px;
+            align-items: stretch;
+            gap: 2.5px;
+        }
+
+        .bar {
+            background-color: var(--text-primary);
+            border-radius: 0.5px;
+        }
+
+        .bar.w1 { width: 1.2px; }
+        .bar.w2 { width: 2.4px; }
+        .bar.w3 { width: 4px; }
+        .bar.w4 { width: 5.5px; }
+
+        .barcode-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 1.5px;
+        }
+
+        /* Home link button */
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.15s ease, border-color 0.15s ease;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #ffffff;
+        }
+
+        .home-btn:hover {
+            color: var(--text-primary);
+            border-color: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="ticket-wrapper">
+            <div class="ticket">
+                <div class="ticket-header">
+                    <div class="ticket-logo">
+                        <i class="ph ph-cube"></i> OQENS
+                    </div>
+                    <div class="ticket-id">ERR-509</div>
+                </div>
+
+                <div class="ticket-body">
+                    <div class="ticket-title">Bandwidth Limit Exceeded</div>
+                    <p class="ticket-desc">
+                        Access to download this resource has been suspended. The tenant workspace hosting this file has exceeded its monthly bandwidth quota.
+                    </p>
+
+                    <div class="admin-contact">
+                        <i class="ph ph-envelope-simple"></i>
+                        <div class="admin-contact-text">
+                            <span class="admin-contact-label">Contact Administrator</span>
+                            <a href="mailto:echo@oqens.me" class="admin-contact-value">echo@oqens.me</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-footer">
+                    <div class="barcode">
+                        <div class="bar w1"></div>
+                        <div class="bar w3"></div>
+                        <div class="bar w2"></div>
+                        <div class="bar w1"></div>
+                        <div class="bar w4"></div>
+                        <div class="bar w2"></div>
+                        <div class="bar w3"></div>
+                        <div class="bar w1"></div>
+                        <div class="bar w2"></div>
+                        <div class="bar w1"></div>
+                        <div class="bar w4"></div>
+                        <div class="bar w3"></div>
+                        <div class="bar w2"></div>
+                    </div>
+                    <div class="barcode-num">509-LIMIT-EXCEEDED</div>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="home-btn">
+            <i class="ph ph-arrow-left"></i> Back to Homepage
+        </a>
+    </div>
+</body>
+</html>

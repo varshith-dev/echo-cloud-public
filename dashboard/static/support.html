@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --border-color: #eaeaea;
+            --accent-blue: #2563eb;
+            --accent-blue-faded: rgba(37, 99, 235, 0.05);
+            --green: #10b981;
+            --green-faded: rgba(16, 185, 129, 0.08);
+            --red: #ef4444;
+            --red-faded: rgba(239, 68, 68, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle, #e5e5e5 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Top Warning Banner */
+        #global-limit-warning-banner {
+            display: none;
+            background-color: rgba(254, 242, 242, 0.9);
+            background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px);
+            border-bottom: 1.5px solid rgba(239, 68, 68, 0.25);
+            color: #dc2626;
+            padding: 14px 20px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(239,68,68,0.05);
+            z-index: 9999;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-logout {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.15s ease;
+        }
+
+        .btn-logout:hover {
+            background: #fafafa;
+            color: var(--text-primary);
+        }
+
+        /* Support Main Container */
+        .support-container {
+            flex: 1;
+            display: flex;
+            padding: 40px 8%;
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 30px;
+        }
+
+        /* Login Layout */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .login-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s ease;
+            background: #fafafa;
+        }
+
+        .form-input:focus {
+            border-color: var(--text-primary);
+            background: #ffffff;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        /* App Panel Layout */
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .panel-sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .btn-new-ticket {
+            padding: 6px 12px;
+            background: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Ticket List */
+        .ticket-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ticket-item {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ticket-item:hover {
+            background: #fafafa;
+        }
+
+        .ticket-item.active {
+            background: var(--accent-blue-faded);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .ticket-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-item-title {
+            font-size: 0.92rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .status-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .status-pill.open {
+            color: var(--green);
+            background: var(--green-faded);
+        }
+
+        .status-pill.resolved {
+            color: var(--text-muted);
+            background: var(--border-color);
+        }
+
+        .ticket-item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        /* Detail Panel Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            gap: 12px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+        }
+
+        /* Active Ticket Detail View */
+        .ticket-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: #fdfdfd;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .message-bubble.sender-tenant {
+            align-self: flex-start;
+        }
+
+        .message-bubble.sender-admin {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .message-bubble.sender-tenant .message-content {
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-top-left-radius: 2px;
+        }
+
+        .message-bubble.sender-admin .message-content {
+            background: var(--accent-blue-faded);
+            border: 1px solid rgba(37, 99, 235, 0.15);
+            color: var(--text-primary);
+            border-top-right-radius: 2px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Reply Section */
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--card-bg);
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.92rem;
+            outline: none;
+            resize: none;
+            height: 44px;
+            transition: border-color 0.15s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--text-primary);
+        }
+
+        .btn-send {
+            padding: 0 20px;
+            background: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn-send:hover {
+            opacity: 0.9;
+        }
+
+        /* Create Ticket Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Alert system */
+        .alert-box {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #111;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            display: none;
+            z-index: 200;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Poll Card Styles */
+        .poll-embed-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+
+        .poll-question {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .poll-option-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: var(--text-primary);
+        }
+
+        .poll-option-btn:hover {
+            background: var(--accent-blue-faded);
+            border-color: var(--accent-blue);
+        }
+
+        .poll-result-row {
+            position: relative;
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            background: #fafafa;
+        }
+
+        .poll-result-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--accent-blue-faded);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
+        .poll-result-text {
+            position: relative;
+            z-index: 2;
+            font-weight: 500;
+        }
+
+        .poll-result-percent {
+            position: relative;
+            z-index: 2;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .poll-result-row.voted {
+            border-color: var(--accent-blue);
+        }
+
+        .poll-result-row.voted .poll-result-bar {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .poll-total-votes {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .poll-selector-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+            transition: background 0.15s ease;
+        }
+
+        .poll-selector-item:hover {
+            background: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .poll-selector-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .poll-selector-question {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .poll-selector-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Warning Banner -->
+    <div id="global-limit-warning-banner">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>RESOURCES ARE LIMITED:</strong> YOU REACHED THE LIMITS. Some system actions may be restricted.</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="/" class="logo">
+                <img src="/static/logo.png" style="width: 44px; height: 44px; object-fit: contain;" alt="OQENS"> OQENS SUPPORT
+            </a>
+            <a href="/docs" target="_blank" style="font-size: 0.88rem; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.15s ease;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'"><i class="ph ph-question"></i> Help & Docs</a>
+        </div>
+        <div class="nav-right" id="nav-user-info">
+            <!-- Populated via Javascript -->
+        </div>
+    </nav>
+
+    <!-- Support Interface -->
+    <div class="support-container" id="support-app">
+        <!-- Rendered dynamically -->
+        <div style="margin: auto; color: var(--text-secondary);">Loading Support Center...</div>
+    </div>
+
+    <!-- Modal for new ticket -->
+    <div class="modal" id="new-ticket-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Submit Support Ticket</h3>
+                <button class="btn-close-modal" onclick="closeTicketModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Ticket Subject</label>
+                <input type="text" id="new-ticket-title" class="form-input" placeholder="What is the issue about?">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="new-ticket-category" class="form-input" style="appearance: none; background: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23555%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E') no-repeat right 12px center; background-size: 16px;">
+                    <option value="General">General Inquiry</option>
+                    <option value="Technical">Technical Issue</option>
+                    <option value="Billing">Billing & Subscription</option>
+                    <option value="Custom Domain">Custom Domain Config</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Describe your issue</label>
+                <textarea id="new-ticket-message" class="form-input" style="height: 120px;" placeholder="Provide details..."></textarea>
+            </div>
+            <button class="btn-submit" onclick="submitTicket()">Submit Ticket</button>
+        </div>
+    </div>
+
+    <!-- Modal for Poll Selection / Creation -->
+    <div class="modal" id="poll-selector-modal">
+        <div class="modal-card" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Insert Poll in Chat</h3>
+                <button class="btn-close-modal" onclick="closePollSelector()"><i class="ph ph-x"></i></button>
+            </div>
+            
+            <div style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px;">
+                <button id="poll-tab-select" onclick="switchPollTab('select')" style="flex: 1; padding: 10px; border: none; background: none; border-bottom: 2px solid var(--accent-blue); font-weight: 600; cursor: pointer; color: var(--text-primary);">Select Existing</button>
+                <button id="poll-tab-create" onclick="switchPollTab('create')" style="flex: 1; padding: 10px; border: none; background: none; border-bottom: 2px solid transparent; font-weight: 500; cursor: pointer; color: var(--text-secondary);">Create New Poll</button>
+            </div>
+
+            <!-- Tab: Select Existing -->
+            <div id="poll-select-tab-content">
+                <div style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;" id="existing-polls-list">
+                    <div style="text-align: center; color: var(--text-muted); padding: 20px;">Loading polls...</div>
+                </div>
+            </div>
+
+            <!-- Tab: Create New -->
+            <div id="poll-create-tab-content" style="display: none; flex-direction: column; gap: 15px;">
+                <div class="form-group">
+                    <label>Question</label>
+                    <input type="text" id="new-poll-question" class="form-input" placeholder="e.g., How satisfied are you with this resolution?">
+                </div>
+                <div class="form-group">
+                    <label>Options</label>
+                    <div id="poll-options-container" style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="text" class="form-input poll-option-input" placeholder="Option 1">
+                        <input type="text" class="form-input poll-option-input" placeholder="Option 2">
+                    </div>
+                    <button class="btn-new-ticket" style="align-self: flex-start; background: var(--border-color); color: var(--text-primary); margin-top: 8px;" onclick="addPollOptionField()">
+                        <i class="ph ph-plus"></i> Add Option
+                    </button>
+                </div>
+                <button class="btn-submit" onclick="createAndInsertPoll()">Create & Insert Poll</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert-box" id="alert-box"></div>
+
+    <script>
+        let currentSession = null;
+        let ticketsList = [];
+        let activeTicketId = null;
+
+        function showAlert(msg) {
+            const box = document.getElementById('alert-box');
+            box.innerText = msg;
+            box.style.display = 'block';
+            setTimeout(() => { box.style.display = 'none'; }, 3000);
+        }
+
+        function renderClientSupportOnly() {
+            const app = document.getElementById('support-app');
+            app.innerHTML = `
+                <div class="login-card" style="max-width: 500px; text-align: left; margin: auto;">
+                    <div class="login-header" style="text-align: center;">
+                        <h1>OQENS Support</h1>
+                        <p>Select your concern to start a live support session.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category of Concern</label>
+                        <select id="client-category" class="form-input" style="appearance: none; background: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23555%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E') no-repeat right 12px center; background-size: 16px;">
+                            <option value="General">General Inquiry</option>
+                            <option value="Technical">Technical Issue</option>
+                            <option value="Billing">Billing & Subscription</option>
+                            <option value="Custom Domain">Custom Domain Config</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn-submit" onclick="startClientChat()">Start Chat</button>
+                </div>
+            `;
+        }
+
+        async function startClientChat() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isLoggedIn = currentSession && currentSession.logged_in && currentSession.role === 'tenant';
+            
+            let code = null;
+            if (!isLoggedIn) {
+                code = urlParams.get('code') || localStorage.getItem('oqens_support_code');
+                if (!code) {
+                    code = prompt("Please enter your OQENS Secret Code to start the support session:");
+                    if (!code) return;
+                    localStorage.setItem('oqens_support_code', code);
+                } else {
+                    localStorage.setItem('oqens_support_code', code);
+                }
+            }
+
+            const category = document.getElementById('client-category').value;
+            const title = `Concern: ${category}`;
+            const message = "Chat started.";
+
+            const btn = document.querySelector('.btn-submit');
+            btn.disabled = true;
+            btn.innerText = "Connecting...";
+
+            const payload = { title, category, message };
+            if (code) {
+                payload.code = code;
+            }
+
+            try {
+                const res = await fetch('/api/support/tickets', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    activeTicketId = data.ticket_id;
+                    renderClientChatInterface();
+                } else {
+                    const err = await res.json();
+                    showAlert(err.error || "Failed to connect to support.");
+                    if (!isLoggedIn) {
+                        localStorage.removeItem('oqens_support_code');
+                    }
+                    btn.disabled = false;
+                    btn.innerText = "Start Chat";
+                }
+            } catch (e) {
+                showAlert("Network error connecting to support.");
+                btn.disabled = false;
+                btn.innerText = "Start Chat";
+            }
+        }
+
+        function renderClientChatInterface() {
+            const app = document.getElementById('support-app');
+            app.innerHTML = `
+                <div class="panel panel-main" style="flex: 1; min-height: 500px; display: flex; flex-direction: column; width: 100%; max-width: 800px; margin: auto;">
+                    <div class="panel-header">
+                        <div>
+                            <h2 style="margin-bottom: 2px;">Live Support Chat</h2>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);" id="client-chat-status">Connecting with an agent...</span>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chat-messages-container" style="flex: 1; min-height: 350px;">
+                        <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">Initializing conversation...</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea class="chat-input" id="reply-message" placeholder="Type your message..."></textarea>
+                        <button class="btn-send" onclick="sendReply()"><i class="ph ph-paper-plane-right"></i></button>
+                    </div>
+                </div>
+            `;
+            // Immediately start loading messages
+            pollMessages();
+        }
+
+        async function loadSupport() {
+            try {
+                const res = await fetch('/api/support/session');
+                const data = await res.json();
+                currentSession = data;
+            } catch (e) {
+                console.error("Failed to load session", e);
+            }
+
+            renderNavbar();
+
+            if (window.location.hostname === 'support.oqens.me' && (!currentSession || !currentSession.logged_in)) {
+                renderClientSupportOnly();
+                return;
+            }
+            
+            if (currentSession && currentSession.logged_in) {
+                renderDashboard();
+                await fetchTickets();
+            } else {
+                renderLogin();
+            }
+        }
+
+        function renderNavbar() {
+            const navRight = document.getElementById('nav-user-info');
+            if (currentSession && currentSession.logged_in) {
+                navRight.innerHTML = `
+                    <span style="font-size: 0.9rem; font-weight: 500;"><i class="ph ph-user"></i> ${currentSession.username}</span>
+                    <a class="btn-logout" onclick="logout()"><i class="ph ph-sign-out"></i> Logout</a>
+                `;
+            } else {
+                navRight.innerHTML = '';
+            }
+        }
+
+        function renderLogin() {
+            const app = document.getElementById('support-app');
+            app.innerHTML = `
+                <div class="login-card">
+                    <div class="login-header">
+                        <h1>Support Authentication</h1>
+                        <p>Authenticate with your OQENS credentials to access help.</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Secret Code or Admin Secret</label>
+                        <input type="password" id="login-code" class="form-input" placeholder="Input credential...">
+                    </div>
+                    <button class="btn-submit" onclick="login()">Access Support</button>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            const app = document.getElementById('support-app');
+            const isTenant = currentSession.role === 'tenant';
+            app.innerHTML = `
+                <div class="panel panel-sidebar">
+                    <div class="panel-header">
+                        <h2>Support Tickets</h2>
+                        ${isTenant ? `<button class="btn-new-ticket" onclick="openTicketModal()"><i class="ph ph-plus"></i> New</button>` : ''}
+                    </div>
+                    <div class="ticket-list" id="ticket-list-container">
+                        <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">No tickets available.</div>
+                    </div>
+                </div>
+                <div class="panel panel-main" id="ticket-details-container">
+                    <div class="empty-state">
+                        <i class="ph ph-chat-circle-dots"></i>
+                        <p>Select a ticket from the sidebar to view detail and conversation.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function login() {
+            const code = document.getElementById('login-code').value;
+            if (!code) return showAlert("Please input a code.");
+
+            const res = await fetch('/api/support/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({code})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showAlert("Access granted.");
+                await loadSupport();
+            } else {
+                showAlert(data.error || "Authentication failed.");
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/support/logout', {method: 'POST'});
+            currentSession = null;
+            activeTicketId = null;
+            await loadSupport();
+        }
+
+        async function fetchTickets() {
+            try {
+                const res = await fetch('/api/support/tickets');
+                if (res.ok) {
+                    const data = await res.json();
+                    ticketsList = data.tickets || [];
+                    renderTicketsList();
+                } else {
+                    console.error("Failed to fetch tickets");
+                }
+            } catch (e) {
+                console.error("Error fetching tickets", e);
+            }
+        }
+
+        function renderTicketsList() {
+            const container = document.getElementById('ticket-list-container');
+            if (ticketsList.length === 0) {
+                container.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">No tickets available.</div>`;
+                return;
+            }
+            container.innerHTML = ticketsList.map(t => {
+                const isSelected = t.id === activeTicketId;
+                const creator = currentSession.role === 'admin' ? t.tenant_name : t.category;
+                return `
+                    <div class="ticket-item ${isSelected ? 'active' : ''}" onclick="selectTicket(${t.id})">
+                        <div class="ticket-item-top">
+                            <span class="ticket-item-title">${escapeHTML(t.title)}</span>
+                            <span class="status-pill ${t.status.toLowerCase()}">${t.status}</span>
+                        </div>
+                        <div class="ticket-item-meta">
+                            <span>@${creator}</span>
+                            <span>${new Date(t.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function selectTicket(ticketId) {
+            activeTicketId = ticketId;
+            renderTicketsList();
+
+            const res = await fetch(`/api/support/tickets/${ticketId}/messages`);
+            const data = await res.json();
+            
+            const container = document.getElementById('ticket-details-container');
+            const ticket = data.ticket;
+            const messages = data.messages || [];
+
+            const isResolved = ticket.status === 'Resolved';
+            const actionBtn = currentSession.role === 'admin' 
+                ? `<button class="btn-new-ticket" style="background:${isResolved ? '#10b981' : '#ef4444'};" onclick="toggleResolve(${ticket.id}, '${isResolved ? 'Open' : 'Resolved'}')">
+                     <i class="ph ph-check-circle"></i> Mark ${isResolved ? 'Open' : 'Resolved'}
+                   </button>` 
+                : `<button class="btn-new-ticket" style="background:#ef4444;" onclick="toggleResolve(${ticket.id}, 'Resolved')"><i class="ph ph-check-circle"></i> Resolve Ticket</button>`;
+
+            container.innerHTML = `
+                <div class="ticket-details">
+                    <div class="panel-header">
+                        <div>
+                            <h2 style="margin-bottom: 2px;">${escapeHTML(ticket.title)}</h2>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Category: ${ticket.category}</span>
+                        </div>
+                        <div style="display:flex; gap: 10px; align-items:center;">
+                            ${!isResolved ? actionBtn : `<span class="status-pill resolved">Resolved</span> ${currentSession.role === 'admin' ? actionBtn : ''}`}
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chat-messages-container">
+                        ${messages.map(m => {
+                            const isPoll = m.message.startsWith('[POLL:') && m.message.endsWith(']');
+                            if (isPoll) {
+                                const pollId = m.message.substring(6, m.message.length - 1);
+                                const embedId = `poll-embed-${m.id}`;
+                                setTimeout(() => loadPollEmbed(embedId, parseInt(pollId)), 0);
+                                return `
+                                    <div class="message-bubble sender-${m.sender}" style="max-width:350px;">
+                                        <div class="poll-embed-card" id="${embedId}" data-poll-id="${pollId}">Loading Poll...</div>
+                                        <span class="message-time">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                    </div>
+                                `;
+                            }
+                            return `
+                                <div class="message-bubble sender-${m.sender}">
+                                    <div class="message-content">${escapeHTML(m.message)}</div>
+                                    <span class="message-time">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea class="chat-input" id="reply-message" placeholder="Type a message..." ${isResolved ? 'disabled' : ''}></textarea>
+                        <button class="btn-send" onclick="sendReply()" ${isResolved ? 'disabled' : ''}><i class="ph ph-paper-plane-right"></i></button>
+                        ${currentSession.role === 'admin' && !isResolved ? `<button class="btn-send" style="background:var(--accent-blue); margin-left:8px;" onclick="openPollSelector()"><i class="ph ph-bar-chart"></i></button>` : ''}
+                    </div>
+                </div>
+            `;
+            scrollToBottom();
+        }
+
+        async function sendReply() {
+            const input = document.getElementById('reply-message');
+            const message = input.value.trim();
+            if (!message) return;
+
+            try {
+                const res = await fetch(`/api/support/tickets/${activeTicketId}/messages`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message})
+                });
+                if (res.ok) {
+                    input.value = '';
+                    await selectTicket(activeTicketId);
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showAlert(data.error || "Failed to send message.");
+                }
+            } catch (e) {
+                console.error("Error sending reply", e);
+                showAlert("Network error sending message.");
+            }
+        }
+
+        async function toggleResolve(ticketId, newStatus) {
+            const res = await fetch(`/api/support/tickets/${ticketId}/resolve`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({status: newStatus})
+            });
+            if (res.ok) {
+                showAlert(`Ticket marked as ${newStatus}.`);
+                await fetchTickets();
+                await selectTicket(ticketId);
+            } else {
+                showAlert("Action failed.");
+            }
+        }
+
+        function openTicketModal() {
+            document.getElementById('new-ticket-modal').style.display = 'flex';
+        }
+
+        function closeTicketModal() {
+            document.getElementById('new-ticket-modal').style.display = 'none';
+        }
+
+        async function submitTicket() {
+            const title = document.getElementById('new-ticket-title').value.trim();
+            const category = document.getElementById('new-ticket-category').value;
+            const message = document.getElementById('new-ticket-message').value.trim();
+
+            if (!title || !message) return showAlert("Please fill in subject and description.");
+
+            const res = await fetch('/api/support/tickets', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, category, message})
+            });
+            if (res.ok) {
+                const data = await res.json();
+                closeTicketModal();
+                showAlert("Ticket submitted successfully.");
+                document.getElementById('new-ticket-title').value = '';
+                document.getElementById('new-ticket-message').value = '';
+                await fetchTickets();
+                await selectTicket(data.ticket_id);
+            } else {
+                showAlert("Failed to submit ticket.");
+            }
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('chat-messages-container');
+            if (container) container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function escapeJSString(str) {
+            return str.replace(/'/g, "\\'");
+        }
+
+        // --- Poll Interaction Functions ---
+        async function loadPollEmbed(embedId, pollId) {
+            const el = document.getElementById(embedId);
+            if (!el) return;
+            try {
+                const res = await fetch(`/api/support/polls/${pollId}`);
+                if (!res.ok) {
+                    el.innerHTML = `<div style="color:var(--red); font-size:0.85rem;"><i class="ph ph-warning"></i> Poll not found</div>`;
+                    return;
+                }
+                const poll = await res.json();
+                
+                let html = `<div class="poll-question">${escapeHTML(poll.question)}</div>`;
+                
+                if (poll.user_voted_option) {
+                    // Render results
+                    html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+                    for (const opt of poll.options) {
+                        const count = poll.votes[opt] || 0;
+                        const pct = poll.total_votes > 0 ? Math.round((count / poll.total_votes) * 100) : 0;
+                        const isVoted = poll.user_voted_option === opt;
+                        html += `
+                            <div class="poll-result-row ${isVoted ? 'voted' : ''}">
+                                <div class="poll-result-bar" style="width: ${pct}%;"></div>
+                                <span class="poll-result-text">${escapeHTML(opt)} ${isVoted ? '<i class="ph ph-check" style="margin-left: 4px; vertical-align: middle;"></i>' : ''}</span>
+                                <span class="poll-result-percent">${pct}% (${count})</span>
+                            </div>
+                        `;
+                    }
+                    html += `</div>`;
+                    html += `<div class="poll-total-votes">${poll.total_votes} votes total</div>`;
+                } else {
+                    // Render buttons
+                    html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+                    for (const opt of poll.options) {
+                        html += `
+                            <button class="poll-option-btn" onclick="castPollVote(${pollId}, '${escapeJSString(opt)}', '${embedId}')">
+                                ${escapeHTML(opt)}
+                            </button>
+                        `;
+                    }
+                    html += `</div>`;
+                }
+                el.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+                el.innerHTML = `<div style="color:var(--red); font-size:0.85rem;">Error loading poll</div>`;
+            }
+        }
+
+        async function castPollVote(pollId, option, embedId) {
+            try {
+                const res = await fetch(`/api/support/polls/${pollId}/vote`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({option})
+                });
+                if (res.ok) {
+                    loadPollEmbed(embedId, pollId);
+                } else {
+                    const data = await res.json();
+                    showAlert(data.error || "Failed to vote.");
+                }
+            } catch (e) {
+                showAlert("Error casting vote.");
+            }
+        }
+
+        // --- Poll Selector Modal Functions ---
+        function openPollSelector() {
+            document.getElementById('poll-selector-modal').style.display = 'flex';
+            switchPollTab('select');
+        }
+
+        function closePollSelector() {
+            document.getElementById('poll-selector-modal').style.display = 'none';
+        }
+
+        function switchPollTab(tab) {
+            const selectTabBtn = document.getElementById('poll-tab-select');
+            const createTabBtn = document.getElementById('poll-tab-create');
+            const selectContent = document.getElementById('poll-select-tab-content');
+            const createContent = document.getElementById('poll-create-tab-content');
+            
+            if (tab === 'select') {
+                selectTabBtn.style.borderBottomColor = 'var(--accent-blue)';
+                selectTabBtn.style.color = 'var(--text-primary)';
+                selectTabBtn.style.fontWeight = '600';
+                
+                createTabBtn.style.borderBottomColor = 'transparent';
+                createTabBtn.style.color = 'var(--text-secondary)';
+                createTabBtn.style.fontWeight = '500';
+                
+                selectContent.style.display = 'block';
+                createContent.style.display = 'none';
+                
+                loadExistingPolls();
+            } else {
+                createTabBtn.style.borderBottomColor = 'var(--accent-blue)';
+                createTabBtn.style.color = 'var(--text-primary)';
+                createTabBtn.style.fontWeight = '600';
+                
+                selectTabBtn.style.borderBottomColor = 'transparent';
+                selectTabBtn.style.color = 'var(--text-secondary)';
+                selectTabBtn.style.fontWeight = '500';
+                
+                createContent.style.display = 'flex';
+                selectContent.style.display = 'none';
+            }
+        }
+
+        async function loadExistingPolls() {
+            const container = document.getElementById('existing-polls-list');
+            container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Loading polls...</div>`;
+            try {
+                const res = await fetch('/api/support/polls');
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const polls = data.polls || [];
+                if (polls.length === 0) {
+                    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No polls created yet. Switch to "Create New Poll" to make one.</div>`;
+                    return;
+                }
+                container.innerHTML = polls.map(p => `
+                    <div class="poll-selector-item">
+                        <div class="poll-selector-details">
+                            <span class="poll-selector-question">${escapeHTML(p.question)}</span>
+                            <span class="poll-selector-meta">${p.options.join(', ')}</span>
+                        </div>
+                        <button class="btn-new-ticket" onclick="insertPoll(${p.id})">Insert</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = `<div style="text-align: center; color: var(--red); padding: 20px;">Failed to load polls.</div>`;
+            }
+        }
+
+        function addPollOptionField() {
+            const container = document.getElementById('poll-options-container');
+            const count = container.children.length + 1;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-input poll-option-input';
+            input.placeholder = `Option ${count}`;
+            container.appendChild(input);
+        }
+
+        async function createAndInsertPoll() {
+            const question = document.getElementById('new-poll-question').value.trim();
+            const optionInputs = document.querySelectorAll('.poll-option-input');
+            const options = [];
+            optionInputs.forEach(inp => {
+                const val = inp.value.trim();
+                if (val) options.push(val);
+            });
+            
+            if (!question || options.length < 2) {
+                return showAlert("Question and at least 2 options are required.");
+            }
+            
+            try {
+                const res = await fetch('/api/support/polls', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({question, options})
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    return showAlert(err.error || "Failed to create poll.");
+                }
+                const data = await res.json();
+                const pollId = data.poll_id;
+                
+                // Clear form fields
+                document.getElementById('new-poll-question').value = '';
+                const container = document.getElementById('poll-options-container');
+                container.innerHTML = `
+                    <input type="text" class="form-input poll-option-input" placeholder="Option 1">
+                    <input type="text" class="form-input poll-option-input" placeholder="Option 2">
+                `;
+                
+                // Insert into conversation
+                await insertPoll(pollId);
+            } catch (e) {
+                showAlert("Error creating poll.");
+            }
+        }
+
+        async function insertPoll(pollId) {
+            if (!activeTicketId) return;
+            const res = await fetch(`/api/support/tickets/${activeTicketId}/messages`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: `[POLL:${pollId}]`})
+            });
+            if (res.ok) {
+                closePollSelector();
+                await selectTicket(activeTicketId);
+            } else {
+                showAlert("Failed to insert poll into chat.");
+            }
+        }
+
+        // Warning Banner check logic
+        (async function() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant') {
+                        const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                        const isBandwidthOver = data.bandwidth_limit_bytes > 0 && (data.bandwidth_bytes >= data.bandwidth_limit_bytes);
+                        if (isStorageOver || isBandwidthOver) {
+                            const banner = document.getElementById('global-limit-warning-banner');
+                            if (banner) banner.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Session verification failed", e);
+            }
+        })();
+
+         async function pollMessages() {
+            if (!activeTicketId) return;
+            try {
+                const res = await fetch(`/api/support/tickets/${activeTicketId}/messages`);
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                // Disable inputs if the ticket is marked resolved
+                const ticket = data.ticket;
+                if (ticket && ticket.status === 'Resolved') {
+                    const replyInput = document.getElementById('reply-message');
+                    const sendBtn = document.querySelector('.btn-send');
+                    if (replyInput) replyInput.disabled = true;
+                    if (sendBtn) sendBtn.disabled = true;
+                    const statusText = document.getElementById('client-chat-status');
+                    if (statusText) statusText.innerText = "This session has been resolved.";
+                } else if (ticket) {
+                    const statusText = document.getElementById('client-chat-status');
+                    if (statusText) statusText.innerText = `Active Session (${ticket.category})`;
+                }
+
+                const messages = data.messages || [];
+                const container = document.getElementById('chat-messages-container');
+                if (container) {
+                    const currentCount = container.children.length;
+                    if (messages.length !== currentCount) {
+                        container.innerHTML = messages.map(m => {
+                            const isPoll = m.message.startsWith('[POLL:') && m.message.endsWith(']');
+                            if (isPoll) {
+                                const pollId = m.message.substring(6, m.message.length - 1);
+                                const embedId = `poll-embed-${m.id}`;
+                                setTimeout(() => loadPollEmbed(embedId, parseInt(pollId)), 0);
+                                return `
+                                    <div class="message-bubble sender-${m.sender}" style="max-width:350px;">
+                                        <div class="poll-embed-card" id="${embedId}" data-poll-id="${pollId}">Loading Poll...</div>
+                                        <span class="message-time">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                    </div>
+                                `;
+                            }
+                            return `
+                                <div class="message-bubble sender-${m.sender}">
+                                    <div class="message-content">${escapeHTML(m.message)}</div>
+                                    <span class="message-time">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
+                            `;
+                        }).join('');
+                        scrollToBottom();
+                    }
+                }
+            } catch (e) {
+                console.error("Polling error", e);
+            }
+        }
+
+        async function pollTickets() {
+            if (currentSession && currentSession.logged_in) {
+                try {
+                    const res = await fetch('/api/support/tickets');
+                    if (res.ok) {
+                        const data = await res.json();
+                        const newTickets = data.tickets || [];
+                        let changed = newTickets.length !== ticketsList.length;
+                        if (!changed) {
+                            for (let i = 0; i < newTickets.length; i++) {
+                                if (newTickets[i].status !== ticketsList[i].status || newTickets[i].id !== ticketsList[i].id) {
+                                    changed = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (changed) {
+                            ticketsList = newTickets;
+                            renderTicketsList();
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+
+        // Start Support App
+        loadSupport();
+        setInterval(pollMessages, 3000);
+        setInterval(pollTickets, 10000);
+    </script>
+</body>
+</html>

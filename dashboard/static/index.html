@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --sidebar-bg: #fafafa;
+            --text-color: #111111;
+            --text-muted: #4a4a4a;
+            --border-color: #eeeeee;
+            --hover-bg: #f5f5f5;
+            --accent: #111111;
+            --accent-text: #ffffff;
+            --progress-bg: #e0e0e0;
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-color); color: var(--text-color); 
+            display: flex; flex-direction: column; min-height: 100vh; transition: background-color 0.3s ease;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px; background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color); display: flex; flex-direction: column;
+            padding-bottom: 20px;
+            position: sticky; top: 0; height: 100vh; flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 30px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 10px;
+        }
+        .sidebar a {
+            padding: 10px 15px; text-decoration: none; color: var(--text-muted);
+            font-size: 0.85rem; font-weight: 400; border-radius: 6px;
+            transition: all 0.2s ease; cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar a:hover, .sidebar a.active { color: var(--text-color); background: var(--hover-bg); }
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 0 10px;
+        }
+
+        /* Main Content */
+        .main { flex: 1; display: flex; flex-direction: column; padding: 30px 4%; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        h1 { font-weight: 400; font-size: 1.6rem; letter-spacing: -0.5px; }
+
+        /* Views */
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Toggle Switch styling */
+        .slider-auto-renew {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .3s; border-radius: 24px;
+        }
+        .slider-auto-renew:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+            background-color: white; transition: .3s; border-radius: 50%;
+        }
+        input:checked + .slider-auto-renew { background-color: #10b981; }
+        input:checked + .slider-auto-renew:before { transform: translateX(20px); }
+
+        /* Overview Cards */
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { padding: 20px; border: 1.5px solid var(--border-color); background: var(--bg-color); border-radius: 8px; }
+        .card h3 { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .card .value { font-size: 1.6rem; font-weight: 300; letter-spacing: -0.5px; margin-bottom: 10px; }
+        
+        /* Quota Bar */
+        .progress-bar-container {
+            width: 100%; height: 6px; background-color: var(--progress-bg); border-radius: 3px; overflow: hidden; margin-top: 8px;
+        }
+        .progress-bar {
+            height: 100%; width: 0%; background-color: var(--text-color); transition: width 0.4s ease;
+        }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--text-color); background: transparent; color: var(--text-color); cursor: pointer; border-radius: 6px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500; }
+        .btn:hover { background: var(--hover-bg); transform: translateY(-1px); }
+        .btn-primary { background: var(--accent) !important; color: var(--accent-text) !important; border-color: var(--accent) !important; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* Storage Explorer */
+        .storage-tools { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .file-list { border: 1.5px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1.5px solid var(--border-color); }
+        .file-item:last-child { border-bottom: none; }
+        .file-name { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 400; }
+        .file-name i { font-size: 1.15rem; color: var(--text-color); }
+        .file-size { color: var(--text-muted); font-size: 0.82rem; }
+        .file-actions { display: flex; align-items: center; gap: 10px; }
+        .file-actions button { background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s ease; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px; }
+        .file-actions button:hover { color: var(--text-color); }
+        .file-actions button.btn-delete:hover { color: #e74c3c; }
+
+        /* Drag & Drop */
+        .dropzone { border: 1.5px dashed var(--border-color); padding: 35px 20px; text-align: center; color: var(--text-muted); border-radius: 8px; margin-bottom: 20px; transition: all 0.2s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .dropzone i { font-size: 1.8rem; color: var(--text-muted); }
+        .dropzone.dragover { background: var(--hover-bg); border-color: var(--text-color); color: var(--text-color); }
+        .dropzone.dragover i { color: var(--text-color); }
+        .dropzone.disabled {
+            background-color: #f9fafb !important;
+            background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(17, 17, 17, 0.03) 10px, rgba(17, 17, 17, 0.03) 20px) !important;
+            border-color: #d1d5db !important;
+            color: #9ca3af !important;
+            cursor: not-allowed;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+        .dropzone.disabled i { color: #9ca3af; }
+
+        /* Lightbox Preview Modal */
+        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .lightbox.active { display: flex; }
+        .lightbox-content { max-width: 80%; max-height: 80%; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .lightbox-close { position: absolute; top: -40px; right: 0; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .lightbox img, .lightbox video { max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid #333; }
+        .lightbox-title { color: white; margin-top: 15px; font-weight: 400; font-size: 1rem; text-align: center; }
+
+        /* Custom Notification Toast */
+        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-color); color: var(--bg-color); padding: 15px 25px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2000; }
+        .toast.show { display: block; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* App Switcher */
+        .app-item:hover { background: var(--hover-bg); }
+        .app-dropdown.show { display: grid !important; }
+
+        /* Top Bar & Actions */
+        .top-bar {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            padding: 12px 0;
+            z-index: 90;
+        }
+
+        .search-bar {
+            background: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 16px;
+            width: 320px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent);
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Upload Progress Container */
+        #uploadProgressContainer {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 300px;
+            max-width: calc(100% - 40px);
+            background: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            z-index: 5000;
+            padding: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Top Bar */
+        @media (max-width: 768px) {
+            .top-bar {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+                margin-bottom: 20px;
+                position: relative;
+            }
+            .top-bar > div:first-child {
+                display: none;
+            }
+            .search-bar {
+                width: 100% !important;
+            }
+            .top-bar-actions {
+                width: 100%;
+                justify-content: space-between;
+                display: flex;
+                gap: 12px;
+            }
+            .top-bar-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            #uploadProgressContainer {
+                bottom: 80px !important;
+            }
+        }
+
+        /* Skeleton Shimmer Loaders */
+        .skeleton-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 18px;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+        .skeleton-item:last-child {
+            border-bottom: none;
+        }
+        .skeleton-text {
+            height: 14px;
+            background: linear-gradient(90deg, var(--border-color) 25%, rgba(0,0,0,0.03) 50%, var(--border-color) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer-row 1.5s infinite;
+            border-radius: 4px;
+        }
+        .skeleton-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(90deg, var(--border-color) 25%, rgba(0,0,0,0.03) 50%, var(--border-color) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer-row 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes skeleton-shimmer-row {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Global Limit Warning Banner -->
+    <div id="limit-warning-banner" style="display: none; background-color: rgba(254, 242, 242, 0.9); background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px); border-bottom: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; padding: 14px 20px; font-size: 0.88rem; font-weight: 500; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(239,68,68,0.05); z-index: 9999; position: sticky; top: 0; width: 100%; box-sizing: border-box;">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>RESOURCES ARE LIMITED:</strong> YOU REACHED THE LIMITS. Some system actions may be restricted.</span>
+    </div>
+
+    <!-- Subscription Suspended Warning Banner -->
+    <div id="billing-suspended-banner" style="display: none; background-color: rgba(254, 242, 242, 0.95); background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px); border-bottom: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; padding: 14px 20px; font-size: 0.88rem; font-weight: 500; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(239,68,68,0.05); z-index: 9999; position: sticky; top: 0; width: 100%; box-sizing: border-box;">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>WORKSPACE SUSPENDED:</strong> Your subscription payment is past due or auto-renewal failed. Uploads and downloads are suspended.</span>
+        <a href="#" id="banner-pay-link" target="_blank" style="margin-left: 10px; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #dc2626; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Pay Now <i class="ph ph-arrow-right"></i></a>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="/static/logo.png" style="width: 44px; height: 44px; object-fit: contain;" alt="OQENS"> OQENS
+            </div>
+            <div class="sidebar-menu">
+                <a onclick="switchTab('overview')" id="tab-overview" class="active"><i class="ph ph-chart-pie-slice"></i> Overview</a>
+                <a onclick="switchTab('storage')" id="tab-storage"><i class="ph ph-folder-open"></i> My Files</a>
+                <a onclick="switchTab('usage')" id="tab-usage"><i class="ph ph-chart-bar"></i> Usage</a>
+                <a onclick="switchTab('settings')" id="tab-settings"><i class="ph ph-gear"></i> Settings</a>
+                <a onclick="switchTab('guide')" id="tab-guide"><i class="ph ph-book-open-text"></i> Guide</a>
+                <a onclick="switchTab('billing')" id="tab-billing"><i class="ph ph-credit-card"></i> Billing</a>
+                <a href="https://papers.oqens.me/" target="_blank" id="tab-papers"><i class="ph ph-note-pencil"></i> Papers</a>
+                <a href="/docs" target="_blank" style="margin-top: 15px; border-top: 1px solid var(--border-color); border-radius: 0; padding-top: 15px;"><i class="ph ph-question"></i> Help & Docs</a>
+                <a href="https://support.oqens.me/" target="_blank"><i class="ph ph-headset"></i> Contact Support</a>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-profile" style="padding: 10px 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 6px;">
+                    <div style="background: var(--hover-bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="ph ph-user" style="font-size: 1.2rem; color: var(--text-color);"></i>
+                    </div>
+                    <div style="overflow: hidden;">
+                        <div id="sidebar-username" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">User</div>
+                        <div id="sidebar-email" style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">email@domain.com</div>
+                    </div>
+                </div>
+                <a onclick="logout()"><i class="ph ph-sign-out"></i> Logout</a>
+            </div>
+        </div>
+
+        <div class="main">
+        
+        <!-- Global Banner Container -->
+        <div id="global-banner-container" style="display: none; margin-bottom: 10px;"></div>
+        <!-- Custom Banner Container -->
+        <div id="custom-banner-container" style="display: none; margin-bottom: 20px;"></div>
+
+        <!-- Overview Tab -->
+        <div id="view-overview" class="view active">
+            <div class="header">
+                <h1>Storage Insights</h1>
+                <div class="app-switcher" style="position: relative;">
+                    <button class="btn" onclick="toggleAppSwitcher(this)" style="padding: 8px; border-radius: 8px;"><i class="ph ph-squares-four" style="font-size: 1.2rem;"></i></button>
+                    <div class="app-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; z-index: 1000; padding: 15px; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <a href="https://dash.echo.oqens.me/" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                            <i class="ph ph-cube" style="font-size: 2rem; color: #111;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 500;">Cloud</span>
+                        </a>
+                        <a href="https://photos.echo.oqens.me/" target="_blank" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                            <i class="ph ph-image" style="font-size: 2rem; color: #111;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 500;">Photos</span>
+                        </a>
+                        <a href="https://papers.oqens.me/" target="_blank" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                            <i class="ph ph-note-pencil" style="font-size: 2rem; color: #111;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 500;">Papers</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="cards">
+                <div class="card" style="grid-column: span 2;">
+                    <h3>Storage Quota</h3>
+                    <div class="value" id="val-storage-summary">-- / --</div>
+                    <div style="color: var(--text-muted); font-size: 0.95rem;" id="val-storage-percent">--% of quota utilized</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="quota-progress"></div>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 2;">
+                    <h3>Bandwidth Quota</h3>
+                    <div class="value" id="val-bandwidth-summary">-- / --</div>
+                    <div style="color: var(--text-muted); font-size: 0.95rem;" id="val-bandwidth-percent">--% of bandwidth utilized</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="bandwidth-progress"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Total Files</h3>
+                    <div class="value" id="val-file-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.95rem;">Active assets stored</div>
+                </div>
+                <div class="card">
+                    <h3>Device Views</h3>
+                    <div class="value" id="val-views-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.95rem; text-transform: uppercase;">VIEWS</div>
+                </div>
+                <div class="card">
+                    <h3>Downloads</h3>
+                    <div class="value" id="val-downloads-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.95rem; text-transform: uppercase;">TOTAL DOWNLOADS</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Tab -->
+        <div id="view-usage" class="view">
+            <div class="header">
+                <h1>Resource Consumption</h1>
+                <div class="app-switcher" style="position: relative;">
+                    <button class="btn" onclick="toggleAppSwitcher(this)" style="padding: 8px; border-radius: 8px;"><i class="ph ph-squares-four" style="font-size: 1.2rem;"></i></button>
+                    <div class="app-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; z-index: 1000; padding: 15px; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <a href="https://dash.echo.oqens.me/" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                            <i class="ph ph-cube" style="font-size: 2rem; color: #111;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 500;">Cloud</span>
+                        </a>
+                        <a href="https://photos.echo.oqens.me/" target="_blank" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                            <i class="ph ph-image" style="font-size: 2rem; color: #111;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 500;">Photos</span>
+                        </a>
+                        <a href="https://papers.oqens.me/" target="_blank" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                            <i class="ph ph-note-pencil" style="font-size: 2rem; color: #111;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 500;">Papers</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cards">
+                <!-- Storage Breakdown -->
+                <div class="card" style="grid-column: span 2;">
+                    <h3>Storage Quota Utilization</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                        <span style="font-size: 1.8rem; font-weight: 600;" id="usage-storage-summary">-- / --</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);" id="usage-storage-percent">--%</span>
+                    </div>
+                    <div class="progress-bar-container" style="height: 10px; background: var(--border-color); border-radius: 5px; overflow: hidden; margin-bottom: 12px;">
+                        <div class="progress-bar" id="usage-storage-bar" style="width: 0%; height: 100%; background: var(--text-color); transition: width 0.3s ease;"></div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">Exceeding storage limits prevents new uploads. Delete unneeded files or contact admin to upgrade.</p>
+                </div>
+                
+                <!-- Bandwidth Breakdown -->
+                <div class="card" style="grid-column: span 2;">
+                    <h3>Bandwidth Allocation</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                        <span style="font-size: 1.8rem; font-weight: 600;" id="usage-bandwidth-summary">-- / --</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);" id="usage-bandwidth-percent">--%</span>
+                    </div>
+                    <div class="progress-bar-container" style="height: 10px; background: var(--border-color); border-radius: 5px; overflow: hidden; margin-bottom: 12px;">
+                        <div class="progress-bar" id="usage-bandwidth-bar" style="width: 0%; height: 100%; background: var(--text-color); transition: width 0.3s ease;"></div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">Exceeding bandwidth limits blocks download streams. Bandwidth resets monthly or upon upgrade.</p>
+                </div>
+
+                <!-- Traffic Analytics -->
+                <div class="card">
+                    <h3>Total Views</h3>
+                    <div class="value" id="usage-views-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; text-transform: uppercase;">VIEWS</div>
+                </div>
+                <div class="card">
+                    <h3>Downloads</h3>
+                    <div class="value" id="usage-downloads-count">0</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; text-transform: uppercase;">TOTAL DOWNLOADS</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Tab -->
+        <div id="view-storage" class="view">
+            <div class="header">
+                <h1>My Files</h1>
+                <div>
+                    <div class="app-switcher" style="position: relative;">
+                        <button class="btn" onclick="toggleAppSwitcher(this)" style="padding: 8px; border-radius: 8px;"><i class="ph ph-squares-four" style="font-size: 1.2rem;"></i></button>
+                        <div class="app-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; z-index: 1000; padding: 15px; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <a href="https://dash.echo.oqens.me/" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                                <i class="ph ph-cube" style="font-size: 2rem; color: #111;"></i>
+                                <span style="font-size: 0.85rem; font-weight: 500;">Cloud</span>
+                            </a>
+                            <a href="https://photos.echo.oqens.me/" target="_blank" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                                <i class="ph ph-image" style="font-size: 2rem; color: #111;"></i>
+                                <span style="font-size: 0.85rem; font-weight: 500;">Photos</span>
+                            </a>
+                            <a href="https://papers.oqens.me/" target="_blank" class="app-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 10px; text-decoration: none; color: var(--text-color); border-radius: 6px; transition: background 0.2s;">
+                                <i class="ph ph-note-pencil" style="font-size: 2rem; color: #111;"></i>
+                                <span style="font-size: 0.85rem; font-weight: 500;">Papers</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Top Bar for Storage view -->
+            <div class="top-bar" id="appTopBar" style="margin-bottom: 20px;">
+                <div></div> <!-- empty spacer -->
+                <div class="search-bar">
+                    <i class="ph ph-magnifying-glass" style="color: var(--text-muted); font-size: 1.1rem;"></i>
+                    <input type="text" placeholder="Search files by name or tag..." id="search-input" oninput="applyFiltersAndSort()">
+                </div>
+                <div class="top-bar-actions" style="justify-self: end;">
+                    <button class="btn btn-secondary" onclick="openFetchUrlModal()">
+                        <i class="ph ph-link-simple"></i> Fetch URL
+                    </button>
+                    <button class="btn btn-primary" onclick="document.getElementById('file-upload').click()">
+                        <i class="ph ph-upload-simple"></i> Upload
+                    </button>
+                </div>
+            </div>
+
+            <div class="dropzone" id="dropzone" onclick="if(this.classList.contains('disabled')) return; const fu = document.getElementById('file-upload'); if(fu) fu.click();">
+                <i class="ph ph-cloud-arrow-up"></i>
+                <p>Drag files here or click to browse</p>
+                <input type="file" id="file-upload" style="display:none" multiple onchange="handleFileUpload(this.files)">
+            </div>
+
+            <!-- Filter and Sort Control Bar -->
+            <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; width: 100%;">
+                <select id="filter-type" onchange="applyFiltersAndSort()" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); outline: none; font-size: 0.9rem; cursor: pointer; flex: 1; min-width: 120px;">
+                    <option value="all">All Types</option>
+                    <option value="image">Images</option>
+                    <option value="video">Videos</option>
+                    <option value="audio">Audio</option>
+                    <option value="pdf">PDFs</option>
+                    <option value="code_docs">Text/Code</option>
+                    <option value="spreadsheet">Spreadsheets</option>
+                    <option value="archive">Archives</option>
+                    <option value="other">Other</option>
+                </select>
+                <select id="filter-tag" onchange="applyFiltersAndSort()" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); outline: none; font-size: 0.9rem; cursor: pointer; flex: 1; min-width: 120px;">
+                    <option value="all">All Tags</option>
+                </select>
+                <select id="sort-order" onchange="applyFiltersAndSort()" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); outline: none; font-size: 0.9rem; cursor: pointer; flex: 1; min-width: 120px;">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="size-desc">Size (Largest)</option>
+                    <option value="size-asc">Size (Smallest)</option>
+                </select>
+            </div>
+
+            <div class="file-list" id="file-list">
+                <div style="padding: 30px; text-align: center; color: var(--text-muted);">Loading files...</div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="view-settings" class="view">
+            <div class="header">
+                <h1>Settings & Developer Integration</h1>
+            </div>
+            
+            <div class="card">
+                <h3>Credentials</h3>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 500;">Username</label>
+                    <input type="text" id="setting-username" readonly style="width: 100%; max-width: 400px; padding: 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 6px; outline: none; font-size: 0.95rem;" />
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 500;">Dashboard Access Code</label>
+                    <div style="display: flex; gap: 10px; max-width: 400px;">
+                        <input type="password" id="setting-access-code" readonly style="flex: 1; padding: 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 6px; outline: none; font-size: 0.95rem;" />
+                        <button class="btn" onclick="toggleAccessCode()" id="btn-toggle-code"><i class="ph ph-eye"></i> Show</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 500;">Public Cloud ID (Cloud Name)</label>
+                    <input type="text" id="setting-cloud-id" readonly style="width: 100%; max-width: 400px; padding: 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 6px; outline: none; font-size: 0.95rem;" />
+                </div>
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 500;">Programmatic API Key (Secret Token)</label>
+                    <div style="display: flex; gap: 10px; max-width: 550px;">
+                        <input type="password" id="setting-api-key" readonly placeholder="No API Key generated yet" style="flex: 1; padding: 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 6px; outline: none; font-size: 0.95rem;" />
+                        <button class="btn" onclick="toggleApiKey()" id="btn-toggle-api"><i class="ph ph-eye"></i> Show</button>
+                        <button class="btn btn-primary" onclick="generateApiKey()"><i class="ph ph-key"></i> Generate Key</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="card-custom-domain" style="margin-top: 20px;">
+                 <h3>Custom Domain Mapping</h3>
+                 
+                 <!-- Upgrade Promotion for Free Plan -->
+                 <div id="domain-upgrade-notice" style="display: none; padding: 15px; border-radius: 6px; background: rgba(17, 17, 17, 0.02); border: 1.5px dashed var(--border-color); text-align: center; margin-top: 15px;">
+                     <i class="ph ph-lock-key" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 10px; display: block;"></i>
+                     <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">
+                         Custom domain mapping is not available on the Free Plan. Upgrade to Starter Plan to map your custom domain.
+                     </p>
+                     <a href="#" id="domain-upgrade-btn" class="btn btn-primary" style="text-decoration: none;"><i class="ph ph-arrow-up-right"></i> Upgrade to Starter Plan</a>
+                 </div>
+
+                 <!-- Toggle Button to Expand/Collapse Form -->
+                 <div id="domain-toggle-container" style="margin-bottom: 10px;">
+                     <button class="btn btn-primary" id="btn-toggle-domain-form" onclick="toggleDomainForm()"><i class="ph ph-plus"></i> Add Custom Domain</button>
+                 </div>
+                
+                <!-- If not requested yet -->
+                <div id="domain-request-form" style="display: none; margin-top: 15px;">
+                    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.88rem; line-height: 1.4;">Map your own custom domain (e.g., <code>cdn.yourcompany.com</code>) to point directly to your files. Provide your email for SSL verification.</p>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 500;">Email Address (For SSL Renewal Warnings)</label>
+                        <input type="email" id="domain-email" placeholder="e.g. admin@yourcompany.com" style="width: 100%; max-width: 400px; padding: 10px 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 6px; outline: none; font-size: 0.9rem;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 500;">Custom Domain</label>
+                        <input type="text" id="domain-name" placeholder="e.g. cdn.yourcompany.com" style="width: 100%; max-width: 400px; padding: 10px 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 6px; outline: none; font-size: 0.9rem;" />
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="requestCustomDomain()"><i class="ph ph-globe"></i> Request Custom Domain</button>
+                        <button class="btn" onclick="toggleDomainForm()"><i class="ph ph-x"></i> Cancel</button>
+                    </div>
+                </div>
+                
+                <!-- If requested -->
+                <div id="domain-status-view" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 500;">Mapped Domain</span>
+                            <strong style="font-size: 1.1rem; font-weight: 500;" id="lbl-domain-name">--</strong>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <span id="badge-domain-status" style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">--</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px; display: none;" id="domain-dns-mapping">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 500;">DNS Configuration Mapping</span>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">Configure your DNS settings with the following record, then validate below:</p>
+                        <div style="background: var(--hover-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px; max-width: 480px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><strong>Type:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px;">CNAME</code></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><strong>Host / Name:</strong> <code id="lbl-dns-host" style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px;">--</code></span>
+                                <button class="btn" style="padding: 4px 8px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;" onclick="navigator.clipboard.writeText(document.getElementById('lbl-dns-host').innerText); showToast('Host copied!')"><i class="ph ph-copy"></i> Copy</button>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><strong>Value / Points To:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px;">dl.oqens.me</code></span>
+                                <button class="btn" style="padding: 4px 8px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;" onclick="navigator.clipboard.writeText('dl.oqens.me'); showToast('Value copied!')"><i class="ph ph-copy"></i> Copy</button>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 8px;">Note: If mapping a root/apex domain (e.g. <code>yourcompany.com</code>), configure an <code>A</code> record pointing to the server IP address instead.</p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="btn-validate-domain" onclick="validateCustomDomain()" style="display: none;"><i class="ph ph-shield-check"></i> Validate Records</button>
+                        <button class="btn" style="border-color: #e74c3c; color: #e74c3c;" onclick="removeCustomDomain()"><i class="ph ph-trash"></i> Delete Custom Domain</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Guide Tab -->
+        <div id="view-guide" class="view">
+            <div class="header">
+                <h1>Developer Integration Guide</h1>
+            </div>
+            
+            <div class="card" style="margin-bottom: 25px; line-height: 1.6;">
+                <h3 style="font-weight: 500; font-size: 0.95rem; margin-bottom: 15px; border-bottom: 1.5px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Overview</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 15px;">Welcome to the OQENS developer integration guide. This dashboard exposes a clean, multi-tenant object storage REST API that lets you read, upload, and delete assets programmatically.</p>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 15px;">Authentication is performed by passing your unique API Key in the <code>X-API-Key</code> request header. All programmatic operations occur securely inside your isolated tenant directory.</p>
+            </div>
+
+            <!-- API Endpoints Card -->
+            <div class="card" style="margin-bottom: 25px;">
+                <h3 style="font-weight: 500; font-size: 0.95rem; margin-bottom: 15px; border-bottom: 1.5px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Programmatic API Reference</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 15px;">
+                    <div>
+                        <h4 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><span style="background: #e0e0e0; color: #111; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.75rem;">GET</span> List Files</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">Retrieve list of all active files and sizes in your storage bucket.</p>
+                        <div style="position: relative;">
+                            <pre style="background: #fafafa; border: 1.5px solid var(--border-color); padding: 12px 90px 12px 12px; border-radius: 6px; font-size: 0.82rem; overflow-x: auto;"><code id="guide-code-list">curl -H "X-API-Key: YOUR_API_KEY" https://echo.oqens.me/api/bucket/list</code></pre>
+                            <button class="btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 4px 10px; font-size: 0.75rem;" onclick="copyGuideCode('guide-code-list')"><i class="ph ph-copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><span style="background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.75rem;">POST</span> Upload File</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">Upload a new file using multipart/form-data payload.</p>
+                        <div style="position: relative;">
+                            <pre style="background: #fafafa; border: 1.5px solid var(--border-color); padding: 12px 90px 12px 12px; border-radius: 6px; font-size: 0.82rem; overflow-x: auto;"><code id="guide-code-upload">curl -X POST -H "X-API-Key: YOUR_API_KEY" -F "file=@/local/path/file.png" https://echo.oqens.me/api/bucket/upload</code></pre>
+                            <button class="btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 4px 10px; font-size: 0.75rem;" onclick="copyGuideCode('guide-code-upload')"><i class="ph ph-copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.75rem;">GET</span> Download File</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">Retrieve file stream. Pass parameter <code>attachment=true</code> to force download.</p>
+                        <div style="position: relative;">
+                            <pre style="background: #fafafa; border: 1.5px solid var(--border-color); padding: 12px 90px 12px 12px; border-radius: 6px; font-size: 0.82rem; overflow-x: auto;"><code id="guide-code-download">curl -H "X-API-Key: YOUR_API_KEY" -o file.png "https://echo.oqens.me/api/bucket/download?key=file.png&attachment=true"</code></pre>
+                            <button class="btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 4px 10px; font-size: 0.75rem;" onclick="copyGuideCode('guide-code-download')"><i class="ph ph-copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.75rem;">DELETE</span> Delete File</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">Delete file from bucket by passing its key as JSON body.</p>
+                        <div style="position: relative;">
+                            <pre style="background: #fafafa; border: 1.5px solid var(--border-color); padding: 12px 90px 12px 12px; border-radius: 6px; font-size: 0.82rem; overflow-x: auto;"><code id="guide-code-delete">curl -X DELETE -H "X-API-Key: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"key":"file.png"}' https://echo.oqens.me/api/bucket/delete</code></pre>
+                            <button class="btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 4px 10px; font-size: 0.75rem;" onclick="copyGuideCode('guide-code-delete')"><i class="ph ph-copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><span style="background: #faf5ff; color: #6b21a8; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.75rem;">GET</span> Public CDN URL</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">Access publicly shared links on <code>dl.oqens.me</code> without headers. Append <code>?preview=true</code> for browser rendering.</p>
+                        <div style="position: relative;">
+                            <pre style="background: #fafafa; border: 1.5px solid var(--border-color); padding: 12px 90px 12px 12px; border-radius: 6px; font-size: 0.82rem; overflow-x: auto;"><code id="guide-code-cdn">https://dl.oqens.me/YOUR_CLOUD_ID/file.png</code></pre>
+                            <button class="btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 4px 10px; font-size: 0.75rem;" onclick="copyGuideCode('guide-code-cdn')"><i class="ph ph-copy"></i> Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Coding Agent System Prompt Card -->
+            <div class="card" style="margin-bottom: 25px;">
+                <h3 style="font-weight: 500; font-size: 0.95rem; margin-bottom: 15px; border-bottom: 1.5px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">AI Coding Agent System Prompt</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin-bottom: 15px;">Deploying an AI Coding Agent (like Antigravity, Claude Engineer, or Cursor)? Copy this optimized system prompt to feed to your agent so it knows exactly how to read, upload, and delete files from your OQENS bucket.</p>
+                <div style="position: relative;">
+                    <pre style="background: #fafafa; max-height: 250px; overflow-y: auto; padding: 15px 120px 15px 15px; border-radius: 6px; border: 1.5px solid var(--border-color); font-size: 0.8rem; font-family: monospace; white-space: pre-wrap;"><code id="guide-agent-prompt-block">Loading prompt...</code></pre>
+                    <button class="btn btn-primary" style="position: absolute; right: 15px; top: 15px;" onclick="copyAgentPromptBlock()"><i class="ph ph-copy"></i> Copy Prompt</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Tab -->
+        <div id="view-billing" class="view">
+            <div class="header">
+                <h1>Billing & Subscription</h1>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px;">
+                <!-- Left: Subscription Details & Auto-Renew -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="card">
+                        <h3>Subscription Status</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 15px;">
+                            <div class="form-group">
+                                <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 500;">Current Plan</label>
+                                <div id="lbl-billing-plan" style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">Loading...</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 500;">Monthly Rate</label>
+                                <div id="lbl-billing-rate" style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">Loading...</div>
+                            </div>
+                            <div class="form-group" id="form-group-next-billing">
+                                <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 500;">Next Renewal Date</label>
+                                <div id="lbl-billing-next-date" style="font-size: 1rem; font-weight: 500; color: var(--text-color);">Loading...</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 500;">Status</label>
+                                <div id="lbl-billing-status" style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.82rem; font-weight: 600; text-align: center;">Loading...</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1.5px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;" id="container-auto-renew">
+                            <div>
+                                <h4 style="font-weight: 500; margin-bottom: 4px;">Auto-Renewal Subscription</h4>
+                                <p style="font-size: 0.82rem; color: var(--text-muted);">Enable auto-renew to automatically bill your account each cycle and prevent suspended access.</p>
+                            </div>
+                            <label style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer;">
+                                <input type="checkbox" id="switch-auto-renew" onchange="toggleAutoRenew(this)" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider-auto-renew" id="slider-auto-renew"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Quick Actions -->
+                <div class="card" id="billing-actions-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3>Billing Support & Actions</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-top: 10px;">
+                            If your payment fails or you want to upgrade/renew your subscription manually, click the button below to open the checkout gateway.
+                        </p>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="#" id="btn-manual-pay" target="_blank" class="btn btn-primary" style="display: inline-flex; width: 100%; justify-content: center; text-decoration: none; gap: 8px;">
+                            <i class="ph ph-credit-card"></i> Pay / Renew Subscription
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="card" style="margin-top: 20px; padding: 0; overflow: hidden;" id="card-billing-transactions">
+                <div style="padding: 20px;">
+                    <h3 style="margin-bottom: 0;">Transaction History Log</h3>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                    <thead>
+                        <tr style="border-bottom: 1.5px solid var(--border-color); background: var(--bg-color);">
+                            <th style="padding: 12px 20px; font-weight: 500; color: var(--text-muted);">Date</th>
+                            <th style="padding: 12px 20px; font-weight: 500; color: var(--text-muted);">Description</th>
+                            <th style="padding: 12px 20px; font-weight: 500; color: var(--text-muted);">Amount</th>
+                            <th style="padding: 12px 20px; font-weight: 500; color: var(--text-muted);">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billing-tx-list">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No transactions recorded.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close" onclick="closeLightbox()"><i class="ph ph-x"></i> Close</button>
+            <div id="lightbox-media"></div>
+            <div class="lightbox-title" id="lightbox-title"></div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="lightbox" onclick="closeShareModal()" style="background: rgba(0,0,0,0.3);">
+        <div class="lightbox-content" onclick="event.stopPropagation()" style="background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 400px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; color: var(--text-color); align-items: stretch;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3 style="font-weight: 600; font-size: 1.1rem; letter-spacing: -0.3px; text-align: left;" id="share-modal-title">Share File</h3>
+                <button onclick="closeShareModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; display: flex; align-items: center;"><i class="ph ph-x"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; text-align: left; margin: 0;">Choose how you want to share this file. Selecting an option will copy the link to your clipboard.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn btn-primary" id="btn-share-preview" style="justify-content: center; width: 100%; height: 42px; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-eye" style="font-size: 1.1rem;"></i> Copy Preview Link
+                </button>
+                <button class="btn" id="btn-share-download" style="justify-content: center; width: 100%; height: 42px; font-size: 0.88rem; border-color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-download-simple" style="font-size: 1.1rem;"></i> Copy Download Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom In-App Modal Dialog -->
+    <div id="custom-alert-modal" class="lightbox" onclick="closeCustomAlert()" style="background: rgba(0,0,0,0.35); z-index: 3000;">
+        <div class="lightbox-content" onclick="event.stopPropagation()" style="background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 380px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 16px; color: var(--text-color); align-items: stretch;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="custom-alert-title" style="font-weight: 600; font-size: 1.05rem; letter-spacing: -0.3px; margin: 0; text-align: left;">Message</h3>
+                <button onclick="closeCustomAlert()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center;"><i class="ph ph-x"></i></button>
+            </div>
+            <p id="custom-alert-message" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; text-align: left; margin: 0; white-space: pre-wrap; font-weight: 400;"></p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px;">
+                <button class="btn" id="custom-alert-cancel-btn" onclick="closeCustomAlert()" style="height: 38px; font-size: 0.82rem; justify-content: center; min-width: 80px;">Cancel</button>
+                <button class="btn btn-primary" id="custom-alert-confirm-btn" style="height: 38px; font-size: 0.82rem; justify-content: center; min-width: 80px;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <!-- Fetch URL Modal -->
+    <div id="fetch-url-modal" class="lightbox" onclick="closeFetchUrlModal()" style="background: rgba(0,0,0,0.3); z-index: 2500;">
+        <div class="lightbox-content" onclick="event.stopPropagation()" style="background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 400px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; color: var(--text-color); align-items: stretch;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3 style="font-weight: 600; font-size: 1.1rem; letter-spacing: -0.3px; text-align: left;">Fetch File from URL</h3>
+                <button onclick="closeFetchUrlModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; display: flex; align-items: center;"><i class="ph ph-x"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; text-align: left; margin: 0;">Paste a file download address below to download it directly to your storage.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
+                <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-color);">File URL</label>
+                <input type="url" id="fetch-url-input" placeholder="https://example.com/file.pdf" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); outline: none; font-size: 0.9rem; color: var(--text-color);" />
+            </div>
+
+            <button class="btn btn-primary" onclick="fetchFromUrl()" style="justify-content: center; width: 100%; height: 42px; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+                <i class="ph ph-download-simple" style="font-size: 1.1rem;"></i> Download to Cloud
+            </button>
+        </div>
+    </div>
+
+    <!-- Upload Progress Popup -->
+    <div id="uploadProgressContainer">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600; font-size: 13px;" id="uploadProgressTitle">Uploading files...</span>
+            <button onclick="document.getElementById('uploadProgressContainer').style.display='none'" style="background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; font-size: 1.1rem;"><i class="ph ph-x"></i></button>
+        </div>
+        <div id="uploadProgressList" style="display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto;">
+            <!-- Dynamic upload progress rows go here -->
+        </div>
+    </div>
+
+    <script>
+        let currentUsername = '';
+
+        let currentSecretCode = '';
+
+        function copyGuideCode(id) {
+            const code = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(code);
+            showToast('Copied to clipboard!');
+        }
+
+        function buildGuideAgentPrompt() {
+            const cdnUrl = isCustomDomainVerified ? `https://${currentCustomDomain}` : `https://dl.oqens.me/${currentCloudId || 'YOUR_CLOUD_ID'}`;
+            return `You are an AI coding assistant. The user has integrated the OQENS Storage Bucket API. 
+Use the following endpoints to read, upload, and delete files on behalf of the user. You must pass the X-API-Key header in programmatic requests.
+
+Developer Credentials:
+- Base API URL: https://echo.oqens.me
+- CDN URL: ${isCustomDomainVerified ? `https://${currentCustomDomain}` : 'https://dl.oqens.me'}
+- API Key: ${currentApiKey || 'YOUR_SECRET_API_KEY'}
+- Cloud ID: ${currentCloudId || 'YOUR_CLOUD_ID'}
+
+Programmatic Commands:
+1. List all files:
+   curl -H "X-API-Key: ${currentApiKey || 'YOUR_SECRET_API_KEY'}" https://echo.oqens.me/api/bucket/list
+2. Upload a file:
+   curl -X POST -H "X-API-Key: ${currentApiKey || 'YOUR_SECRET_API_KEY'}" -F "file=@{local_filepath}" https://echo.oqens.me/api/bucket/upload
+3. Download/Stream a file:
+   curl -H "X-API-Key: ${currentApiKey || 'YOUR_SECRET_API_KEY'}" -o {output_filename} "https://echo.oqens.me/api/bucket/download?key={filename}&attachment=true"
+4. Delete a file:
+   curl -X DELETE -H "X-API-Key: ${currentApiKey || 'YOUR_SECRET_API_KEY'}" -H "Content-Type: application/json" -d '{"key":"{filename}"}' https://echo.oqens.me/api/bucket/delete
+5. Public CDN direct download:
+   ${cdnUrl}/{filename}
+6. Public CDN inline preview:
+   ${cdnUrl}/{filename}?preview=true`;
+        }
+
+        function copyAgentPromptBlock() {
+            navigator.clipboard.writeText(buildGuideAgentPrompt());
+            showToast('AI Agent System Prompt copied to clipboard!');
+        }
+
+        function switchTab(tab, updateState = true) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.getElementById('view-' + tab).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+            if (tab === 'overview' || tab === 'settings' || tab === 'usage' || tab === 'guide') fetchSessionInfo();
+            if (tab === 'storage') fetchFiles();
+            if (tab === 'billing') loadTenantBilling();
+            
+            if (updateState) {
+                const newPath = tab === 'overview' ? '/dash' : '/dash/' + tab;
+                window.history.pushState({ tab }, '', newPath);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleAccessCode() {
+            const input = document.getElementById('setting-access-code');
+            const btn = document.getElementById('btn-toggle-code');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="ph ph-eye-closed"></i> Hide';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="ph ph-eye"></i> Show';
+            }
+        }
+
+        function toggleApiKey() {
+            const input = document.getElementById('setting-api-key');
+            const btn = document.getElementById('btn-toggle-api');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="ph ph-eye-closed"></i> Hide';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="ph ph-eye"></i> Show';
+            }
+        }
+
+        async function generateApiKey() {
+            const proceed = () => {
+                fetch('/api/tenant/generate-api', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showToast('Secret API Key generated successfully!');
+                            fetchSessionInfo();
+                        } else {
+                            showAlert("Error", "Failed to generate API key.");
+                        }
+                    })
+                    .catch(() => showAlert("Error", "API key generation failed."));
+            };
+
+            if (currentApiKey) {
+                showConfirm(
+                    "Regenerate API Key?",
+                    "Are you sure you want to regenerate your secret API Key? All existing programmatic scripts using the old key will stop working!",
+                    proceed
+                );
+            } else {
+                proceed();
+            }
+        }
+
+        async function requestCustomDomain() {
+            const domain = document.getElementById('domain-name').value.trim();
+            const email = document.getElementById('domain-email').value.trim();
+            if (!domain || !email) {
+                showAlert("Input Required", "Please fill in both Email and Custom Domain.");
+                return;
+            }
+            try {
+                const res = await fetch('/api/tenant/custom-domain', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ domain, email })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Custom domain requested successfully.');
+                    fetchSessionInfo();
+                } else {
+                    showAlert("Request Failed", data.error || 'Failed to request domain');
+                }
+            } catch (e) {
+                showAlert("Error", "Operation failed.");
+            }
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        let currentApiKey = '';
+        let currentCloudId = '';
+        let currentCustomDomain = '';
+        let isCustomDomainVerified = false;
+        let currentBillingStatus = '';
+
+        async function fetchSessionInfo() {
+            try {
+                const res = await fetch('/api/session');
+                const data = await res.json();
+                if (!data.role || (data.role !== 'tenant' && data.role !== 'admin')) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+                currentUsername = data.tenant_username || '';
+                currentSecretCode = data.tenant_secret_code || '';
+                currentApiKey = data.api_key || '';
+                currentCloudId = data.cloud_id || '';
+                currentCustomDomain = data.custom_domain || '';
+                isCustomDomainVerified = data.custom_domain_verified === 1;
+                currentBillingStatus = data.billing_status || 'Active';
+
+                // Update sidebar profile
+                const sidebarUser = document.getElementById('sidebar-username');
+                const sidebarEmail = document.getElementById('sidebar-email');
+                if(sidebarUser) sidebarUser.innerText = currentUsername;
+                if(sidebarEmail) sidebarEmail.innerText = data.custom_domain_email || data.email || 'No Email';
+
+                // Update top warning banner for suspension
+                const suspendedBanner = document.getElementById('billing-suspended-banner');
+                if (suspendedBanner) {
+                    if (currentBillingStatus === 'Suspended') {
+                        suspendedBanner.style.display = 'flex';
+                        document.getElementById('banner-pay-link').href = data.checkout_token ? `https://payments.oqens.me/checkout?token=${data.checkout_token}` : '#';
+                    } else {
+                        suspendedBanner.style.display = 'none';
+                    }
+                }
+
+                // Custom Banner Logic
+                const customBanner = document.getElementById('custom-banner-container');
+                if (customBanner) {
+                    if ((data.custom_message_active == 1 || data.custom_message_active === '1') && data.custom_message) {
+                        const msgKey = 'dismissed_custom_' + (data.custom_message.length + '_' + data.custom_message.substring(0, 15).replace(/\\s/g, ''));
+                        if (localStorage.getItem(msgKey)) {
+                            customBanner.style.display = 'none';
+                        } else {
+                            customBanner.style.display = 'flex';
+                            let themeColor, themeBg, themeBorder, themeText;
+                            if (data.custom_message_theme === 'danger') {
+                                themeColor = '#ef4444'; themeBg = 'rgba(254, 242, 242, 0.8)'; themeBorder = '#fca5a5'; themeText = '#991b1b';
+                            } else if (data.custom_message_theme === 'warning') {
+                                themeColor = '#f59e0b'; themeBg = 'rgba(255, 251, 235, 0.8)'; themeBorder = '#fcd34d'; themeText = '#92400e';
+                            } else if (data.custom_message_theme === 'success') {
+                                themeColor = '#10b981'; themeBg = 'rgba(236, 253, 245, 0.8)'; themeBorder = '#6ee7b7'; themeText = '#065f46';
+                            } else {
+                                themeColor = '#3b82f6'; themeBg = 'rgba(239, 246, 255, 0.8)'; themeBorder = '#93c5fd'; themeText = '#1e40af';
+                            }
+                            
+                            customBanner.style.background = `repeating-linear-gradient(45deg, ${themeBg}, ${themeBg} 10px, rgba(255,255,255,0.4) 10px, rgba(255,255,255,0.4) 20px)`;
+                            customBanner.style.border = `1.5px solid ${themeBorder}`;
+                            customBanner.style.color = themeText;
+                            customBanner.style.padding = '12px 16px';
+                            customBanner.style.borderRadius = '8px';
+                            customBanner.style.alignItems = 'center';
+                            customBanner.style.gap = '10px';
+                            customBanner.style.justifyContent = 'space-between';
+                            
+                            const iconHtml = data.custom_message_icon ? `<i class="ph ${data.custom_message_icon}" style="font-size: 1.5rem; color: ${themeColor}; flex-shrink: 0;"></i>` : '';
+                            const closeBtn = `<i class="ph ph-x" style="font-size: 1.2rem; cursor: pointer; color: ${themeText}; opacity: 0.7; flex-shrink: 0;" onclick="localStorage.setItem('${msgKey}', 'true'); document.getElementById('custom-banner-container').style.display='none';"></i>`;
+                            customBanner.innerHTML = `<div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">${iconHtml}<div style="font-size: 0.9rem; font-weight: 500;">${data.custom_message.replace(/\\n/g, '<br>')}</div></div>${closeBtn}`;
+                        }
+                    } else {
+                        customBanner.style.display = 'none';
+                    }
+                }
+                
+                // Global Banner Logic
+                const globalBanner = document.getElementById('global-banner-container');
+                if (globalBanner) {
+                    if ((data.global_banner_active == 1 || data.global_banner_active === '1') && data.global_banner_message) {
+                        const gMsgKey = 'dismissed_global_' + (data.global_banner_message.length + '_' + data.global_banner_message.substring(0, 15).replace(/\\s/g, ''));
+                        if (localStorage.getItem(gMsgKey)) {
+                            globalBanner.style.display = 'none';
+                        } else {
+                            globalBanner.style.display = 'flex';
+                            let themeColor, themeBg, themeBorder, themeText;
+                            if (data.global_banner_theme === 'danger') {
+                                themeColor = '#ef4444'; themeBg = 'rgba(254, 242, 242, 0.8)'; themeBorder = '#fca5a5'; themeText = '#991b1b';
+                            } else if (data.global_banner_theme === 'warning') {
+                                themeColor = '#f59e0b'; themeBg = 'rgba(255, 251, 235, 0.8)'; themeBorder = '#fcd34d'; themeText = '#92400e';
+                            } else if (data.global_banner_theme === 'success') {
+                                themeColor = '#10b981'; themeBg = 'rgba(236, 253, 245, 0.8)'; themeBorder = '#6ee7b7'; themeText = '#065f46';
+                            } else {
+                                themeColor = '#3b82f6'; themeBg = 'rgba(239, 246, 255, 0.8)'; themeBorder = '#93c5fd'; themeText = '#1e40af';
+                            }
+                            
+                            globalBanner.style.background = themeBg;
+                            globalBanner.style.border = `1.5px solid ${themeBorder}`;
+                            globalBanner.style.color = themeText;
+                            globalBanner.style.padding = '12px 16px';
+                            globalBanner.style.borderRadius = '8px';
+                            globalBanner.style.alignItems = 'center';
+                            globalBanner.style.gap = '10px';
+                            globalBanner.style.justifyContent = 'space-between';
+                            
+                            const iconHtml = data.global_banner_icon ? `<i class="ph ${data.global_banner_icon}" style="font-size: 1.5rem; color: ${themeColor}; flex-shrink: 0;"></i>` : '';
+                            const closeBtn = `<i class="ph ph-x" style="font-size: 1.2rem; cursor: pointer; color: ${themeText}; opacity: 0.7; flex-shrink: 0;" onclick="localStorage.setItem('${gMsgKey}', 'true'); document.getElementById('global-banner-container').style.display='none';"></i>`;
+                            globalBanner.innerHTML = `<div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">${iconHtml}<div style="font-size: 0.9rem; font-weight: 500;">${data.global_banner_message.replace(/\\n/g, '<br>')}</div></div>${closeBtn}`;
+                        }
+                    } else {
+                        globalBanner.style.display = 'none';
+                    }
+                }
+                
+                // Populate Settings input fields
+                if (document.getElementById('setting-username')) {
+                    document.getElementById('setting-username').value = currentUsername;
+                }
+                if (document.getElementById('setting-access-code')) {
+                    document.getElementById('setting-access-code').value = currentSecretCode;
+                }
+                if (document.getElementById('setting-cloud-id')) {
+                    document.getElementById('setting-cloud-id').value = currentCloudId;
+                }
+                if (document.getElementById('setting-api-key')) {
+                    document.getElementById('setting-api-key').value = currentApiKey;
+                }
+
+                // Update guide credentials if elements exist
+                if (document.getElementById('guide-code-list')) {
+                    document.getElementById('guide-code-list').innerText = `curl -H "X-API-Key: ${currentApiKey || 'YOUR_API_KEY'}" https://echo.oqens.me/api/bucket/list`;
+                }
+                if (document.getElementById('guide-code-upload')) {
+                    document.getElementById('guide-code-upload').innerText = `curl -X POST -H "X-API-Key: ${currentApiKey || 'YOUR_API_KEY'}" -F "file=@/local/path/file.png" https://echo.oqens.me/api/bucket/upload`;
+                }
+                if (document.getElementById('guide-code-download')) {
+                    document.getElementById('guide-code-download').innerText = `curl -H "X-API-Key: ${currentApiKey || 'YOUR_API_KEY'}" -o file.png "https://echo.oqens.me/api/bucket/download?key=file.png&attachment=true"`;
+                }
+                if (document.getElementById('guide-code-delete')) {
+                    document.getElementById('guide-code-delete').innerText = `curl -X DELETE -H "X-API-Key: ${currentApiKey || 'YOUR_API_KEY'}" -H "Content-Type: application/json" -d '{"key":"file.png"}' https://echo.oqens.me/api/bucket/delete`;
+                }
+                if (document.getElementById('guide-code-cdn')) {
+                    document.getElementById('guide-code-cdn').innerText = isCustomDomainVerified
+                        ? `https://${currentCustomDomain}/file.png`
+                        : `https://dl.oqens.me/${currentCloudId || 'YOUR_CLOUD_ID'}/file.png`;
+                }
+                if (document.getElementById('guide-agent-prompt-block')) {
+                    document.getElementById('guide-agent-prompt-block').innerText = buildGuideAgentPrompt();
+                }
+
+                // Custom Domain section population
+                if (document.getElementById('card-custom-domain')) {
+                    if (parseFloat(data.monthly_rate) === 0.0) {
+                        document.getElementById('domain-upgrade-notice').style.display = 'block';
+                        document.getElementById('domain-upgrade-btn').href = `/selectplan?token=${data.checkout_token}`;
+                        if (document.getElementById('domain-toggle-container')) {
+                            document.getElementById('domain-toggle-container').style.display = 'none';
+                        }
+                        document.getElementById('domain-request-form').style.display = 'none';
+                        document.getElementById('domain-status-view').style.display = 'none';
+                    } else {
+                        document.getElementById('domain-upgrade-notice').style.display = 'none';
+                        if (data.custom_domain) {
+                            if (document.getElementById('domain-toggle-container')) {
+                                document.getElementById('domain-toggle-container').style.display = 'none';
+                            }
+                            document.getElementById('domain-request-form').style.display = 'none';
+                            document.getElementById('domain-status-view').style.display = 'block';
+                            document.getElementById('lbl-domain-name').innerText = data.custom_domain;
+                            
+                            let parts = data.custom_domain.split('.');
+                            let hostSuggested = parts.length > 2 ? parts[0] : '@';
+                            document.getElementById('lbl-dns-host').innerText = hostSuggested;
+                            
+                            const badge = document.getElementById('badge-domain-status');
+                            const validateBtn = document.getElementById('btn-validate-domain');
+                            if (document.getElementById('domain-dns-mapping')) {
+                                document.getElementById('domain-dns-mapping').style.display = 'block';
+                            }
+                            if (data.custom_domain_verified === 1) {
+                                badge.innerText = 'Verified & Active';
+                                badge.style.background = '#e8f8f5';
+                                badge.style.color = '#2ecc71';
+                                badge.style.border = '1px solid #2ecc71';
+                                if (validateBtn) validateBtn.style.display = 'none';
+                            } else {
+                                badge.innerText = 'Pending Verification';
+                                badge.style.background = '#fef5e7';
+                                badge.style.color = '#f39c12';
+                                badge.style.border = '1px solid #f39c12';
+                                if (validateBtn) validateBtn.style.display = 'inline-flex';
+                            }
+                        } else {
+                            if (document.getElementById('domain-toggle-container')) {
+                                document.getElementById('domain-toggle-container').style.display = 'block';
+                            }
+                            document.getElementById('domain-request-form').style.display = 'none';
+                            document.getElementById('domain-status-view').style.display = 'none';
+                            
+                            // Reset toggle button state
+                            const toggleBtn = document.getElementById('btn-toggle-domain-form');
+                            if (toggleBtn) {
+                                toggleBtn.innerHTML = `<i class="ph ph-plus"></i> Add Custom Domain`;
+                                toggleBtn.classList.add('btn-primary');
+                            }
+                        }
+                    }
+                }
+                
+
+                
+                // Check and toggle Global Limit Warning Banner
+                let limitExceeded = false;
+                if (data.role === 'tenant') {
+                    const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                    const isBandwidthOver = data.bandwidth_limit_bytes > 0 && (data.bandwidth_bytes >= data.bandwidth_limit_bytes);
+                    if (isStorageOver || isBandwidthOver) {
+                        limitExceeded = true;
+                    }
+                }
+                const banner = document.getElementById('limit-warning-banner');
+                if (banner) {
+                    banner.style.display = limitExceeded ? 'flex' : 'none';
+                }
+
+                // Check and toggle dropzone upload disabled state
+                const dropzone = document.getElementById('dropzone');
+                if (dropzone) {
+                    if (data.role === 'tenant' && limitExceeded) {
+                        dropzone.classList.add('disabled');
+                        const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                        const msg = isStorageOver ? 'Upload disabled: Storage capacity exceeded' : 'Upload disabled: Bandwidth capacity exceeded';
+                        dropzone.innerHTML = `<i class="ph ph-warning-octagon"></i><p>${msg}</p>`;
+                    } else {
+                        dropzone.classList.remove('disabled');
+                        // Restore dropzone if not uploading
+                        const progressContainer = document.getElementById('uploadProgressContainer');
+                        const isUploading = progressContainer && progressContainer.style.display === 'flex';
+                        if (!isUploading) {
+                            dropzone.innerHTML = `<i class="ph ph-cloud-arrow-up"></i><p>Drag files here or click to browse</p><input type="file" id="file-upload" style="display:none" multiple onchange="handleFileUpload(this.files)">`;
+                        }
+                    }
+                }
+
+                if (data.role === 'tenant') {
+                    const usedFormatted = formatBytes(data.storage_used_bytes);
+                    const limitFormatted = formatBytes(data.storage_limit_bytes);
+                    const storagePercent = data.storage_limit_bytes > 0 ? ((data.storage_used_bytes / data.storage_limit_bytes) * 100).toFixed(1) : 0;
+                    
+                    document.getElementById('val-storage-summary').innerText = `${usedFormatted} / ${limitFormatted}`;
+                    document.getElementById('val-storage-percent').innerText = `${storagePercent}% of quota utilized`;
+                    document.getElementById('quota-progress').style.width = `${storagePercent}%`;
+                    
+                    const bwUsedFormatted = formatBytes(data.bandwidth_bytes || 0);
+                    const bwLimitFormatted = data.bandwidth_limit_bytes > 0 ? formatBytes(data.bandwidth_limit_bytes) : 'Unlimited';
+                    const bwPercent = data.bandwidth_limit_bytes > 0 ? ((data.bandwidth_bytes / data.bandwidth_limit_bytes) * 100).toFixed(1) : 0;
+                    
+                    document.getElementById('val-bandwidth-summary').innerText = `${bwUsedFormatted} / ${bwLimitFormatted}`;
+                    document.getElementById('val-bandwidth-percent').innerText = data.bandwidth_limit_bytes > 0 ? `${bwPercent}% of bandwidth utilized` : 'Unlimited bandwidth quota';
+                    document.getElementById('bandwidth-progress').style.width = data.bandwidth_limit_bytes > 0 ? `${bwPercent}%` : '0%';
+                    
+                    document.getElementById('val-views-count').innerText = data.unique_views_count || 0;
+                    document.getElementById('val-downloads-count').innerText = data.downloads_count || 0;
+
+                    // Populate Usage Tab elements
+                    if (document.getElementById('usage-storage-summary')) {
+                        document.getElementById('usage-storage-summary').innerText = `${usedFormatted} / ${limitFormatted}`;
+                    }
+                    if (document.getElementById('usage-storage-percent')) {
+                        document.getElementById('usage-storage-percent').innerText = `${storagePercent}%`;
+                    }
+                    if (document.getElementById('usage-storage-bar')) {
+                        document.getElementById('usage-storage-bar').style.width = `${storagePercent}%`;
+                    }
+                    if (document.getElementById('usage-bandwidth-summary')) {
+                        document.getElementById('usage-bandwidth-summary').innerText = `${bwUsedFormatted} / ${bwLimitFormatted}`;
+                    }
+                    if (document.getElementById('usage-bandwidth-percent')) {
+                        document.getElementById('usage-bandwidth-percent').innerText = data.bandwidth_limit_bytes > 0 ? `${bwPercent}%` : '0%';
+                    }
+                    if (document.getElementById('usage-bandwidth-bar')) {
+                        document.getElementById('usage-bandwidth-bar').style.width = data.bandwidth_limit_bytes > 0 ? `${bwPercent}%` : '0%';
+                    }
+                    if (document.getElementById('usage-views-count')) {
+                        document.getElementById('usage-views-count').innerText = data.unique_views_count || 0;
+                    }
+                    if (document.getElementById('usage-downloads-count')) {
+                        document.getElementById('usage-downloads-count').innerText = data.downloads_count || 0;
+                    }
+                } else if (data.role === 'admin') {
+                    // Admin has unlimited overview
+                    document.getElementById('val-storage-summary').innerText = `Unlimited (Admin)`;
+                    document.getElementById('val-storage-percent').innerText = `N/A`;
+                    document.getElementById('quota-progress').style.width = `100%`;
+                    
+                    document.getElementById('val-bandwidth-summary').innerText = `Unlimited (Admin)`;
+                    document.getElementById('val-bandwidth-percent').innerText = `N/A`;
+                    document.getElementById('bandwidth-progress').style.width = `100%`;
+                }
+            } catch (e) {
+                console.error("Session fetch error", e);
+            }
+        }
+
+        let localFiles = [];
+
+        function getFileIcon(ext) {
+            const extMap = {
+                // Images
+                'png': 'ph ph-file-image',
+                'jpg': 'ph ph-file-image',
+                'jpeg': 'ph ph-file-image',
+                'gif': 'ph ph-file-image',
+                'webp': 'ph ph-file-image',
+                'svg': 'ph ph-file-image',
+                'bmp': 'ph ph-file-image',
+                'ico': 'ph ph-file-image',
+                // Videos
+                'mp4': 'ph ph-file-video',
+                'webm': 'ph ph-file-video',
+                'mov': 'ph ph-file-video',
+                'avi': 'ph ph-file-video',
+                'mkv': 'ph ph-file-video',
+                'flv': 'ph ph-file-video',
+                '3gp': 'ph ph-file-video',
+                // Audio
+                'mp3': 'ph ph-file-audio',
+                'wav': 'ph ph-file-audio',
+                'ogg': 'ph ph-file-audio',
+                'flac': 'ph ph-file-audio',
+                'm4a': 'ph ph-file-audio',
+                'aac': 'ph ph-file-audio',
+                // Archives
+                'zip': 'ph ph-file-archive',
+                'rar': 'ph ph-file-archive',
+                'tar': 'ph ph-file-archive',
+                'gz': 'ph ph-file-archive',
+                '7z': 'ph ph-file-archive',
+                // Documents & Code
+                'paper': 'ph ph-scroll',
+                'pdf': 'ph ph-file-pdf',
+                'txt': 'ph ph-file-text',
+
+                'md': 'ph ph-file-text',
+                'log': 'ph ph-file-text',
+                'doc': 'ph ph-file-doc',
+                'docx': 'ph ph-file-doc',
+                'xls': 'ph ph-file-xls',
+                'xlsx': 'ph ph-file-xls',
+                'csv': 'ph ph-file-xls',
+                'ppt': 'ph ph-file-ppt',
+                'pptx': 'ph ph-file-ppt',
+                'tex': 'ph ph-file-text',
+                'latex': 'ph ph-file-text',
+                'js': 'ph ph-file-code',
+                'ts': 'ph ph-file-code',
+                'py': 'ph ph-file-code',
+                'go': 'ph ph-file-code',
+                'html': 'ph ph-file-code',
+                'css': 'ph ph-file-code',
+                'json': 'ph ph-file-code',
+                'yaml': 'ph ph-file-code',
+                'yml': 'ph ph-file-code',
+                'c': 'ph ph-file-code',
+                'cpp': 'ph ph-file-code',
+                'cs': 'ph ph-file-code',
+                'java': 'ph ph-file-code',
+                'sh': 'ph ph-file-code',
+                'bat': 'ph ph-file-code',
+                'sql': 'ph ph-file-code',
+                'php': 'ph ph-file-code',
+                'rs': 'ph ph-file-code'
+            };
+            return extMap[ext] || 'ph ph-file';
+        }
+
+        async function addTag(filename, tag) {
+            if (!tag.trim()) return;
+            try {
+                const res = await fetch('/api/bucket/tags', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({key: filename, tag: tag})
+                });
+                if (res.ok) {
+                    showToast('Tag added successfully!');
+                    fetchFiles();
+                } else {
+                    showToast('Failed to add tag.');
+                }
+            } catch (e) {
+                console.error("Add tag error", e);
+            }
+        }
+
+        async function deleteTag(filename, tag) {
+            try {
+                const res = await fetch('/api/bucket/tags/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({key: filename, tag: tag})
+                });
+                if (res.ok) {
+                    showToast('Tag removed!');
+                    fetchFiles();
+                } else {
+                    showToast('Failed to remove tag.');
+                }
+            } catch (e) {
+                console.error("Delete tag error", e);
+            }
+        }
+
+        function showAddTagInput(btn, filename) {
+            const container = btn.parentElement;
+            btn.style.display = 'none';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Tag name...';
+            input.style = 'padding: 2px 6px; font-size: 0.75rem; border: 1.5px solid var(--border-color); border-radius: 4px; outline: none; width: 80px;';
+            container.appendChild(input);
+            input.focus();
+            
+            async function save() {
+                const val = input.value.trim();
+                if (val) {
+                    await addTag(filename, val);
+                } else {
+                    input.remove();
+                    btn.style.display = 'inline-flex';
+                }
+            }
+            
+            input.onblur = save;
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') save();
+                if (e.key === 'Escape') {
+                    input.remove();
+                    btn.style.display = 'inline-flex';
+                }
+            };
+        }
+
+        function applyFiltersAndSort() {
+            const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+            const typeFilter = document.getElementById('filter-type').value;
+            const tagFilter = document.getElementById('filter-tag').value;
+            const sortOrder = document.getElementById('sort-order').value;
+            const list = document.getElementById('file-list');
+            
+            let filtered = [...localFiles];
+            
+            // Search filter (filename or tag)
+            if (searchVal) {
+                filtered = filtered.filter(f => {
+                    const nameMatch = f.key.toLowerCase().includes(searchVal);
+                    const tagMatch = f.tags && f.tags.some(t => t.toLowerCase().includes(searchVal));
+                    return nameMatch || tagMatch;
+                });
+            }
+            
+            // Type filter
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(f => {
+                    const ext = f.key.split('.').pop().toLowerCase();
+                    if (typeFilter === 'image') return ['jpg','jpeg','png','gif','webp','svg','bmp','ico'].includes(ext);
+                    if (typeFilter === 'video') return ['mp4','webm','mov','avi','mkv','flv','3gp'].includes(ext);
+                    if (typeFilter === 'audio') return ['mp3','wav','ogg','flac','m4a','aac'].includes(ext);
+                    if (typeFilter === 'pdf') return ext === 'pdf';
+                    if (typeFilter === 'code_docs') return ['txt','md','log','js','ts','py','go','html','css','json','yaml','yml','c','cpp','cs','java','sh','bat','sql','php','rs','paper'].includes(ext);
+                    if (typeFilter === 'spreadsheet') return ['xls','xlsx','csv'].includes(ext);
+                    if (typeFilter === 'archive') return ['zip','rar','tar','gz','7z'].includes(ext);
+                    if (typeFilter === 'other') {
+                        const known = ['jpg','jpeg','png','gif','webp','svg','bmp','ico','mp4','webm','mov','avi','mkv','flv','3gp','mp3','wav','ogg','flac','m4a','aac','zip','rar','tar','gz','7z','pdf','txt','md','log','doc','docx','xls','xlsx','csv','ppt','pptx','tex','latex','js','ts','py','go','html','css','json','yaml','yml','c','cpp','cs','java','sh','bat','sql','php','rs','paper'];
+                        return !known.includes(ext);
+                    }
+
+                    return true;
+                });
+            }
+            
+            // Tag filter
+            if (tagFilter !== 'all') {
+                filtered = filtered.filter(f => f.tags && f.tags.includes(tagFilter));
+            }
+            
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortOrder === 'name-asc') return a.key.localeCompare(b.key);
+                if (sortOrder === 'name-desc') return b.key.localeCompare(a.key);
+                if (sortOrder === 'size-asc') return a.size - b.size;
+                if (sortOrder === 'size-desc') return b.size - a.size;
+                if (sortOrder === 'date-asc') return new Date(a.last_modified) - new Date(b.last_modified);
+                if (sortOrder === 'date-desc') return new Date(b.last_modified) - new Date(a.last_modified);
+                return 0;
+            });
+            
+            // Render
+            list.innerHTML = '';
+            document.getElementById('val-file-count').innerText = localFiles.length;
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);"><i class="ph ph-folder-open" style="font-size: 2rem; display: block; margin: 0 auto 10px;"></i> No files match criteria.</div>';
+                return;
+            }
+            
+            filtered.forEach(f => {
+                const sizeMB = (f.size / (1024*1024)).toFixed(2);
+                const ext = f.key.split('.').pop().toLowerCase();
+                const isMedia = ['jpg','jpeg','png','gif','webp','mp4','webm'].includes(ext);
+                const isPaper = ext === 'paper';
+                
+                let shareUrl = '';
+                if (isPaper) {
+                    const paperSlug = f.key.slice(0, -6);
+                    shareUrl = `https://papers.oqens.me/p/${currentUsername}/${paperSlug}`;
+                } else {
+                    shareUrl = isCustomDomainVerified
+                        ? `${window.location.protocol}//${currentCustomDomain}/${f.key}`
+                        : `${window.location.protocol}//dl.oqens.me/${currentCloudId}/${f.key}`;
+                }
+                
+                const iconClass = getFileIcon(ext);
+                
+                let mediaPreview = '';
+                let editBtn = '';
+                if (isMedia) {
+                    mediaPreview = `<button onclick="previewMedia('${f.raw_key}', '${ext}')"><i class="ph ph-eye"></i> Preview</button>`;
+                } else if (isPaper) {
+                    const paperSlug = f.key.slice(0, -6);
+                    const paperUrl = `https://papers.oqens.me/p/${currentUsername}/${paperSlug}`;
+                    const editUrl = `https://papers.oqens.me/edit/${paperSlug}/`;
+                    mediaPreview = `<button onclick="window.open('${paperUrl}', '_blank')"><i class="ph ph-eye"></i> Preview</button>`;
+                    editBtn = `<button onclick="window.open('${editUrl}', '_blank')"><i class="ph ph-pencil-simple"></i> Edit</button>`;
+                }
+                
+                // Tags display list
+                const tagsListHtml = (f.tags || []).map(t => `
+                    <span style="display: inline-flex; align-items: center; gap: 4px; background: #f0f0f0; color: var(--text-primary); font-size: 0.78rem; padding: 2px 8px; border-radius: 4px; font-weight: 500;">
+                        ${t}
+                        <i class="ph ph-x" style="cursor: pointer; font-size: 0.65rem;" onclick="deleteTag('${f.raw_key.replace(/'/g, "\\'")}', '${t.replace(/'/g, "\\'")}')"></i>
+                    </span>
+                `).join('');
+                
+                list.innerHTML += `
+                    <div class="file-item" style="display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; border-bottom: 1.5px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+                            <div class="file-name" style="font-weight: 500; display: flex; align-items: center; gap: 10px; font-size: 0.95rem;">
+                                <i class="${iconClass}" style="font-size: 1.25rem; color: var(--text-primary);"></i> ${f.key}
+                            </div>
+                            <div style="display:flex; align-items:center; gap: 20px;">
+                                <div class="file-size" style="font-size: 0.88rem; color: var(--text-secondary);">${sizeMB} MB</div>
+                                <div class="file-actions" style="display: flex; gap: 8px;">
+                                    ${mediaPreview}
+                                    ${editBtn}
+                                    <button onclick="openShareModal('${f.key.replace(/'/g, "\\'")}', '${shareUrl.replace(/'/g, "\\'")}')"><i class="ph ph-share-network"></i> Share</button>
+                                    <button onclick="downloadFile('${f.raw_key}')"><i class="ph ph-download-simple"></i> Download</button>
+                                    <button class="btn-delete" onclick="deleteFile('${f.raw_key}')"><i class="ph ph-trash"></i> Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tags row -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 500; display: flex; align-items: center; gap: 4px;"><i class="ph ph-tag"></i> Tags:</span>
+                            ${tagsListHtml}
+                            <button class="btn" style="padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" onclick="showAddTagInput(this, '${f.raw_key.replace(/'/g, "\\'")}')">
+                                <i class="ph ph-plus"></i> Add Tag
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+        }
+
+        async function fetchFiles() {
+            const list = document.getElementById('file-list');
+            list.innerHTML = Array(5).fill(0).map(() => `
+                <div class="skeleton-item">
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-text" style="width: 40%;"></div>
+                    </div>
+                    <div class="skeleton-text" style="width: 15%; margin-right: 20px;"></div>
+                    <div class="skeleton-text" style="width: 20%;"></div>
+                </div>
+            `).join('');
+            try {
+                const res = await fetch('/api/bucket/list');
+                const data = await res.json();
+                if (data.error) {
+                    list.innerHTML = `<div style="padding: 30px; color: #e74c3c; text-align: center;">Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                localFiles = data.files || [];
+                
+                // Collect unique tags
+                const allTagsSet = new Set();
+                localFiles.forEach(f => {
+                    if (f.tags) f.tags.forEach(t => allTagsSet.add(t));
+                });
+                
+                // Repopulate dynamic tags dropdown filter
+                const tagFilterSelect = document.getElementById('filter-tag');
+                const currentSelection = tagFilterSelect.value;
+                tagFilterSelect.innerHTML = '<option value="all">All Tags</option>';
+                Array.from(allTagsSet).sort().forEach(t => {
+                    tagFilterSelect.innerHTML += `<option value="${t}">${t}</option>`;
+                });
+                if (allTagsSet.has(currentSelection)) {
+                    tagFilterSelect.value = currentSelection;
+                } else {
+                    tagFilterSelect.value = 'all';
+                }
+                
+                applyFiltersAndSort();
+            } catch (e) {
+                list.innerHTML = `<div style="padding: 30px; color: #e74c3c; text-align: center;">Connection failed.</div>`;
+            }
+        }
+
+        function openShareModal(filename, baseUrl) {
+            document.getElementById('share-modal-title').innerText = `Share: ${filename}`;
+            document.getElementById('btn-share-preview').onclick = () => {
+                navigator.clipboard.writeText(`${baseUrl}?preview=true`);
+                showToast('Preview link copied to clipboard!');
+                closeShareModal();
+            };
+            document.getElementById('btn-share-download').onclick = () => {
+                navigator.clipboard.writeText(baseUrl);
+                showToast('Download link copied to clipboard!');
+                closeShareModal();
+            };
+            document.getElementById('share-modal').classList.add('active');
+        }
+
+        function closeShareModal() {
+            document.getElementById('share-modal').classList.remove('active');
+        }
+
+        function previewMedia(key, ext) {
+            const container = document.getElementById('lightbox-media');
+            const lightbox = document.getElementById('lightbox');
+            const title = document.getElementById('lightbox-title');
+            
+            container.innerHTML = '';
+            title.innerText = key;
+            
+            const srcUrl = `/api/bucket/download?key=${encodeURIComponent(key)}`;
+            
+            if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                container.innerHTML = `
+                    <div style="position: relative; display: flex; justify-content: center; align-items: center; max-height: 70vh; overflow: hidden;">
+                        <img id="lightbox-img" src="${srcUrl}" style="filter: blur(25px); transition: filter 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid #333;" alt="${key}">
+                        
+                        <!-- Liquid Glass Loader -->
+                        <div id="lightbox-loader" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 4px; z-index: 500; transition: opacity 0.5s ease;">
+                            <div style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 25px 30px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; gap: 12px; width: 80%; max-width: 280px; align-items: center;">
+                                <span style="color: rgba(255,255,255,0.9); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">Rendering Image</span>
+                                <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; position: relative;">
+                                    <div id="lightbox-progress-bar" style="width: 10%; height: 100%; background: linear-gradient(90deg, #ffffff, #e0e0e0); border-radius: 10px; transition: width 0.3s ease; position: relative; overflow: hidden;">
+                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%); animation: liquid-shimmer 1.5s infinite; background-size: 200% 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const img = document.getElementById('lightbox-img');
+                const loader = document.getElementById('lightbox-loader');
+                const bar = document.getElementById('lightbox-progress-bar');
+                
+                let progress = 10;
+                const interval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.floor(Math.random() * 15) + 5;
+                        if (progress > 90) progress = 90;
+                        if (bar) bar.style.width = progress + '%';
+                    }
+                }, 150);
+                
+                img.onload = () => {
+                    clearInterval(interval);
+                    if (bar) bar.style.width = '100%';
+                    setTimeout(() => {
+                        if (img) img.style.filter = 'blur(0px)';
+                        if (loader) {
+                            loader.style.opacity = '0';
+                            setTimeout(() => {
+                                if (loader) loader.style.display = 'none';
+                            }, 500);
+                        }
+                    }, 200);
+                };
+                
+                img.onerror = () => {
+                    clearInterval(interval);
+                    if (loader) loader.innerHTML = `<div style="color: #ff6b6b; font-size: 0.9rem; font-weight: 500;">Failed to load image</div>`;
+                };
+                
+            } else if (['mp4','webm'].includes(ext)) {
+                container.innerHTML = `<video src="${srcUrl}" style="max-width: 100%; max-height: 70vh; border-radius: 4px; border: 1px solid #333;" controls autoplay></video>`;
+            }
+            
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightbox-media').innerHTML = '';
+        }
+
+        let activeConfirmCallback = null;
+        let activeCancelCallback = null;
+
+        function showConfirm(title, message, onConfirm, onCancel = null) {
+            document.getElementById('custom-alert-title').innerText = title;
+            document.getElementById('custom-alert-message').innerText = message;
+            
+            const cancelBtn = document.getElementById('custom-alert-cancel-btn');
+            const confirmBtn = document.getElementById('custom-alert-confirm-btn');
+            
+            cancelBtn.style.display = 'inline-flex';
+            confirmBtn.innerText = 'Confirm';
+            
+            activeConfirmCallback = onConfirm;
+            activeCancelCallback = onCancel;
+            
+            confirmBtn.onclick = () => {
+                closeCustomAlert();
+                if (activeConfirmCallback) activeConfirmCallback();
+            };
+            
+            cancelBtn.onclick = () => {
+                closeCustomAlert();
+                if (activeCancelCallback) activeCancelCallback();
+            };
+            
+            document.getElementById('custom-alert-modal').classList.add('active');
+        }
+
+        function showAlert(title, message, onOk = null) {
+            document.getElementById('custom-alert-title').innerText = title;
+            document.getElementById('custom-alert-message').innerText = message;
+            
+            const cancelBtn = document.getElementById('custom-alert-cancel-btn');
+            const confirmBtn = document.getElementById('custom-alert-confirm-btn');
+            
+            cancelBtn.style.display = 'none';
+            confirmBtn.innerText = 'OK';
+            
+            activeConfirmCallback = onOk;
+            
+            confirmBtn.onclick = () => {
+                closeCustomAlert();
+                if (activeConfirmCallback) activeConfirmCallback();
+            };
+            
+            document.getElementById('custom-alert-modal').classList.add('active');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('custom-alert-modal').classList.remove('active');
+        }
+
+        // Close preview/share modals on ESC press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+                if (typeof closeShareModal === 'function') closeShareModal();
+                if (typeof closeCustomAlert === 'function') closeCustomAlert();
+                if (typeof closeFetchUrlModal === 'function') closeFetchUrlModal();
+            }
+        });
+
+        async function downloadFile(key) {
+            // Force download by passing attachment=true
+            window.open('/api/bucket/download?key=' + encodeURIComponent(key) + '&attachment=true', '_blank');
+        }
+
+        async function deleteFile(key) {
+            showConfirm(
+                "Delete Asset",
+                "Are you sure you want to permanently delete this file?",
+                async () => {
+                    try {
+                        const res = await fetch('/api/bucket/delete', {
+                            method: 'DELETE',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({key})
+                        });
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            showToast('File deleted successfully.');
+                            fetchFiles();
+                            fetchSessionInfo();
+                        } else {
+                            showAlert("Error", 'Delete failed: ' + (data.error || 'unknown error'));
+                        }
+                    } catch (e) { showAlert("Error", "Delete operation failed."); }
+                }
+            );
+        }
+
+        async function removeCustomDomain() {
+            showConfirm(
+                "Remove Custom Domain",
+                "Are you sure you want to remove your custom domain? This will delete the domain routing configuration.",
+                async () => {
+                    try {
+                        const res = await fetch('/api/tenant/custom-domain', { method: 'DELETE' });
+                        if (res.ok) {
+                            showToast('Custom domain configuration removed.');
+                            fetchSessionInfo();
+                        } else {
+                            showAlert("Error", 'Failed to remove custom domain.');
+                        }
+                    } catch(e) { showAlert("Error", "Operation failed."); }
+                }
+            );
+        }
+
+        async function validateCustomDomain() {
+            const btn = document.getElementById('btn-validate-domain');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-spinner" style="display:inline-block; animation: spin 1s linear infinite; margin-right: 5px;"></i> Certifying SSL...`;
+            
+            try {
+                const res = await fetch('/api/tenant/custom-domain/verify', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast('Domain SSL certified and activated successfully!');
+                    fetchSessionInfo();
+                } else {
+                    showAlert("Verification Failed", data.error || 'Verification failed. Please check your DNS records.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            } catch (e) {
+                showAlert("Error", "SSL Verification request failed.");
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        function toggleDomainForm() {
+            const form = document.getElementById('domain-request-form');
+            const toggleContainer = document.getElementById('domain-toggle-container');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                if (toggleContainer) toggleContainer.style.display = 'none';
+                form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                form.style.display = 'none';
+                if (toggleContainer) toggleContainer.style.display = 'block';
+            }
+        }
+
+
+
+        async function loadTenantBilling() {
+            try {
+                const res = await fetch('/api/session');
+                if (!res.ok) throw new Error("Failed to fetch session information");
+                const data = await res.json();
+                
+                if (res.ok) {
+                    currentUsername = data.tenant_username || '';
+                    currentSecretCode = data.tenant_secret_code || '';
+                    currentApiKey = data.api_key || '';
+                    currentCloudId = data.cloud_id || '';
+                    currentCustomDomain = data.custom_domain || '';
+                    isCustomDomainVerified = data.custom_domain_verified === 1;
+                    currentBillingStatus = data.billing_status || 'Active';
+
+                    const plan = getPlanFromRate(data.monthly_rate || 0);
+                    document.getElementById('lbl-billing-plan').innerText = plan;
+                    document.getElementById('lbl-billing-rate').innerText = '₹' + parseFloat(data.monthly_rate || 0).toFixed(2) + '/month';
+                    document.getElementById('lbl-billing-next-date').innerText = data.next_billing_date || 'N/A';
+                    
+                    const statusEl = document.getElementById('lbl-billing-status');
+                    statusEl.innerText = currentBillingStatus;
+                    if (currentBillingStatus === 'Active') {
+                        statusEl.style.background = '#e8f8f5';
+                        statusEl.style.color = '#2ecc71';
+                        statusEl.style.border = '1px solid #2ecc71';
+                    } else if (currentBillingStatus === 'Suspended') {
+                        statusEl.style.background = '#fdf2f2';
+                        statusEl.style.color = '#ef4444';
+                        statusEl.style.border = '1px solid #ef4444';
+                    } else {
+                        statusEl.style.background = '#fef5e7';
+                        statusEl.style.color = '#f39c12';
+                        statusEl.style.border = '1px solid #f39c12';
+                    }
+
+                    const isFree = parseFloat(data.monthly_rate || 0) === 0.0;
+                    if (isFree) {
+                        document.getElementById('btn-manual-pay').innerHTML = '<i class="ph ph-arrow-up-right"></i> Upgrade Plan';
+                        document.getElementById('btn-manual-pay').href = data.checkout_token ? `/selectplan?token=${data.checkout_token}` : '#';
+                        document.getElementById('container-auto-renew').style.display = 'none';
+                        document.getElementById('form-group-next-billing').style.display = 'none';
+                        document.getElementById('card-billing-transactions').style.display = 'none';
+                    } else {
+                        document.getElementById('btn-manual-pay').innerHTML = '<i class="ph ph-credit-card"></i> Pay / Renew Subscription';
+                        document.getElementById('btn-manual-pay').href = data.checkout_token ? `https://payments.oqens.me/checkout?token=${data.checkout_token}` : '#';
+                        document.getElementById('container-auto-renew').style.display = 'flex';
+                        document.getElementById('form-group-next-billing').style.display = 'block';
+                        document.getElementById('card-billing-transactions').style.display = 'block';
+                    }
+
+                    document.getElementById('switch-auto-renew').checked = data.auto_renew === 1;
+
+                    const suspendedBanner = document.getElementById('billing-suspended-banner');
+                    if (suspendedBanner) {
+                        if (currentBillingStatus === 'Suspended') {
+                            suspendedBanner.style.display = 'flex';
+                            document.getElementById('banner-pay-link').href = data.checkout_token ? `https://payments.oqens.me/checkout?token=${data.checkout_token}` : '#';
+                        } else {
+                            suspendedBanner.style.display = 'none';
+                        }
+                    }
+                }
+
+                const txRes = await fetch('/api/tenant/billing/transactions');
+                let txs = [];
+                if (txRes.ok) {
+                    const resData = await txRes.json();
+                    txs = Array.isArray(resData) ? resData : (resData.transactions || []);
+                }
+                
+                const tbody = document.getElementById('billing-tx-list');
+                tbody.innerHTML = '';
+                
+                if (txs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No transactions recorded.</td></tr>`;
+                } else {
+                    txs.forEach(tx => {
+                        const statusStyle = tx.status === 'Paid' ? 'color: #10b981; font-weight: 600;' : 'color: #ef4444; font-weight: 600;';
+                        tbody.innerHTML += `
+                            <tr style="border-bottom: 1.5px solid var(--border-color);">
+                                <td style="padding: 12px 20px;">${tx.date}</td>
+                                <td style="padding: 12px 20px;">${tx.description || ''}</td>
+                                <td style="padding: 12px 20px;">₹${parseFloat(tx.amount || 0).toFixed(2)}</td>
+                                <td style="padding: 12px 20px; ${statusStyle}">${tx.status}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.error("Load tenant billing failed", e);
+            }
+        }
+
+        function getPlanFromRate(rate) {
+            const r = parseFloat(rate);
+            if (r === 0) return 'Free Plan';
+            if (r === 57) return 'Starter Plan';
+            if (r === 137) return 'Pro Plan';
+            return 'Custom / Enterprise';
+        }
+
+        async function toggleAutoRenew(checkbox) {
+            const autoRenew = checkbox.checked ? 1 : 0;
+            try {
+                const res = await fetch('/api/tenant/billing/toggle-auto-renew', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ auto_renew: autoRenew })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast(`Auto-renewal ${autoRenew === 1 ? 'enabled' : 'disabled'} successfully.`);
+                    loadTenantBilling();
+                } else {
+                    showAlert('Error', 'Failed to toggle auto-renewal.');
+                    checkbox.checked = !checkbox.checked;
+                }
+            } catch (e) {
+                showAlert('Error', 'Connection error toggling auto-renewal.');
+                checkbox.checked = !checkbox.checked;
+            }
+        }
+
+        function handleFileUpload(files) {
+            if (currentBillingStatus === 'Suspended') {
+                showAlert("Workspace Suspended", "Your workspace is suspended due to unpaid subscription fees. Please activate your subscription in the Billing tab.");
+                return;
+            }
+            if (!files || files.length === 0) return;
+            
+            const dropzone = document.getElementById('dropzone');
+            if (dropzone) {
+                dropzone.classList.add('disabled');
+                dropzone.innerHTML = `<i class="ph ph-spinner spin"></i><p>Uploading files... Please wait.</p>`;
+            }
+            
+            const progressContainer = document.getElementById('uploadProgressContainer');
+            const progressList = document.getElementById('uploadProgressList');
+            const progressTitle = document.getElementById('uploadProgressTitle');
+            
+            progressContainer.style.display = 'flex';
+            progressList.innerHTML = '';
+            progressTitle.innerText = `Uploading ${files.length} file(s)...`;
+            
+            let uploadedCount = 0;
+            let totalFiles = files.length;
+            
+            Array.from(files).forEach((file, index) => {
+                const itemId = `upload-item-${index}`;
+                
+                // Add item UI
+                progressList.innerHTML += `
+                    <div id="${itemId}" style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500;">
+                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">${file.name}</span>
+                            <span class="pct-text">0%</span>
+                        </div>
+                        <div class="progress-bar-container" style="background: var(--hover-bg); height: 6px; border-radius: 3px; overflow: hidden;">
+                            <div class="progress-bar" style="width: 0%; height: 100%; background: var(--accent);"></div>
+                        </div>
+                    </div>
+                `;
+                
+                // Create XHR
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                xhr.open('POST', '/api/bucket/upload', true);
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        const item = document.getElementById(itemId);
+                        if (item) {
+                            item.querySelector('.progress-bar').style.width = `${pct}%`;
+                            item.querySelector('.pct-text').innerText = `${pct}%`;
+                        }
+                    }
+                });
+                
+                xhr.onload = () => {
+                    uploadedCount++;
+                    const item = document.getElementById(itemId);
+                    if (item) {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.error) {
+                                    item.querySelector('.pct-text').innerHTML = `<i class="ph ph-x-circle" style="color: #ef4444;" title="${data.error.replace(/"/g, '&quot;')}"></i>`;
+                                } else {
+                                    item.querySelector('.pct-text').innerHTML = '<i class="ph ph-check-circle" style="color: #10b981;"></i>';
+                                }
+                            } catch(err) {
+                                item.querySelector('.pct-text').innerHTML = '<i class="ph ph-check-circle" style="color: #10b981;"></i>';
+                            }
+                        } else {
+                            item.querySelector('.pct-text').innerHTML = '<i class="ph ph-x-circle" style="color: #ef4444;"></i>';
+                        }
+                    }
+                    if (uploadedCount === totalFiles) {
+                        progressTitle.innerText = 'All uploads complete';
+                        showToast('Upload complete');
+                        resetDropzone();
+                        fetchFiles();
+                        fetchSessionInfo();
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                        }, 3000);
+                    }
+                };
+                
+                xhr.onerror = () => {
+                    uploadedCount++;
+                    const item = document.getElementById(itemId);
+                    if (item) {
+                        item.querySelector('.pct-text').innerHTML = '<i class="ph ph-x-circle" style="color: #ef4444;"></i>';
+                    }
+                    if (uploadedCount === totalFiles) {
+                        progressTitle.innerText = 'Uploads finished with errors';
+                        resetDropzone();
+                        fetchFiles();
+                        fetchSessionInfo();
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                        }, 3000);
+                    }
+                };
+                
+                xhr.send(formData);
+            });
+        }
+        
+        function resetDropzone() {
+            const dropzone = document.getElementById('dropzone');
+            if (dropzone) {
+                dropzone.classList.remove('disabled');
+                dropzone.innerHTML = `<i class="ph ph-cloud-arrow-up"></i><p>Drag files here or click to browse</p><input type="file" id="file-upload" style="display:none" multiple onchange="handleFileUpload(this.files)">`;
+            }
+        }
+
+        function openFetchUrlModal() {
+            document.getElementById('fetch-url-input').value = '';
+            document.getElementById('fetch-url-modal').classList.add('active');
+        }
+
+        function closeFetchUrlModal() {
+            document.getElementById('fetch-url-modal').classList.remove('active');
+        }
+
+        async function fetchFromUrl() {
+            const url = document.getElementById('fetch-url-input').value.trim();
+            if (!url) return;
+            
+            try {
+                const btn = document.querySelector('#fetch-url-modal .btn-primary');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Fetching...';
+                btn.disabled = true;
+                
+                const res = await fetch('/api/bucket/fetch-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showToast('Saved to cloud');
+                    closeFetchUrlModal();
+                    fetchFiles();
+                    fetchSessionInfo();
+                } else {
+                    showAlert('Fetch Error', data.error || 'Failed to download file');
+                }
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            } catch(e) {
+                showAlert('Error', 'Network error while fetching URL.');
+            }
+        }
+
+        // CSS Spinner and liquid shimmer animation style insertion
+        const style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } } @keyframes liquid-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }';
+        document.getElementsByTagName('head')[0].appendChild(style);
+
+        /* Drag and Drop Events */
+        const dropzone = document.getElementById('dropzone');
+        if (dropzone) {
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (dropzone.classList.contains('disabled')) return;
+                dropzone.classList.add('dragover');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('dragover');
+            });
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                if (dropzone.classList.contains('disabled')) return;
+                handleFileUpload(e.dataTransfer.files);
+            });
+        }
+
+        async function logout() {
+            await fetch('/api/logout', {method: 'POST'});
+            window.location.href = '/';
+        }
+
+        // Handle browser Back/Forward navigation
+        window.onpopstate = function(event) {
+            const tab = (event.state && event.state.tab) ? event.state.tab : 'overview';
+            switchTab(tab, false);
+        };
+
+        // Init
+        fetchSessionInfo();
+        const path = window.location.pathname;
+        let initialTab = 'overview';
+        if (path.endsWith('/storage')) initialTab = 'storage';
+        else if (path.endsWith('/settings')) initialTab = 'settings';
+        else if (path.endsWith('/usage')) initialTab = 'usage';
+        else if (path.endsWith('/guide')) initialTab = 'guide';
+        else if (path.endsWith('/billing')) initialTab = 'billing';
+        switchTab(initialTab, false);
+    </script>
+    <script>
+        function toggleAppSwitcher(btn) {
+            const dropdown = btn.nextElementSibling;
+            document.querySelectorAll('.app-dropdown').forEach(d => {
+                if (d !== dropdown) d.classList.remove('show');
+            });
+            dropdown.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.app-switcher')) {
+                document.querySelectorAll('.app-dropdown').forEach(d => d.classList.remove('show'));
+            }
+        });
+    </script>
+</body>
+</html>

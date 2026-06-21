@@ -1,0 +1,276 @@
+CREATE TABLE IF NOT EXISTS album_access_requests (
+            id SERIAL PRIMARY KEY,
+            share_token TEXT,
+            requester_username TEXT,
+            requester_email TEXT,
+            details TEXT,
+            status TEXT DEFAULT 'pending',
+            approval_token TEXT UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS shared_album_access (
+            id SERIAL PRIMARY KEY,
+            share_token TEXT,
+            email TEXT,
+            granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS analytics_datasets (
+            id SERIAL PRIMARY KEY,
+            name TEXT UNIQUE,
+            target_type TEXT,
+            target_value TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS analytics_logs (
+            id SERIAL PRIMARY KEY,
+            dataset_id INTEGER REFERENCES analytics_datasets(id) ON DELETE CASCADE,
+            ip_address TEXT,
+            country TEXT,
+            city TEXT,
+            isp TEXT,
+            device_type TEXT,
+            device_name TEXT,
+            os_name TEXT,
+            browser_name TEXT,
+            battery_level REAL,
+            connection_type TEXT,
+            source_url TEXT,
+            referrer_url TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS subscription_plans (
+            id SERIAL PRIMARY KEY,
+            plan_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            monthly_rate REAL NOT NULL,
+            storage_limit_gb REAL NOT NULL,
+            bandwidth_limit_gb REAL NOT NULL,
+            features TEXT,
+            status TEXT DEFAULT 'Active'
+        )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS plan_enquiries (
+            id SERIAL PRIMARY KEY,
+            email TEXT,
+            mobile TEXT,
+            storage_req TEXT,
+            bandwidth_req TEXT,
+            message TEXT,
+            status TEXT DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS tenants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        secret_code TEXT UNIQUE,
+        storage_limit_bytes INTEGER,
+        storage_used_bytes INTEGER DEFAULT 0
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS device_views (
+        tenant_username TEXT,
+        device_id TEXT,
+        PRIMARY KEY (tenant_username, device_id)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS support_tickets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tenant_id INTEGER,
+        title TEXT,
+        category TEXT,
+        status TEXT DEFAULT 'Open',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS support_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticket_id INTEGER,
+        sender TEXT,
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS support_team (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        secret_code TEXT UNIQUE,
+        email TEXT UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS file_tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tenant_username TEXT,
+        filename TEXT,
+        tag TEXT,
+        UNIQUE(tenant_username, filename, tag)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_config (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS support_polls (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        question TEXT,
+        options TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS support_poll_votes (
+        poll_id INTEGER,
+        voter_id TEXT,
+        selected_option TEXT,
+        PRIMARY KEY (poll_id, voter_id)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS billing_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tenant_id INTEGER,
+        amount REAL,
+        date TEXT,
+        status TEXT,
+        description TEXT,
+        FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_domains (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        domain TEXT UNIQUE NOT NULL,
+        email TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        status TEXT DEFAULT 'Active'
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS coupons (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT UNIQUE NOT NULL,
+        discount_type TEXT NOT NULL,
+        discount_value REAL NOT NULL,
+        expiry_date TEXT,
+        max_uses INTEGER DEFAULT -1,
+        used_count INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'Active'
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS referral_links (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT UNIQUE NOT NULL,
+        label TEXT NOT NULL,
+        granted_tier TEXT DEFAULT 'starter',
+        display_tier TEXT,
+        granted_storage_gb REAL,
+        granted_bandwidth_gb REAL,
+        granted_duration_days INTEGER DEFAULT -1,
+        max_uses INTEGER DEFAULT -1,
+        used_count INTEGER DEFAULT 0,
+        link_expires_at TEXT,
+        status TEXT DEFAULT 'Active',
+        created_at TEXT
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS referral_uses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        referral_code TEXT NOT NULL,
+        tenant_id INTEGER NOT NULL,
+        tenant_username TEXT,
+        device_fingerprint TEXT,
+        ip_address TEXT,
+        activated_at TEXT,
+        benefit_expires_at TEXT
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS mail_templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS mail_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        status TEXT NOT NULL,
+        error_message TEXT,
+        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS markdown_pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tenant_username TEXT NOT NULL,
+        title TEXT NOT NULL,
+        slug TEXT NOT NULL,
+        content TEXT DEFAULT "",
+        is_published INTEGER DEFAULT 0,
+        created_at TEXT,
+        updated_at TEXT,
+        UNIQUE(tenant_username, slug)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS markdown_collections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tenant_username TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT DEFAULT "",
+        slug TEXT NOT NULL,
+        created_at TEXT,
+        UNIQUE(tenant_username, slug)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS feature_flags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        flag_key TEXT NOT NULL UNIQUE,
+        description TEXT DEFAULT "",
+        created_at TEXT
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS tenant_features (
+        tenant_id INTEGER NOT NULL,
+        feature_id INTEGER NOT NULL,
+        PRIMARY KEY(tenant_id, feature_id)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS collection_access (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        collection_id INTEGER NOT NULL,
+        email TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'view',
+        notified INTEGER DEFAULT 0,
+        UNIQUE(collection_id, email)
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS page_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        page_id INTEGER NOT NULL,
+        email TEXT NOT NULL,
+        comment TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS status_metrics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        checked_at TEXT UNIQUE,
+        api_status TEXT,   -- 'operational', 'degraded', 'outage'
+        cos_status TEXT,   -- 'operational', 'degraded', 'outage'
+        nginx_status TEXT, -- 'operational', 'degraded', 'outage'
+        db_status TEXT     -- 'operational', 'degraded', 'outage'
+    )
+--------------------------------------------------
+CREATE TABLE IF NOT EXISTS status_incidents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        description TEXT,
+        status TEXT,       -- 'Investigating', 'Identified', 'Monitoring', 'Resolved'
+        created_at TEXT,
+        resolved_at TEXT
+    )
+--------------------------------------------------

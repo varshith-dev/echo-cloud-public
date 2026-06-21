@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Origin Protection</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --border-color: #e5e5e5;
+            --hover-bg: #f9f9f9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 40px 10%;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo { 
+            font-size: 1.25rem; font-weight: 600; 
+            letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-links { display: flex; gap: 40px; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none; font-size: 0.95rem;
+            transition: color 0.2s ease; display: flex; align-items: center; gap: 6px;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+
+        .content-container {
+            flex: 1;
+            padding: 80px 10%;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 400;
+            letter-spacing: -1.5px;
+            margin-bottom: 40px;
+        }
+        .section-text {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        .section-text strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin: 40px 0 20px 0;
+            color: var(--text-primary);
+        }
+
+        footer {
+            background: #fafafa;
+            border-top: 1px solid var(--border-color);
+            padding: 80px 10% 40px 10%;
+            width: 100%;
+            margin-top: 80px;
+        }
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto 60px auto;
+        }
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .footer-col h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .footer-col a {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .footer-col a:hover {
+            color: var(--text-primary);
+        }
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 900px) {
+            .content-container { padding: 40px 10%; }
+            h1 { font-size: 2.2rem; }
+            .footer-links { grid-template-columns: 1fr; gap: 30px; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Limit Warning Banner -->
+    <div id="global-limit-warning-banner" style="display: none; background-color: rgba(254, 242, 242, 0.9); background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px); border-bottom: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; padding: 14px 20px; font-size: 0.88rem; font-weight: 500; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(239,68,68,0.05); z-index: 9999; position: sticky; top: 0; width: 100%; box-sizing: border-box;">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>RESOURCES ARE LIMITED:</strong> YOU REACHED THE LIMITS. Some system actions may be restricted.</span>
+    </div>
+
+    <nav>
+        <a href="/" class="logo">
+            <i class="ph ph-cube"></i> OQENS
+        </a>
+        <div class="nav-links">
+            <a href="/docs"><i class="ph ph-book-open-text"></i> Docs</a>
+            
+            <a href="https://support.oqens.me/" target="_blank"><i class="ph ph-headset"></i> Support</a>
+            <a href="/login"><i class="ph ph-sign-in"></i> Login</a>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        <h1>Origin Protection</h1>
+        <p class="section-text">
+            OQENS is designed to mitigate DDoS and scanner threats by allowing complete concealment of the origin server's IP address. By placing an edge proxy like <strong>Cloudflare</strong> in front of your storage node, you shield your origin VM from direct internet scanning.
+        </p>
+        <p class="section-text">
+            Once origin protection is configured, any client requesting a file download routes through Cloudflare's massive edge network first. This completely obscures the OQENS backend server IP and prevents malicious actors from launching targeted application-layer attacks.
+        </p>
+
+        <h2>Nginx Edge Filtering</h2>
+        <p class="section-text">
+            For maximum security, OQENS administrators can configure Nginx to reject all direct connection attempts that do not originate from Cloudflare's known IPv4 and IPv6 IP blocks. This forces all traffic through the proxy layer and closes all backdoors to the backend port.
+        </p>
+
+        <h2>SSL Offloading & Edge Caching</h2>
+        <p class="section-text">
+            With Cloudflare proxying active, SSL termination and request rate-limiting are handled at the proxy edge. This reduces the resource footprint on your OQENS server and improves cache performance for frequently requested assets.
+        </p>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="/login">Dashboard</a>
+                <a href="/docs">Documentation</a>
+                <a href="/docs">API Reference</a>
+            </div>
+            <div class="footer-col">
+                <h4>Security</h4>
+                <a href="/data-segregation">Data Segregation</a>
+                <a href="/origin-protection">Origin Protection</a>
+                <a href="/compliance">Compliance</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="/about">About</a>
+                <a href="https://status.echo.oqens.me/">Status Page</a>
+                <a href="https://support.oqens.me/" target="_blank">Contact Support</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 OQENS MEDIA. All rights reserved.</span>
+            <span>Radically simple object storage.</span>
+        </div>
+    </footer>
+
+    <script>
+        (async function() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant') {
+                        const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                        const isBandwidthOver = data.bandwidth_limit_bytes > 0 && (data.bandwidth_bytes >= data.bandwidth_limit_bytes);
+                        if (isStorageOver || isBandwidthOver) {
+                            const banner = document.getElementById('global-limit-warning-banner');
+                            if (banner) banner.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Session verification failed", e);
+            }
+        })();
+    </script>
+</body>
+</html>

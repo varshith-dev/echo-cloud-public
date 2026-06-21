@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Select Plan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --text-color: #111111;
+            --text-muted: #666666;
+            --border-color: #eeeeee;
+            --card-bg: #ffffff;
+            --accent: #111111;
+            --accent-hover: #333333;
+            --accent-text: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Navbar */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 8%; border-bottom: 1.5px solid var(--border-color);
+            background: var(--card-bg); sticky top: 0; z-index: 100;
+        }
+        .logo { font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: var(--text-color); text-decoration: none; cursor: pointer; }
+        .logo i { font-size: 1.3rem; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.88rem; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+        .nav-links a:hover { color: var(--text-color); }
+
+        /* Hero */
+        .select-hero { text-align: center; padding: 60px 4% 40px 4%; max-width: 800px; margin: 0 auto; }
+        .select-hero h1 { font-weight: 500; font-size: 2.2rem; letter-spacing: -0.8px; margin-bottom: 15px; }
+        .select-hero p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
+
+        /* Grid */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 24px; max-width: 1300px; width: 95%; margin: 0 auto 60px auto;
+        }
+        
+        /* Skeleton Animation */
+        .skeleton-card {
+            background: var(--card-bg); border: 1.5px solid var(--border-color);
+            border-radius: 12px; padding: 35px 25px; display: flex; flex-direction: column;
+        }
+        .skeleton-text {
+            background: #e5e7eb; border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0.8; }
+        }
+        .price-card {
+            background: var(--card-bg); border: 1.5px solid var(--border-color);
+            border-radius: 12px; padding: 35px 25px; display: flex; flex-direction: column;
+            transition: all 0.3s ease; position: relative;
+        }
+        .price-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.04); border-color: var(--text-color); }
+        
+        .price-card.popular { border-color: var(--text-color); }
+        .price-card.popular::before {
+            content: 'RECOMMENDED'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: var(--accent-text); padding: 4px 12px; border-radius: 20px;
+            font-size: 0.65rem; font-weight: 600; letter-spacing: 0.5px;
+        }
+
+        .plan-name { font-size: 1rem; font-weight: 500; margin-bottom: 10px; color: var(--text-muted); }
+        .plan-price { font-size: 2.2rem; font-weight: 300; letter-spacing: -1px; margin-bottom: 20px; display: flex; align-items: baseline; }
+        .plan-price span { font-size: 0.9rem; color: var(--text-muted); letter-spacing: 0; font-weight: 400; margin-left: 4px; }
+        
+        .plan-limits {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            border-bottom: 1.5px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        .limit-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        .features-list { list-style: none; margin-bottom: 35px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .features-list li { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+        .features-list li i { color: #2ecc71; font-size: 1rem; }
+
+        .btn-plan {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 24px; border: 1.5px solid var(--text-color); background: transparent;
+            color: var(--text-color); text-decoration: none; border-radius: 6px; font-size: 0.88rem;
+            font-weight: 500; transition: all 0.2s ease; cursor: pointer; text-align: center;
+        }
+        .btn-plan:hover { background: var(--accent); color: var(--accent-text); }
+        .btn-primary { background: var(--accent); color: var(--accent-text); }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        footer {
+            background: #fafafa;
+            border-top: 1px solid var(--border-color);
+            padding: 80px 10% 40px 10%;
+            width: 100%;
+            margin-top: auto;
+        }
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto 60px auto;
+        }
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .footer-col h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .footer-col a {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .footer-col a:hover {
+            color: var(--text-color);
+        }
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 1100px) {
+            .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-links { grid-template-columns: 1fr; gap: 30px; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+        }
+        @media (max-width: 700px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="https://oqens.me/" class="logo">
+            <i class="ph ph-cube"></i> OQENS
+        </a>
+        <div class="nav-links">
+            <a href="/docs"><i class="ph ph-book-open-text"></i> Docs</a>
+            <a href="/login" id="nav-login"><i class="ph ph-sign-in"></i> Login</a>
+        </div>
+    </nav>
+
+    <div class="select-hero">
+        <h1>Select your workspace plan</h1>
+        <p>Choose the size and capability that matches your requirements. You can upgrade anytime.</p>
+    </div>
+
+    <div class="pricing-grid" id="pricing-grid">
+        <!-- Skeleton 1 -->
+        <div class="skeleton-card">
+            <div class="skeleton-text" style="width: 40%; height: 20px; margin-bottom: 10px;"></div>
+            <div class="skeleton-text" style="width: 60%; height: 40px; margin-bottom: 20px;"></div>
+            <div class="plan-limits" style="border:none; padding-bottom:0;">
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+            </div>
+            <div style="flex-grow: 1; display:flex; flex-direction:column; gap:12px; margin-bottom:35px; margin-top:20px;">
+                <div class="skeleton-text" style="width: 80%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 70%; height: 15px;"></div>
+            </div>
+            <div class="skeleton-text" style="width: 100%; height: 45px; border-radius: 6px;"></div>
+        </div>
+        <!-- Skeleton 2 -->
+        <div class="skeleton-card">
+            <div class="skeleton-text" style="width: 40%; height: 20px; margin-bottom: 10px;"></div>
+            <div class="skeleton-text" style="width: 60%; height: 40px; margin-bottom: 20px;"></div>
+            <div class="plan-limits" style="border:none; padding-bottom:0;">
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+            </div>
+            <div style="flex-grow: 1; display:flex; flex-direction:column; gap:12px; margin-bottom:35px; margin-top:20px;">
+                <div class="skeleton-text" style="width: 80%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 70%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 85%; height: 15px;"></div>
+            </div>
+            <div class="skeleton-text" style="width: 100%; height: 45px; border-radius: 6px;"></div>
+        </div>
+        <!-- Skeleton 3 -->
+        <div class="skeleton-card">
+            <div class="skeleton-text" style="width: 40%; height: 20px; margin-bottom: 10px;"></div>
+            <div class="skeleton-text" style="width: 60%; height: 40px; margin-bottom: 20px;"></div>
+            <div class="plan-limits" style="border:none; padding-bottom:0;">
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+            </div>
+            <div style="flex-grow: 1; display:flex; flex-direction:column; gap:12px; margin-bottom:35px; margin-top:20px;">
+                <div class="skeleton-text" style="width: 80%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 70%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 85%; height: 15px;"></div>
+            </div>
+            <div class="skeleton-text" style="width: 100%; height: 45px; border-radius: 6px;"></div>
+        </div>
+        <!-- Skeleton 4 -->
+        <div class="skeleton-card">
+            <div class="skeleton-text" style="width: 40%; height: 20px; margin-bottom: 10px;"></div>
+            <div class="skeleton-text" style="width: 60%; height: 40px; margin-bottom: 20px;"></div>
+            <div class="plan-limits" style="border:none; padding-bottom:0;">
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+                <div class="skeleton-text" style="width: 45%; height: 25px; border-radius: 20px;"></div>
+            </div>
+            <div style="flex-grow: 1; display:flex; flex-direction:column; gap:12px; margin-bottom:35px; margin-top:20px;">
+                <div class="skeleton-text" style="width: 80%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 70%; height: 15px;"></div>
+                <div class="skeleton-text" style="width: 85%; height: 15px;"></div>
+            </div>
+            <div class="skeleton-text" style="width: 100%; height: 45px; border-radius: 6px;"></div>
+        </div>
+    </div>
+
+    <!-- Enquiry Modal -->
+    <div id="enquiry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 8px; width: 90%; max-width: 800px; border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: var(--text-color);">Custom Plan Enquiry</h2>
+            <form id="enquiry-form" onsubmit="submitEnquiry(event)">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Email Address</label>
+                        <input type="email" id="enq-email" required style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Mobile Number</label>
+                        <input type="text" id="enq-mobile" required style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Required Storage (GB)</label>
+                        <input type="number" id="enq-storage" required min="1" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Required Bandwidth (GB)</label>
+                        <input type="number" id="enq-bandwidth" required min="1" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Preferred Budget (INR/mo)</label>
+                        <input type="number" id="enq-budget" required min="1" placeholder="e.g. 150" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 25px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Message / Additional Requirements</label>
+                    <textarea id="enq-message" required rows="4" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color); resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                    <button type="button" class="btn" onclick="document.getElementById('enquiry-modal').style.display='none'" style="background: transparent; color: var(--text-color);">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-enq">Submit Enquiry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="/login">Dashboard</a>
+                <a href="/docs">Documentation</a>
+                <a href="/docs">API Reference</a>
+            </div>
+            <div class="footer-col">
+                <h4>Security</h4>
+                <a href="/data-segregation">Data Segregation</a>
+                <a href="/origin-protection">Origin Protection</a>
+                <a href="/compliance">Compliance</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="/about">About</a>
+                <a href="https://status.echo.oqens.me/">Status Page</a>
+                <a href="https://support.oqens.me/" target="_blank">Contact Support</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 OQENS MEDIA. All rights reserved.</span>
+            <span>Radically simple object storage.</span>
+        </div>
+    </footer>
+
+    <style>
+        .price-card.current-plan {
+            opacity: 0.6;
+            border-color: #cccccc !important;
+            pointer-events: none;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+        .price-card.current-plan::after {
+            content: 'CURRENT PLAN';
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #777777;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    </style>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        let globalSession = null;
+        let checkoutDetails = null;
+
+        async function initSelectPlanPage() {
+            // Check session and update navbar
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant') {
+                        globalSession = data;
+                        document.getElementById('enq-email').value = data.email || '';
+                        const navLogin = document.getElementById('nav-login');
+                        if (navLogin) {
+                            navLogin.href = '/';
+                            navLogin.innerHTML = '<i class="ph ph-layout"></i> Dashboard';
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            if (token) {
+                try {
+                    const res = await fetch(`/api/payments/checkout-details?token=${token}`);
+                    const data = await res.json();
+                    if (!data.error) {
+                        checkoutDetails = data;
+                        document.querySelector('.logo').setAttribute('href', 'https://echo.oqens.me/');
+                        document.querySelector('.select-hero h1').innerText = "Upgrade your workspace plan";
+                        document.querySelector('.select-hero p').innerText = `Select an upgrade for workspace "${data.username}".`;
+                    }
+                } catch(e) {}
+            }
+
+            await renderPlans();
+        }
+
+        async function renderPlans() {
+            const grid = document.getElementById('pricing-grid');
+            grid.innerHTML = ''; 
+
+            let currentRate = checkoutDetails ? (parseFloat(checkoutDetails.amount) || 0.0) : 0.0;
+            let freeBtnHtml = '';
+
+            if (currentRate === 0) {
+                freeBtnHtml = `<a class="btn-plan" style="background:#eee;color:#777;border-color:#ddd;cursor:default;">Current Plan (Free)</a>`;
+            } else {
+                freeBtnHtml = `<a class="btn-plan" style="background:#f5f5f5;color:#aaa;border-color:#ddd;cursor:not-allowed;">Downgrade Disabled</a>`;
+            }
+
+            // 1. Free Plan
+            let freeCardClass = currentRate === 0 ? 'price-card current-plan' : 'price-card';
+            grid.innerHTML += `
+                <div class="${freeCardClass}">
+                    <div class="plan-name">Free Plan</div>
+                    <div class="plan-price">₹0<span>/month</span></div>
+                    <div class="plan-limits">
+                        <div class="limit-pill"><i class="ph ph-hard-drive"></i> 100 MB Storage</div>
+                        <div class="limit-pill"><i class="ph ph-activity"></i> 500 MB Bw</div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="ph ph-check"></i> 1 Edge Delivery Node</li>
+                        <li><i class="ph ph-check"></i> Shared oqens.me domain</li>
+                    </ul>
+                    ${freeBtnHtml}
+                </div>
+            `;
+
+            // 2. Fetch Active Plans
+            try {
+                const res = await fetch('/api/system/pricing');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.status === 'success' && data.plans) {
+                        data.plans.forEach(p => {
+                            if (p.plan_id === 'free') return;
+                            let featuresHtml = '';
+                            if (p.features_json) {
+                                try {
+                                    const feats = JSON.parse(p.features_json);
+                                    feats.forEach(f => {
+                                        featuresHtml += `<li><i class="ph ph-check"></i> ${f}</li>`;
+                                    });
+                                } catch(e){}
+                            }
+
+                            let btnHtml = '';
+                            if (!token) {
+                                btnHtml = `<a href="/signup?plan=${p.plan_id}" class="btn-plan btn-primary">Choose ${p.plan_name}</a>`;
+                            } else {
+                                if (currentRate === p.monthly_rate) {
+                                    btnHtml = `<a style="background: #eee; color: #777; cursor: default; border-color: #ddd;" class="btn-plan">Current Plan</a>`;
+                                } else if (currentRate > p.monthly_rate) {
+                                    btnHtml = `<a style="background: #f5f5f5; color: #aaa; cursor: not-allowed; border-color: #ddd;" class="btn-plan">Downgrade Disabled</a>`;
+                                } else {
+                                    btnHtml = `<a style="cursor: pointer;" onclick="upgradeAndRedirect('${p.plan_id}')" class="btn-plan btn-primary">Upgrade to ${p.plan_name}</a>`;
+                                }
+                            }
+
+                            let cardClass = currentRate === p.monthly_rate ? 'price-card current-plan' : 'price-card';
+
+                            grid.innerHTML += `
+                                <div class="${cardClass}">
+                                    <div class="plan-name">${p.plan_name}</div>
+                                    <div class="plan-price">₹${p.monthly_rate}<span>/month</span></div>
+                                    <div class="plan-limits">
+                                        <div class="limit-pill"><i class="ph ph-hard-drive"></i> ${p.storage_limit_gb} GB Storage</div>
+                                        <div class="limit-pill"><i class="ph ph-activity"></i> ${p.bandwidth_limit_gb} GB Bw</div>
+                                    </div>
+                                    <ul class="features-list">
+                                        ${featuresHtml}
+                                    </ul>
+                                    ${btnHtml}
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch(e) {}
+
+            // 3. Custom Plan
+            grid.innerHTML += `
+                <div class="price-card">
+                    <div class="plan-name">Custom Plan</div>
+                    <div class="plan-price">Variable</div>
+                    <div class="plan-limits">
+                        <div class="limit-pill"><i class="ph ph-hard-drive"></i> Custom Storage</div>
+                        <div class="limit-pill"><i class="ph ph-activity"></i> Custom Bw</div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="ph ph-check"></i> Tailored for your needs</li>
+                        <li><i class="ph ph-check"></i> Volume discounts</li>
+                        <li><i class="ph ph-check"></i> Dedicated Support</li>
+                    </ul>
+                    <a onclick="document.getElementById('enquiry-modal').style.display='flex';" style="cursor:pointer;" class="btn-plan">Enquire Now</a>
+                </div>
+            `;
+        }
+
+        async function submitEnquiry(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-enq');
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+            
+            const payload = {
+                email: document.getElementById('enq-email').value,
+                mobile: document.getElementById('enq-mobile').value,
+                req_storage_gb: parseFloat(document.getElementById('enq-storage').value),
+                req_bandwidth_gb: parseFloat(document.getElementById('enq-bandwidth').value),
+                preferred_budget: document.getElementById('enq-budget').value,
+                message: document.getElementById('enq-message').value
+            };
+            
+            try {
+                const res = await fetch('/api/enquiries/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    document.getElementById('enquiry-modal').style.display = 'none';
+                    alert('Enquiry submitted successfully! Our team will contact you soon.');
+                    document.getElementById('enquiry-form').reset();
+                    if (globalSession) document.getElementById('enq-email').value = globalSession.email || '';
+                } else {
+                    alert('Failed to submit enquiry: ' + (data.error || 'Unknown'));
+                }
+            } catch(err) {
+                alert('Network error. Please try again later.');
+            }
+            btn.disabled = false;
+            btn.innerText = 'Submit Enquiry';
+        }
+
+        function upgradeAndRedirect(planName) {
+            fetch('/api/payments/upgrade-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token, plan: planName })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = `https://payments.oqens.me/checkout?token=${token}`;
+                } else {
+                    alert(data.error || "Failed to upgrade plan.");
+                }
+            })
+            .catch(err => {
+                console.error("Upgrade plan error:", err);
+                alert("Upgrade failed. Please try again.");
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initSelectPlanPage);
+    </script>
+</body>
+</html>

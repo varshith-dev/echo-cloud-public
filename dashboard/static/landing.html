@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Radically Simple Cloud Storage</title>
+    <meta name="description" content="OQENS is a fast, multi-tenant object storage platform. Upload, manage, and deliver files via custom domains with automated SSL. No bloat, just storage.">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #0a0a0a;
+            --muted: #6b6b6b;
+            --border: #e8e8e8;
+            --accent: #0a0a0a;
+            --hover-bg: #f5f5f5;
+            --card-bg: #fafafa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 8%;
+            height: 68px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            font-size: 1.05rem; font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; text-decoration: none; color: var(--text);
+        }
+        .logo i { font-size: 1.3rem; }
+        .nav-links { display: flex; gap: 36px; align-items: center; }
+        .nav-links a {
+            color: var(--muted); text-decoration: none; font-size: 0.9rem;
+            font-weight: 400; transition: color 0.18s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 20px;
+            background: var(--text); color: #fff !important;
+            border-radius: 6px; font-size: 0.88rem !important;
+            font-weight: 500 !important; transition: opacity 0.18s !important;
+        }
+        .nav-cta:hover { opacity: 0.85; color: #fff !important; }
+
+        /* ── Hero ── */
+        .hero {
+            display: grid; grid-template-columns: 1fr 1fr;
+            align-items: center; gap: 60px;
+            padding: 100px 8% 90px;
+            max-width: 1280px; margin: 0 auto;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #f0fdf4; color: #166534;
+            border: 1px solid #bbf7d0;
+            padding: 5px 13px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2px;
+            margin-bottom: 28px;
+        }
+        .hero-badge span { width: 7px; height: 7px; background: #16a34a; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+        h1 {
+            font-size: clamp(2.8rem, 5vw, 4.4rem);
+            font-weight: 700; line-height: 1.07;
+            letter-spacing: -2.5px; margin-bottom: 24px;
+        }
+        h1 em {
+            font-style: italic; font-family: 'Playfair Display', serif;
+            font-weight: 400; letter-spacing: -1px;
+        }
+        .hero-sub {
+            font-size: 1.1rem; color: var(--muted);
+            line-height: 1.7; max-width: 480px; margin-bottom: 44px;
+            font-weight: 400;
+        }
+        .hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; font-size: 0.95rem; font-weight: 600;
+            background: var(--text); color: #fff;
+            border: none; border-radius: 8px; cursor: pointer;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .btn-outline {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 26px; font-size: 0.95rem; font-weight: 500;
+            background: transparent; color: var(--text);
+            border: 1.5px solid var(--border); border-radius: 8px;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--text); background: var(--hover-bg); }
+
+        .hero-visual {
+            display: flex; align-items: center; justify-content: center;
+        }
+        .mockup-shell {
+            width: 100%; max-width: 460px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px; overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.08);
+        }
+        .mockup-bar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dot { width: 11px; height: 11px; border-radius: 50%; }
+        .dot-r { background: #ff5f57; }
+        .dot-y { background: #febc2e; }
+        .dot-g { background: #28c840; }
+        .mockup-body { padding: 20px; background: #fff; }
+        .file-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 8px;
+            margin-bottom: 6px; font-size: 0.85rem;
+            transition: background 0.15s; cursor: default;
+        }
+        .file-row:hover { background: var(--hover-bg); }
+        .file-row i { color: var(--muted); font-size: 1.15rem; }
+        .file-name { flex: 1; font-weight: 500; }
+        .file-size { color: var(--muted); font-size: 0.78rem; }
+        .file-tag {
+            font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
+            font-weight: 600; letter-spacing: 0.3px;
+        }
+        .tag-img { background: #eff6ff; color: #1d4ed8; }
+        .tag-pdf { background: #fef2f2; color: #dc2626; }
+        .tag-vid { background: #f0fdf4; color: #166534; }
+        .tag-zip { background: #faf5ff; color: #7c3aed; }
+        .mockup-footer {
+            background: var(--card-bg); border-top: 1px solid var(--border);
+            padding: 12px 20px; font-size: 0.78rem; color: var(--muted);
+            display: flex; justify-content: space-between;
+        }
+        .usage-bar-wrap { width: 120px; height: 5px; background: var(--border); border-radius: 3px; margin-top: 3px; }
+        .usage-bar { height: 100%; width: 38%; background: var(--text); border-radius: 3px; }
+
+        /* ── Stats strip ── */
+        .stats-strip {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 36px 8%;
+            display: flex; justify-content: center; gap: 80px;
+            background: var(--card-bg);
+        }
+        .stat { text-align: center; }
+        .stat-num { font-size: 2rem; font-weight: 700; letter-spacing: -1px; }
+        .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+        /* ── Section shared ── */
+        section { padding: 96px 8%; max-width: 1280px; margin: 0 auto; }
+        .section-label {
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px;
+            text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 700; letter-spacing: -1.5px; line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .section-sub {
+            font-size: 1rem; color: var(--muted); line-height: 1.7;
+            max-width: 520px; margin-bottom: 56px;
+        }
+
+        /* ── Features grid ── */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+            border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden;
+        }
+        .feat-card {
+            padding: 36px 30px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: #fff; transition: background 0.2s;
+        }
+        .feat-card:hover { background: var(--card-bg); }
+        .feat-card:nth-child(3n) { border-right: none; }
+        .feat-card:nth-last-child(-n+3) { border-bottom: none; }
+        .feat-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+        }
+        .feat-icon i { font-size: 1.3rem; }
+        .feat-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; }
+        .feat-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+        /* ── How it works ── */
+        .steps-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px;
+        }
+        .step { position: relative; }
+        .step-num {
+            font-size: 3.5rem; font-weight: 700; letter-spacing: -3px;
+            color: var(--border); line-height: 1; margin-bottom: 20px;
+            font-family: 'Playfair Display', serif; font-style: italic;
+        }
+        .step h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 10px; }
+        .step p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+        .step-connector {
+            position: absolute; top: 28px; right: -24px;
+            width: 48px; height: 1px; background: var(--border);
+        }
+        .step:last-child .step-connector { display: none; }
+
+        /* ── Code block ── */
+        .code-wrap {
+            border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        }
+        .code-tabs {
+            display: flex; background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .code-tab {
+            padding: 13px 22px; border: none; background: none;
+            font-size: 0.83rem; font-weight: 500; color: var(--muted);
+            cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif;
+            border-bottom: 2px solid transparent;
+        }
+        .code-tab:hover { color: var(--text); }
+        .code-tab.active { color: var(--text); background: #fff; border-bottom-color: var(--text); }
+        .code-body { background: #0d1117; padding: 28px 32px; overflow-x: auto; }
+        .code-block { display: none; }
+        .code-block.active { display: block; }
+        .code-block code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.88rem; line-height: 1.7;
+            color: #e6edf3; white-space: pre;
+        }
+        .kw { color: #ff7b72; }
+        .str { color: #a5d6ff; }
+        .cm { color: #8b949e; }
+        .fn { color: #d2a8ff; }
+        .var { color: #ffa657; }
+
+        /* ── Pricing preview ── */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+        }
+        .plan-card {
+            border: 1.5px solid var(--border); border-radius: 12px;
+            padding: 32px 28px; background: #fff;
+            transition: all 0.2s; position: relative;
+        }
+        .plan-card:hover { border-color: var(--text); transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
+        .plan-card.featured {
+            border-color: var(--text); background: var(--text); color: #fff;
+        }
+        .plan-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--text); color: #fff; padding: 3px 12px;
+            border-radius: 20px; font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.5px; white-space: nowrap;
+        }
+        .plan-card.featured .plan-badge { background: #fff; color: var(--text); }
+        .plan-name { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.7; }
+        .plan-price { font-size: 2.6rem; font-weight: 700; letter-spacing: -2px; line-height: 1; margin-bottom: 6px; }
+        .plan-price sup { font-size: 1.2rem; font-weight: 600; vertical-align: top; margin-top: 6px; margin-right: 2px; }
+        .plan-period { font-size: 0.82rem; opacity: 0.6; margin-bottom: 28px; }
+        .plan-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 11px; }
+        .plan-features li { font-size: 0.88rem; display: flex; align-items: center; gap: 10px; }
+        .plan-features li i { font-size: 1rem; color: #10b981; flex-shrink: 0; }
+        .plan-card.featured .plan-features li i { color: #6ee7b7; }
+        .plan-btn {
+            display: block; width: 100%; padding: 12px;
+            text-align: center; font-size: 0.9rem; font-weight: 600;
+            border-radius: 8px; text-decoration: none; transition: all 0.2s;
+            border: 1.5px solid var(--border); color: var(--text); background: transparent;
+        }
+        .plan-card.featured .plan-btn { background: #fff; color: var(--text); border-color: #fff; }
+        .plan-btn:hover { background: var(--hover-bg); }
+        .plan-card.featured .plan-btn:hover { opacity: 0.9; }
+
+        /* ── FAQ ── */
+        .faq-list { display: flex; flex-direction: column; max-width: 720px; }
+        .faq-item { border-bottom: 1px solid var(--border); }
+        .faq-q {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 0; cursor: pointer; user-select: none;
+        }
+        .faq-q h3 { font-size: 0.97rem; font-weight: 500; }
+        .faq-q i { color: var(--muted); transition: transform 0.25s; }
+        .faq-item.open .faq-q i { transform: rotate(45deg); }
+        .faq-a {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .faq-item.open .faq-a { max-height: 200px; padding-bottom: 18px; }
+        .faq-a p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+        /* ── CTA Banner ── */
+        .cta-banner {
+            margin: 0 8% 96px;
+            background: var(--text); color: #fff;
+            border-radius: 16px; padding: 64px 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 40px; flex-wrap: wrap;
+        }
+        .cta-banner h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; letter-spacing: -1px; max-width: 500px; }
+        .cta-banner p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 0.95rem; }
+        .btn-white {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; font-size: 0.95rem; font-weight: 600;
+            background: #fff; color: var(--text);
+            border-radius: 8px; text-decoration: none;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,0.2); }
+
+        /* ── Footer ── */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 64px 8% 36px;
+        }
+        .footer-inner { max-width: 1280px; margin: 0 auto; }
+        .footer-top {
+            display: grid; grid-template-columns: 1.4fr repeat(3, 1fr);
+            gap: 48px; margin-bottom: 48px;
+        }
+        .footer-brand p { font-size: 0.85rem; color: var(--muted); margin-top: 12px; line-height: 1.6; max-width: 240px; }
+        .footer-col h4 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+        .footer-col a { display: block; font-size: 0.85rem; color: var(--muted); text-decoration: none; margin-bottom: 10px; transition: color 0.18s; }
+        .footer-col a:hover { color: var(--text); }
+        .footer-bottom {
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid var(--border); padding-top: 24px;
+            font-size: 0.8rem; color: var(--muted); flex-wrap: wrap; gap: 12px;
+        }
+        .footer-bottom-links { display: flex; gap: 24px; }
+        .footer-bottom-links a { color: var(--muted); text-decoration: none; }
+        .footer-bottom-links a:hover { color: var(--text); }
+
+        /* ── Limit banner ── */
+        #limit-banner {
+            display: none; background: #fef2f2;
+            border-bottom: 1px solid #fecaca;
+            color: #dc2626; padding: 12px 8%;
+            font-size: 0.85rem; font-weight: 500;
+            align-items: center; justify-content: center; gap: 8px;
+            position: sticky; top: 68px; z-index: 99;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 960px) {
+            .hero { grid-template-columns: 1fr; padding: 64px 6% 48px; gap: 48px; }
+            .hero-visual { display: none; }
+            .features-grid { grid-template-columns: 1fr 1fr; }
+            .feat-card:nth-child(2n) { border-right: none; }
+            .steps-grid { grid-template-columns: 1fr; gap: 36px; }
+            .step-connector { display: none; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+            .cta-banner { padding: 48px 36px; }
+            .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+            .stats-strip { gap: 40px; flex-wrap: wrap; }
+            .footer-brand { grid-column: 1 / -1; }
+        }
+        @media (max-width: 600px) {
+            nav { padding: 0 5%; }
+            .nav-links a:not(.nav-cta) { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .feat-card { border-right: none; }
+            .cta-banner { flex-direction: column; align-items: flex-start; }
+            .footer-top { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Limit Banner -->
+<div id="limit-banner">
+    <i class="ph ph-warning-octagon"></i>
+    <span><strong>Storage or Bandwidth Limit Reached.</strong> Some operations may be restricted.</span>
+</div>
+
+<!-- Nav -->
+<nav>
+    <a href="/" class="logo"><img src="/static/logo.png" style="width: 44px; height: 44px; object-fit: contain; margin-right: 8px;" alt="OQENS"> OQENS</a>
+    <div class="nav-links">
+        <a href="/pricing"><i class="ph ph-tag"></i> Pricing</a>
+        <a href="/docs"><i class="ph ph-book-open-text"></i> Docs</a>
+        <a href="/about">About</a>
+        <a href="/login" class="nav-cta"><i class="ph ph-sign-in"></i> Log In</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+    <div>
+        <div class="hero-badge"><span></span> Now live — multi-tenant object storage</div>
+        <h1>Radically <em>simple</em><br>cloud storage.</h1>
+        <p class="hero-sub">No bloat. No complex setups. Upload, manage, and deliver files from your own domain with automated SSL — all in one platform.</p>
+        <div class="hero-actions">
+            <a href="/pricing" class="btn-primary">Get Started <i class="ph ph-arrow-right"></i></a>
+            <a href="/docs" class="btn-outline"><i class="ph ph-book-open-text"></i> Read the Docs</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="mockup-shell">
+            <div class="mockup-bar">
+                <div class="dot dot-r"></div>
+                <div class="dot dot-y"></div>
+                <div class="dot dot-g"></div>
+            </div>
+            <div class="mockup-body">
+                <div class="file-row">
+                    <i class="ph ph-image"></i>
+                    <span class="file-name">hero-banner.png</span>
+                    <span class="file-size">2.4 MB</span>
+                    <span class="file-tag tag-img">IMG</span>
+                </div>
+                <div class="file-row">
+                    <i class="ph ph-file-pdf"></i>
+                    <span class="file-name">Q4-report.pdf</span>
+                    <span class="file-size">840 KB</span>
+                    <span class="file-tag tag-pdf">PDF</span>
+                </div>
+                <div class="file-row">
+                    <i class="ph ph-video"></i>
+                    <span class="file-name">product-demo.mp4</span>
+                    <span class="file-size">18.2 MB</span>
+                    <span class="file-tag tag-vid">VID</span>
+                </div>
+                <div class="file-row">
+                    <i class="ph ph-file-zip"></i>
+                    <span class="file-name">assets-bundle.zip</span>
+                    <span class="file-size">5.1 MB</span>
+                    <span class="file-tag tag-zip">ZIP</span>
+                </div>
+            </div>
+            <div class="mockup-footer">
+                <span>4 files · 26.6 MB used</span>
+                <div>
+                    <div style="font-size:0.7rem;margin-bottom:3px;">38% of 100 GB</div>
+                    <div class="usage-bar-wrap"><div class="usage-bar"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Strip -->
+<div class="stats-strip">
+    <div class="stat">
+        <div class="stat-num">100GB+</div>
+        <div class="stat-label">Storage per tenant</div>
+    </div>
+    <div class="stat">
+        <div class="stat-num">API-Ready</div>
+        <div class="stat-label">Standard REST protocol</div>
+    </div>
+    <div class="stat">
+        <div class="stat-num">Auto SSL</div>
+        <div class="stat-label">Let's Encrypt via Certbot</div>
+    </div>
+    <div class="stat">
+        <div class="stat-num">Multi-Tenant</div>
+        <div class="stat-label">Fully isolated workspaces</div>
+    </div>
+</div>
+
+<!-- Features -->
+<section>
+    <p class="section-label">What you get</p>
+    <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+    <p class="section-sub">OQENS is purpose-built for lean teams that want powerful storage without the operational overhead.</p>
+    <div class="features-grid">
+        <div class="feat-card">
+            <div class="feat-icon"><i class="ph ph-users-three"></i></div>
+            <h3>Multi-Tenant Isolation</h3>
+            <p>Every workspace is fully isolated. Files, quotas, and access tokens are segregated at the filesystem level.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon"><i class="ph ph-globe"></i></div>
+            <h3>Custom Domains + SSL</h3>
+            <p>Point your domain's CNAME to OQENS. We automatically configure Nginx proxies and provision Let's Encrypt certificates.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon"><i class="ph ph-plugs-connected"></i></div>
+            <h3>HTTP API Access</h3>
+            <p>Upload, list, preview, and delete files programmatically using your API key and standard HTTP endpoints.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon"><i class="ph ph-chart-pie-slice"></i></div>
+            <h3>Quota Enforcement</h3>
+            <p>Set hard storage and bandwidth limits per tenant. The system enforces them automatically — no surprises on your bill.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon"><i class="ph ph-link"></i></div>
+            <h3>Instant Share Links</h3>
+            <p>Generate preview URLs and direct download links for any file. Shareable in one click, no third-party CDN required.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon"><i class="ph ph-chart-line-up"></i></div>
+            <h3>Analytics & Tracking</h3>
+            <p>Track unique views, downloads, and bandwidth per file and tenant. All surfaced in a clean admin dashboard.</p>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section style="border-top: 1px solid var(--border);">
+    <p class="section-label">Simple workflow</p>
+    <h2 class="section-title">Up and running<br>in minutes.</h2>
+    <p class="section-sub">Three steps from sign-up to serving your first file over a custom domain.</p>
+    <div class="steps-grid">
+        <div class="step">
+            <div class="step-num">01</div>
+            <h3>Sign Up & Get Your Cloud ID</h3>
+            <p>Create a workspace. OQENS provisions an isolated storage environment and gives you a unique Cloud ID and API key instantly.</p>
+            <div class="step-connector"></div>
+        </div>
+        <div class="step">
+            <div class="step-num">02</div>
+            <h3>Upload via Dashboard or API</h3>
+            <p>Drag-and-drop files in the web UI or integrate our HTTP API into your app. Supports any file type — images, videos, PDFs, archives.</p>
+            <div class="step-connector"></div>
+        </div>
+        <div class="step">
+            <div class="step-num">03</div>
+            <h3>Serve Over Your Domain</h3>
+            <p>Add a CNAME, request your custom domain in Settings. OQENS handles Nginx config and SSL issuance automatically — no DevOps needed.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Code -->
+<section style="border-top: 1px solid var(--border);">
+    <p class="section-label">For developers</p>
+    <h2 class="section-title">Integrate in minutes.</h2>
+    <p class="section-sub">One HTTP endpoint. Any language. Your API key handles auth.</p>
+    <div class="code-wrap">
+        <div class="code-tabs">
+            <button class="code-tab active" onclick="switchTab('curl', this)">cURL</button>
+            <button class="code-tab" onclick="switchTab('js', this)">JavaScript</button>
+            <button class="code-tab" onclick="switchTab('python', this)">Python</button>
+        </div>
+        <div class="code-body">
+            <pre id="tab-curl" class="code-block active"><code><span class="cm"># Upload a file to your OQENS workspace</span>
+<span class="fn">curl</span> -X POST \
+  -F <span class="str">"file=@photo.jpg"</span> \
+  -H <span class="str">"X-API-Key: oqens_api_xxxxxxxxxxxxxxxx"</span> \
+  https://auth.oqens.me/api/bucket/upload
+
+<span class="cm"># Response</span>
+<span class="cm"># { "url": "https://dl.oqens.me/your-id/photo.jpg", "size": 204800 }</span></code></pre>
+            <pre id="tab-js" class="code-block"><code><span class="cm">// Upload a file using the Fetch API</span>
+<span class="kw">const</span> <span class="var">formData</span> = <span class="kw">new</span> <span class="fn">FormData</span>();
+<span class="var">formData</span>.<span class="fn">append</span>(<span class="str">'file'</span>, fileInput.files[0]);
+
+<span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://auth.oqens.me/api/bucket/upload'</span>, {
+  method: <span class="str">'POST'</span>,
+  headers: { <span class="str">'X-API-Key'</span>: <span class="str">'oqens_api_xxxxxxxxxxxxxxxx'</span> },
+  body: <span class="var">formData</span>
+});
+<span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> <span class="var">res</span>.<span class="fn">json</span>();
+console.<span class="fn">log</span>(<span class="var">data</span>.url); <span class="cm">// https://dl.oqens.me/your-id/file.jpg</span></code></pre>
+            <pre id="tab-python" class="code-block"><code><span class="kw">import</span> requests
+
+<span class="var">url</span> = <span class="str">"https://auth.oqens.me/api/bucket/upload"</span>
+<span class="var">headers</span> = {<span class="str">"X-API-Key"</span>: <span class="str">"oqens_api_xxxxxxxxxxxxxxxx"</span>}
+<span class="var">files</span> = {<span class="str">"file"</span>: <span class="fn">open</span>(<span class="str">"document.pdf"</span>, <span class="str">"rb"</span>)}
+
+<span class="var">response</span> = requests.<span class="fn">post</span>(<span class="var">url</span>, headers=<span class="var">headers</span>, files=<span class="var">files</span>)
+<span class="fn">print</span>(<span class="var">response</span>.<span class="fn">json</span>())
+<span class="cm"># {'url': 'https://dl.oqens.me/your-id/document.pdf', 'size': 86234}</span></code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- Products preview -->
+<section style="border-top: 1px solid var(--border);" id="products">
+    <p class="section-label">Products</p>
+    <h2 class="section-title">The OQENS Ecosystem.</h2>
+    <p class="section-sub">A unified suite of tools powered by edge distribution.</p>
+    <div class="pricing-grid">
+        <div class="plan-card" style="display:flex; flex-direction:column;">
+            <div class="plan-name" style="display:flex; align-items:center; gap:8px;"><i class="ph ph-cloud"></i> Echo Cloud</div>
+            <p style="margin-top:20px; margin-bottom:30px; color:var(--muted); line-height:1.6; flex:1;">
+                Our flagship distributed storage architecture. Host your static assets, files, and media on an incredibly fast, globally replicated edge network.
+            </p>
+            <a href="/signup" class="plan-btn" style="margin-top:auto;">Open Echo Cloud</a>
+        </div>
+        <div class="plan-card featured" style="display:flex; flex-direction:column;">
+            <div class="plan-badge">New Release</div>
+            <div class="plan-name" style="display:flex; align-items:center; gap:8px;"><i class="ph ph-file-text"></i> Papers</div>
+            <p style="margin-top:20px; margin-bottom:30px; color:rgba(255,255,255,0.8); line-height:1.6; flex:1;">
+                A stunning markdown editing workspace. Write at the speed of thought and instantly publish your papers to a globally optimized SEO directory.
+            </p>
+            <a href="/papers" class="plan-btn" style="margin-top:auto;">Discover Papers</a>
+        </div>
+        <div class="plan-card" style="display:flex; flex-direction:column;">
+            <div class="plan-name" style="display:flex; align-items:center; gap:8px;"><i class="ph ph-image"></i> Photos</div>
+            <p style="margin-top:20px; margin-bottom:30px; color:var(--muted); line-height:1.6; flex:1;">
+                Securely distribute your high-resolution photography. Edge-cached galleries ensure that guests around the world can view your albums instantly.
+            </p>
+            <a href="/photos" class="plan-btn" style="margin-top:auto;">Discover Photos</a>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section style="border-top: 1px solid var(--border);">
+    <p class="section-label">FAQ</p>
+    <h2 class="section-title">Common questions.</h2>
+    <div class="faq-list">
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">
+                <h3>Is my data isolated from other tenants?</h3>
+                <i class="ph ph-plus"></i>
+            </div>
+            <div class="faq-a"><p>Yes. OQENS enforces strict tenant segregation. Files are stored in isolated directories tied to your Cloud ID. No tenant can access another's data, API keys, or bandwidth quota.</p></div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">
+                <h3>How do custom domains work?</h3>
+                <i class="ph ph-plus"></i>
+            </div>
+            <div class="faq-a"><p>Point your domain's CNAME record to <code>dl.oqens.me</code>. Then request the domain in your dashboard Settings. OQENS automatically configures an Nginx reverse proxy and provisions a free Let's Encrypt SSL certificate via Certbot.</p></div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">
+                <h3>What file types are supported?</h3>
+                <i class="ph ph-plus"></i>
+            </div>
+            <div class="faq-a"><p>All file types are supported — images, videos, PDFs, archives, documents, binaries. There is no file type restriction, only your storage quota limits apply.</p></div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">
+                <h3>Are downloads and views tracked?</h3>
+                <i class="ph ph-plus"></i>
+            </div>
+            <div class="faq-a"><p>Yes. OQENS tracks unique device views (via anonymous persistent cookies) and total file downloads. Bandwidth consumption is calculated in real-time and visible in your dashboard analytics.</p></div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">
+                <h3>What happens if I exceed my quota?</h3>
+                <i class="ph ph-plus"></i>
+            </div>
+            <div class="faq-a"><p>When your storage or bandwidth limit is reached, uploads and downloads are automatically restricted until the next billing cycle or until you upgrade your plan. You'll see a warning banner in your dashboard.</p></div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">
+                <h3>Can I use the API without the dashboard?</h3>
+                <i class="ph ph-plus"></i>
+            </div>
+            <div class="faq-a"><p>Absolutely. Every tenant gets an API key they can use to upload, list, and delete files programmatically. The dashboard is optional — the API is first-class.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Banner -->
+<div class="cta-banner">
+    <div>
+        <h2>Start storing in 60 seconds.</h2>
+        <p>No credit card required for the free plan. Upgrade whenever you're ready.</p>
+    </div>
+    <a href="/pricing" class="btn-white">Get Started <i class="ph ph-arrow-right"></i></a>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a href="/" class="logo"><img src="/static/logo.png" style="width: 44px; height: 44px; object-fit: contain; margin-right: 8px;" alt="OQENS"> OQENS</a>
+                <p>Radically simple multi-tenant object storage. Built for developers who want power without complexity.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="/pricing">Pricing</a>
+                <a href="/docs">Documentation</a>
+                <a href="/docs">API Reference</a>
+                <a href="/login">Dashboard</a>
+            </div>
+            <div class="footer-col">
+                <h4>Security</h4>
+                <a href="/data-segregation">Data Segregation</a>
+                <a href="/origin-protection">Origin Protection</a>
+                <a href="/compliance">Compliance</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="/about">About</a>
+                <a href="https://status.echo.oqens.me/">System Status</a>
+                <a href="https://support.oqens.me/" target="_blank">Contact Support</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 OQENS MEDIA. All rights reserved.</span>
+            <div class="footer-bottom-links">
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="https://status.echo.oqens.me/">Status</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function switchTab(id, btn) {
+        document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + id).classList.add('active');
+    }
+
+    function toggleFaq(el) {
+        const item = el.closest('.faq-item');
+        const wasOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+        if (!wasOpen) item.classList.add('open');
+    }
+
+    // Check session limits
+    (async () => {
+        try {
+            const res = await fetch('/api/session');
+            if (!res.ok) return;
+            const d = await res.json();
+            if (d.role === 'tenant') {
+                const storageOver = d.storage_used_bytes >= d.storage_limit_bytes;
+                const bwOver = d.bandwidth_limit_bytes > 0 && d.bandwidth_bytes >= d.bandwidth_limit_bytes;
+                if (storageOver || bwOver) {
+                    document.getElementById('limit-banner').style.display = 'flex';
+                }
+            }
+        } catch(e) {}
+    })();
+</script>
+</body>
+</html>

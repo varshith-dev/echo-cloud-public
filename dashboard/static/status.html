@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | System Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-color: #fbfbfb;
+            --card-bg: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --border-color: #eaeaea;
+            --green: #10b981;
+            --green-bg: rgba(16, 185, 129, 0.08);
+            --pill-height: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 80px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header block */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        /* Global Status Card */
+        .global-status-card {
+            background: var(--green-bg);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 20px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--green);
+            border-radius: 50%;
+            position: relative;
+        }
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border: 1.5px solid var(--green);
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        .global-status-text {
+            font-weight: 500;
+            font-size: 1.05rem;
+            color: #065f46;
+        }
+
+        /* Components Card */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .component-item {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .component-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            letter-spacing: -0.1px;
+        }
+        .component-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        /* 90 Days Timeline Grid */
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(90, 1fr);
+            gap: 2.5px;
+            height: var(--pill-height);
+            align-items: stretch;
+        }
+        .timeline-bar {
+            background-color: var(--green);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.1s ease;
+            position: relative;
+        }
+        .timeline-bar:hover {
+            opacity: 0.85;
+            transform: scaleY(1.1);
+        }
+
+        /* Timeline Labels */
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Past Incidents Card */
+        .incidents-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .incidents-card h2 {
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            letter-spacing: -0.2px;
+        }
+        .incident-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .month-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .no-incidents {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 10px 0;
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: absolute;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111111;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            display: none;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: #111111;
+        }
+        .timeline-bar:hover .tooltip {
+            display: block;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        footer a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Limit Warning Banner -->
+    <div id="global-limit-warning-banner" style="display: none; background-color: rgba(254, 242, 242, 0.9); background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px); border-bottom: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; padding: 14px 20px; font-size: 0.88rem; font-weight: 500; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(239,68,68,0.05); z-index: 9999; position: sticky; top: 0; width: 100%; box-sizing: border-box;">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>RESOURCES ARE LIMITED:</strong> YOU REACHED THE LIMITS. Some system actions may be restricted.</span>
+    </div>
+
+    <div class="container">
+        <header>
+            <a href="https://echo.oqens.me/" class="logo">
+                <i class="ph ph-cube"></i> OQENS STATUS
+            </a>
+            <div style="display: flex; gap: 20px;">
+                <a href="/docs" target="_blank" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; font-weight: 500;">Help & Docs</a>
+                <a href="https://support.oqens.me/" target="_blank" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; font-weight: 500;">Support</a>
+            </div>
+        </header>
+
+        <div class="global-status-card">
+            <div class="pulse-dot"></div>
+            <div class="global-status-text">All systems operational</div>
+        </div>
+
+        <div class="card">
+            <!-- Component 1 -->
+            <div class="component-item">
+                <div class="component-header">
+                    <span class="component-name">API Gateway & Dashboard</span>
+                    <span class="component-status">Operational</span>
+                </div>
+                <div class="timeline-container">
+                    <div class="timeline-grid" id="grid-api"></div>
+                    <div class="timeline-labels">
+                        <span>90 days ago</span>
+                        <span>100.0% uptime</span>
+                        <span>Today</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Component 2 -->
+            <div class="component-item">
+                <div class="component-header">
+                    <span class="component-name">Custom Origin Storage Engine (COS)</span>
+                    <span class="component-status">Operational</span>
+                </div>
+                <div class="timeline-container">
+                    <div class="timeline-grid" id="grid-cos"></div>
+                    <div class="timeline-labels">
+                        <span>90 days ago</span>
+                        <span>100.0% uptime</span>
+                        <span>Today</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Component 3 -->
+            <div class="component-item">
+                <div class="component-header">
+                    <span class="component-name">Nginx Ingress Proxy Routing</span>
+                    <span class="component-status">Operational</span>
+                </div>
+                <div class="timeline-container">
+                    <div class="timeline-grid" id="grid-nginx"></div>
+                    <div class="timeline-labels">
+                        <span>90 days ago</span>
+                        <span>100.0% uptime</span>
+                        <span>Today</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Component 4 -->
+            <div class="component-item">
+                <div class="component-header">
+                    <span class="component-name">Database Services</span>
+                    <span class="component-status">Operational</span>
+                </div>
+                <div class="timeline-container">
+                    <div class="timeline-grid" id="grid-db"></div>
+                    <div class="timeline-labels">
+                        <span>90 days ago</span>
+                        <span>100.0% uptime</span>
+                        <span>Today</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="incidents-card">
+            <h2>Past Incidents</h2>
+            <div class="incident-list">
+                <div>
+                    <div class="month-header">June 2026</div>
+                    <div class="no-incidents">No incidents reported this month.</div>
+                </div>
+                <div>
+                    <div class="month-header">May 2026</div>
+                    <div class="no-incidents">No incidents reported this month.</div>
+                </div>
+                <div>
+                    <div class="month-header">April 2026</div>
+                    <div class="no-incidents">No incidents reported this month.</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <span>Powered by <a href="https://echo.oqens.me/">OQENS MEDIA</a> &bull; contact: <a href="https://support.oqens.me/" target="_blank">echo@oqens.me</a></span>
+        </footer>
+    </div>
+
+    <script>
+        const grids = {
+            'grid-api': 'api',
+            'grid-cos': 'cos',
+            'grid-nginx': 'nginx',
+            'grid-db': 'db'
+        };
+
+        const compNameMap = {
+            'api': 'API Gateway & Dashboard',
+            'cos': 'Custom Origin Storage Engine (COS)',
+            'nginx': 'Nginx Ingress Proxy Routing',
+            'db': 'Database Services'
+        };
+
+        function getStatusColor(status) {
+            if (status === 'outage') return '#ef4444';
+            if (status === 'degraded') return '#f59e0b';
+            return 'var(--green)';
+        }
+
+        async function loadStatus() {
+            try {
+                const res = await fetch('/api/status');
+                if (!res.ok) throw new Error("Failed to fetch system status");
+                const data = await res.json();
+                
+                const current = data.current;
+                const timeline = data.timeline;
+                const incidents = data.incidents;
+
+                // 1. Update Component Status Badges
+                const compMap = {
+                    'api': current.api_status || 'operational',
+                    'cos': current.cos_status || 'operational',
+                    'nginx': current.nginx_status || 'operational',
+                    'db': current.db_status || 'operational'
+                };
+
+                // Find elements and update
+                const compElements = document.querySelectorAll('.component-item');
+                compElements.forEach(item => {
+                    const nameEl = item.querySelector('.component-name');
+                    const statusEl = item.querySelector('.component-status');
+                    if (nameEl && statusEl) {
+                        const name = nameEl.innerText.trim();
+                        let key = '';
+                        if (name.includes('API')) key = 'api';
+                        else if (name.includes('COS') || name.includes('Storage')) key = 'cos';
+                        else if (name.includes('Nginx') || name.includes('Routing')) key = 'nginx';
+                        else if (name.includes('Database')) key = 'db';
+
+                        if (key && compMap[key]) {
+                            const status = compMap[key];
+                            statusEl.innerText = status.charAt(0).toUpperCase() + status.slice(1);
+                            statusEl.style.color = getStatusColor(status);
+                        }
+                    }
+                });
+
+                // 2. Render Timeline Grids
+                Object.keys(grids).forEach(gridId => {
+                    const compKey = grids[gridId];
+                    const grid = document.getElementById(gridId);
+                    if (!grid) return;
+                    grid.innerHTML = '';
+                    
+                    const now = new Date();
+                    let outageDays = 0;
+                    
+                    for (let i = 89; i >= 0; i--) {
+                        const date = new Date();
+                        date.setDate(now.getDate() - i);
+                        
+                        // Format YYYY-MM-DD
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const dateKey = `${year}-${month}-${day}`;
+                        
+                        const dateString = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        
+                        // Check status in timeline
+                        let status = 'operational';
+                        if (timeline[dateKey] && timeline[dateKey][compKey]) {
+                            status = timeline[dateKey][compKey];
+                        }
+                        
+                        if (status !== 'operational') outageDays++;
+                        
+                        const bar = document.createElement('div');
+                        bar.className = 'timeline-bar';
+                        bar.style.backgroundColor = getStatusColor(status);
+                        
+                        // Add tooltip
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'tooltip';
+                        tooltip.innerText = `${dateString}: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                        bar.appendChild(tooltip);
+                        
+                        grid.appendChild(bar);
+                    }
+                    
+                    // Update uptime percentage
+                    const parent = grid.closest('.component-item');
+                    const uptimeEl = parent.querySelector('.timeline-labels span:nth-child(2)');
+                    if (uptimeEl) {
+                        const uptimePct = ((90 - outageDays) / 90 * 100).toFixed(1);
+                        uptimeEl.innerText = `${uptimePct}% uptime`;
+                    }
+                });
+
+                // 3. Update Global Status Card
+                const hasOutage = Object.values(compMap).includes('outage');
+                const hasDegraded = Object.values(compMap).includes('degraded');
+                
+                const globalCard = document.querySelector('.global-status-card');
+                const globalText = document.querySelector('.global-status-text');
+                const globalDot = document.querySelector('.pulse-dot');
+                
+                if (globalCard && globalText && globalDot) {
+                    if (hasOutage) {
+                        globalCard.style.backgroundColor = 'rgba(239, 68, 68, 0.08)';
+                        globalCard.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                        globalText.innerText = 'Outage detected on some services';
+                        globalText.style.color = '#991b1b';
+                        globalDot.style.backgroundColor = '#ef4444';
+                    } else if (hasDegraded) {
+                        globalCard.style.backgroundColor = 'rgba(245, 158, 11, 0.08)';
+                        globalCard.style.borderColor = 'rgba(245, 158, 11, 0.2)';
+                        globalText.innerText = 'Some services are experiencing degraded performance';
+                        globalText.style.color = '#92400e';
+                        globalDot.style.backgroundColor = '#f59e0b';
+                    } else {
+                        globalCard.style.backgroundColor = 'var(--green-bg)';
+                        globalCard.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                        globalText.innerText = 'All systems operational';
+                        globalText.style.color = '#065f46';
+                        globalDot.style.backgroundColor = 'var(--green)';
+                    }
+                }
+
+                // 4. Render Incidents List (grouping by month)
+                const incidentsContainer = document.querySelector('.incident-list');
+                if (incidentsContainer) {
+                    incidentsContainer.innerHTML = '';
+                    
+                    // Generate last 3 months
+                    const now = new Date();
+                    const months = [];
+                    for (let i = 0; i < 3; i++) {
+                        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                        months.push({
+                            name: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+                            year: d.getFullYear(),
+                            month: d.getMonth()
+                        });
+                    }
+
+                    months.forEach(m => {
+                        const monthBlock = document.createElement('div');
+                        const header = document.createElement('div');
+                        header.className = 'month-header';
+                        header.innerText = m.name;
+                        monthBlock.appendChild(header);
+
+                        // Find incidents for this month
+                        const monthIncidents = incidents.filter(inc => {
+                            const incDate = new Date(inc.created_at);
+                            return incDate.getFullYear() === m.year && incDate.getMonth() === m.month;
+                        });
+
+                        if (monthIncidents.length === 0) {
+                            const noInc = document.createElement('div');
+                            noInc.className = 'no-incidents';
+                            noInc.innerText = 'No incidents reported this month.';
+                            monthBlock.appendChild(noInc);
+                        } else {
+                            monthIncidents.forEach(inc => {
+                                const incEl = document.createElement('div');
+                                incEl.style.marginBottom = '18px';
+                                incEl.style.paddingLeft = '12px';
+                                incEl.style.borderLeft = `3px solid ${inc.status === 'Resolved' ? 'var(--green)' : '#ef4444'}`;
+                                
+                                const timeStr = new Date(inc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                                
+                                incEl.innerHTML = `
+                                    <div style="font-weight: 600; font-size: 0.92rem; margin-bottom: 4px;">${inc.title}</div>
+                                    <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">Status: <strong>${inc.status}</strong> &bull; ${timeStr}</div>
+                                    <div style="font-size: 0.85rem; line-height: 1.4; color: #333;">${inc.description}</div>
+                                `;
+                                monthBlock.appendChild(incEl);
+                            });
+                        }
+                        
+                        incidentsContainer.appendChild(monthBlock);
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Run on load
+        loadStatus();
+
+        // Warning banner from session check
+        (async function() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant') {
+                        const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                        const isBandwidthOver = data.bandwidth_limit_bytes > 0 && (data.bandwidth_bytes >= data.bandwidth_limit_bytes);
+                        if (isStorageOver || isBandwidthOver) {
+                            const banner = document.getElementById('global-limit-warning-banner');
+                            if (banner) banner.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Session verification failed", e);
+            }
+        })();
+    </script>
+</body>
+</html>

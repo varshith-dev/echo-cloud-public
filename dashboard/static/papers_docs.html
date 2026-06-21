@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS Papers - Documentation</title>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #ffffff;
+            --bg-alt: #fafafa;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --accent: #000000;
+            --border-light: #e5e7eb;
+            --code-bg: #f3f4f6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%; height: 65px;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000; padding: 0 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-main); }
+        .logo img { width: 28px; height: 28px; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
+        .nav-links a:hover { color: var(--text-main); }
+
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 500; text-decoration: none; transition: 0.2s; border: none; font-size: 0.9rem; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #374151; }
+
+        /* Layout */
+        .docs-container { display: flex; margin-top: 65px; flex: 1; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px; height: calc(100vh - 65px); position: fixed;
+            border-right: 1px solid var(--border-light);
+            background: var(--bg-alt); padding: 32px 24px; overflow-y: auto;
+        }
+        .sidebar-section { margin-bottom: 24px; }
+        .sidebar-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .sidebar-link { display: block; color: var(--text-muted); text-decoration: none; font-size: 0.95rem; margin-bottom: 10px; transition: color 0.2s; }
+        .sidebar-link:hover { color: var(--accent); font-weight: 500; }
+        
+        /* Main Content */
+        .content { margin-left: 260px; padding: 48px 80px; max-width: 900px; flex: 1; }
+        .content h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.02em; }
+        .content h2 { font-size: 1.75rem; font-weight: 600; margin-top: 48px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-light); }
+        .content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 32px; margin-bottom: 12px; }
+        .content p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 16px; color: #374151; }
+        
+        /* Code blocks */
+        pre { background: #111827; color: #e5e7eb; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 24px 0; font-family: monospace; font-size: 0.9rem; line-height: 1.5; }
+        code { font-family: monospace; background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #ef4444; }
+        pre code { background: transparent; padding: 0; color: inherit; }
+
+        /* Notice Boxes */
+        .notice { padding: 16px 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid var(--accent); background: #f3f4f6; }
+        .notice p { margin: 0; font-size: 0.95rem; }
+        .notice strong { color: var(--accent); }
+
+        ul { margin-left: 24px; margin-bottom: 16px; font-size: 1.05rem; line-height: 1.7; color: #374151; }
+        li { margin-bottom: 8px; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .content { margin-left: 0; padding: 32px 24px; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="OQENS">
+            Papers Docs
+        </a>
+        <div class="nav-links">
+            <a href="https://papers.oqens.me/">Go to App</a>
+            <a href="https://support.oqens.me">Support</a>
+            <a href="https://echo.oqens.me/signup?app=papers" class="btn btn-primary">Start Writing</a>
+        </div>
+    </nav>
+
+    <div class="docs-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Getting Started</div>
+                <a href="#introduction" class="sidebar-link">Introduction</a>
+                <a href="#quickstart" class="sidebar-link">Quickstart</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Formatting</div>
+                <a href="#markdown-basics" class="sidebar-link">Markdown Basics</a>
+                <a href="#math" class="sidebar-link">Math & Equations</a>
+                <a href="#code-blocks" class="sidebar-link">Code Highlighting</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Advanced Embeds</div>
+                <a href="#charts" class="sidebar-link">Interactive Charts</a>
+                <a href="#diagrams" class="sidebar-link">Mermaid Diagrams</a>
+                <a href="#tables" class="sidebar-link">Grid.js Tables</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Publishing</div>
+                <a href="#sharing" class="sidebar-link">Public Pages</a>
+                <a href="#seo" class="sidebar-link">SEO & Meta</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1 id="introduction">OQENS Papers Documentation</h1>
+            <p>Welcome to the official documentation for OQENS Papers. Papers is a lightning-fast, distraction-free Markdown workspace designed for creators, developers, and writers who want to craft beautiful documents and publish them to the web instantly.</p>
+            
+            <div class="notice">
+                <p><strong>Note:</strong> OQENS Papers uses GitHub Flavored Markdown (GFM) out of the box, meaning almost all standard formatting from GitHub and other tools will work perfectly here.</p>
+            </div>
+
+            <h2 id="markdown-basics">Markdown Basics</h2>
+            <p>If you've never used Markdown before, it's a lightweight markup language that you can use to add formatting elements to plaintext text documents.</p>
+            
+            <h3>Headings & Text</h3>
+<pre>
+# Heading 1
+## Heading 2
+### Heading 3
+
+**Bold text**
+*Italic text*
+~~Strikethrough~~
+</pre>
+
+            <h3>Lists and Links</h3>
+<pre>
+- Bullet point 1
+- Bullet point 2
+  - Nested point
+
+1. Numbered item 1
+2. Numbered item 2
+
+[Click here for OQENS](https://oqens.me)
+</pre>
+
+            <h2 id="math">Math & Equations</h2>
+            <p>OQENS Papers natively supports rendering LaTeX mathematical expressions using KaTeX. This is perfect for technical writers and academics.</p>
+            <p>Use single dollar signs <code>$...$</code> for inline equations, and double dollar signs <code>$$...$$</code> for block equations.</p>
+<pre>
+Here is an inline equation: $E=mc^2$
+
+Here is a block equation:
+$$
+\frac{n!}{k!(n-k)!} = \binom{n}{k}
+$$
+</pre>
+
+            <h2 id="charts">Interactive Charts (Chart.js)</h2>
+            <p>You can embed fully interactive, responsive charts directly into your documents without writing any JavaScript logic. We support this by parsing special JSON blocks within your markdown.</p>
+            <p>To create a chart, create a code block with the language set to <code>chartjs</code> and paste standard Chart.js JSON configuration inside.</p>
+<pre>
+```chartjs
+{
+  "type": "bar",
+  "data": {
+    "labels": ["Jan", "Feb", "Mar", "Apr"],
+    "datasets": [{
+      "label": "Revenue",
+      "data": [12000, 19000, 3000, 5000],
+      "backgroundColor": "#3b82f6"
+    }]
+  }
+}
+```
+</pre>
+
+            <h2 id="diagrams">Mermaid Diagrams</h2>
+            <p>Mermaid is a JavaScript-based diagramming and charting tool that renders Markdown-inspired text definitions dynamically to create and modify diagrams.</p>
+            <p>Just use the <code>mermaid</code> code block tag.</p>
+<pre>
+```mermaid
+graph TD;
+    A[Client]--&gt;B[OQENS Edge CDN];
+    B--&gt;C[Application Server];
+    C--&gt;D[(PostgreSQL)];
+```
+</pre>
+
+            <h2 id="tables">Advanced Data Tables (Grid.js)</h2>
+            <p>Standard Markdown tables are supported, but if you need pagination, sorting, or searching for large datasets, you can use our native Grid.js integration.</p>
+<pre>
+```gridjs
+{
+  "search": true,
+  "sort": true,
+  "pagination": { "limit": 3 },
+  "columns": ["Name", "Email", "Status"],
+  "data": [
+    ["John Doe", "john@example.com", "Active"],
+    ["Jane Smith", "jane@example.com", "Pending"],
+    ["Bob Wilson", "bob@example.com", "Active"]
+  ]
+}
+```
+</pre>
+
+            <h2 id="sharing">Publishing to the Web</h2>
+            <p>Every document in Papers is private to your workspace by default. To publish a document to the world:</p>
+            <ul>
+                <li>Click the <strong>Publish</strong> button in the top right corner of the editor.</li>
+                <li>Set a custom <strong>slug</strong> (e.g., <code>/my-awesome-post</code>).</li>
+                <li>Toggle visibility to "Public".</li>
+            </ul>
+            <p>Your document will be instantly built, cached globally on our CDN, and accessible at <code>papers.oqens.me/p/{username}/{slug}</code> (or on your custom domain if configured).</p>
+            
+            <h2 id="seo">SEO & Meta Information</h2>
+            <p>When you publish a page, Papers automatically generates meta tags for search engines and social media previews. However, you can explicitly define these at the very top of your document using YAML frontmatter:</p>
+<pre>
+---
+title: "The Ultimate Guide to Markdown"
+description: "Learn how to use OQENS Papers to write faster."
+image: "https://example.com/banner.jpg"
+---
+
+# Your content begins here...
+</pre>
+
+        </main>
+    </div>
+
+    <script>
+        // Smooth scrolling for sidebar links
+        document.querySelectorAll('.sidebar-link').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    window.scrollTo({
+                        top: targetEl.offsetTop - 85,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

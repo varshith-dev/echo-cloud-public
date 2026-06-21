@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Privacy Policy</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --border-color: #e5e5e5;
+            --hover-bg: #f9f9f9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 40px 10%;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo { 
+            font-size: 1.25rem; font-weight: 600; 
+            letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-links { display: flex; gap: 40px; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none; font-size: 0.95rem;
+            transition: color 0.2s ease; display: flex; align-items: center; gap: 6px;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+
+        .content-container {
+            flex: 1;
+            padding: 80px 10%;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 400;
+            letter-spacing: -1.5px;
+            margin-bottom: 40px;
+        }
+        .section-text {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        .section-text strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin: 40px 0 20px 0;
+            color: var(--text-primary);
+        }
+
+        footer {
+            background: #fafafa;
+            border-top: 1px solid var(--border-color);
+            padding: 80px 10% 40px 10%;
+            width: 100%;
+            margin-top: 80px;
+        }
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto 60px auto;
+        }
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .footer-col h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .footer-col a {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .footer-col a:hover {
+            color: var(--text-primary);
+        }
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 900px) {
+            .content-container { padding: 40px 10%; }
+            h1 { font-size: 2.2rem; }
+            .footer-links { grid-template-columns: 1fr; gap: 30px; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Limit Warning Banner -->
+    <div id="global-limit-warning-banner" style="display: none; background-color: rgba(254, 242, 242, 0.9); background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px); border-bottom: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; padding: 14px 20px; font-size: 0.88rem; font-weight: 500; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(239,68,68,0.05); z-index: 9999; position: sticky; top: 0; width: 100%; box-sizing: border-box;">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>RESOURCES ARE LIMITED:</strong> YOU REACHED THE LIMITS. Some system actions may be restricted.</span>
+    </div>
+
+    <nav>
+        <a href="/" class="logo">
+            <i class="ph ph-cube"></i> OQENS
+        </a>
+        <div class="nav-links">
+            <a href="/docs"><i class="ph ph-book-open-text"></i> Docs</a>
+            <a href="/login"><i class="ph ph-sign-in"></i> Login</a>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        <h1>Privacy Policy</h1>
+        <p class="section-text">
+            At OQENS, we value your privacy and are committed to protecting your personal data in accordance with the General Data Protection Regulation (GDPR) and other applicable privacy laws. This policy describes how we collect, store, and process information.
+        </p>
+
+        <h2>1. Information We Collect</h2>
+        <p class="section-text">
+            OQENS acts primarily as an infrastructure and object storage provider. We collect basic account information (such as your username, email address, and hashed password) when you register a workspace. We also collect billing records and payment logs linked to subscription status updates.
+        </p>
+        <p class="section-text">
+            We do not index, inspect, or scan the files you upload to your private media nodes, preserving strict workspace confidentiality.
+        </p>
+
+        <h2>2. Data Locality and Security</h2>
+        <p class="section-text">
+            All files uploaded to OQENS are stored within isolated cloud storage compartments in our regional data center location. We do not distribute, replicate, or share your data files with third-party tracking services or external databases. Access to your tenant database records is guarded by API credentials and access-token checks.
+        </p>
+
+        <h2>3. Your Rights (GDPR)</h2>
+        <p class="section-text">
+            Under GDPR, you have the right to access, rectify, or request the deletion of your personal records and workspace databases. You can exercise these rights at any time by terminating your workspace, which permanently purges all uploaded objects and metadata from our servers, or by reaching out to our administration.
+        </p>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="/login">Dashboard</a>
+                <a href="/docs">Documentation</a>
+                <a href="/docs">API Reference</a>
+            </div>
+            <div class="footer-col">
+                <h4>Security</h4>
+                <a href="/data-segregation">Data Segregation</a>
+                <a href="/origin-protection">Origin Protection</a>
+                <a href="/compliance">Compliance</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="/about">About</a>
+                <a href="https://status.echo.oqens.me/">Status Page</a>
+                <a href="https://support.oqens.me/" target="_blank">Contact Support</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 OQENS MEDIA. All rights reserved.</span>
+            <span>Radically simple object storage.</span>
+        </div>
+    </footer>
+
+    <script>
+        (async function() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant') {
+                        const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                        const isBandwidthOver = data.bandwidth_limit_bytes > 0 && (data.bandwidth_bytes >= data.bandwidth_limit_bytes);
+                        if (isStorageOver || isBandwidthOver) {
+                            const banner = document.getElementById('global-limit-warning-banner');
+                            if (banner) banner.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Session verification failed", e);
+            }
+        })();
+    </script>
+</body>
+</html>

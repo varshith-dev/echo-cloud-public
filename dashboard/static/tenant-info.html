@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS Admin | Manage Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --text-color: #111111;
+            --text-muted: #666666;
+            --border-color: #eeeeee;
+            --card-bg: #ffffff;
+            --accent: #111111;
+            --accent-hover: #333333;
+            --accent-text: #ffffff;
+            --hover-bg: #f5f5f5;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --success: #10b981;
+            --success-bg: #e8f8f5;
+            --warning: #f39c12;
+            --warning-bg: #fef5e7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Navbar */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 5%; border-bottom: 1.5px solid var(--border-color);
+            background: var(--card-bg); position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: var(--text-color); text-decoration: none; }
+        .logo i { font-size: 1.3rem; }
+        
+        .container {
+            max-width: 1300px;
+            width: 90%;
+            margin: 40px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .back-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .btn-back:hover {
+            color: var(--text-color);
+        }
+
+        /* Layout Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+            margin-bottom: 25px;
+        }
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+            font-size: 0.88rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--text-color);
+        }
+        .form-group input[readonly] {
+            background: var(--hover-bg);
+            cursor: not-allowed;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 1.5px solid var(--border-color);
+            background: transparent;
+            color: var(--text-color);
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--hover-bg);
+        }
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--accent-text);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+        .btn-danger {
+            background: var(--danger-bg);
+            border-color: #fca5a5;
+            color: var(--danger);
+        }
+        .btn-danger:hover {
+            background: #fee2e2;
+        }
+
+        /* Leaderboard and metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            border: 1.5px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 16px;
+            background: var(--bg-color);
+        }
+        .metric-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Progress bars */
+        .progress-container {
+            margin-bottom: 15px;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+        .progress-bar-bg {
+            height: 8px;
+            background: var(--hover-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+        th {
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--bg-color);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+        tr:hover td {
+            background: var(--hover-bg);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        /* Toast & Alerts */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--accent);
+            color: var(--accent-text);
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <span class="logo"><i class="ph ph-cube"></i> OQENS ADMIN CENTRE</span>
+        <a href="https://host.echo.oqens.me/#tenants" class="btn"><i class="ph ph-squares-four"></i> Portal</a>
+    </nav>
+
+    <div class="container">
+        <div class="back-bar">
+            <a href="https://host.echo.oqens.me/#tenants" class="btn-back"><i class="ph ph-arrow-left"></i> Back to Tenants List</a>
+            <h2 id="lbl-workspace-title" style="font-weight: 500; font-size: 1.3rem; letter-spacing: -0.4px;">Workspace Management</h2>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column: Edit Form -->
+            <div class="card">
+                <h3><i class="ph ph-pencil-simple"></i> Edit Configuration</h3>
+                <form id="form-edit-tenant" onsubmit="saveTenantChanges(event)">
+                    <input type="hidden" id="edit-tid">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="edit-user" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cloud Name ID</label>
+                            <input type="text" id="edit-cloud-id">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Whitelist Email</label>
+                            <input type="email" id="edit-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Custom Domain</label>
+                            <input type="text" id="edit-custom-domain" placeholder="e.g. storage.example.com">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Secret Access Code</label>
+                            <input type="text" id="edit-code" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Account Password</label>
+                            <input type="password" id="edit-password" placeholder="Leave blank to keep unchanged">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" id="edit-api-key" readonly style="background-color: var(--hover-bg); cursor: not-allowed;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Storage Limit</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="edit-limit" required style="flex: 1;">
+                                <select id="edit-limit-unit" style="width: auto;">
+                                    <option value="GB">GB</option>
+                                    <option value="MB">MB</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Bandwidth Limit (0 = Unlimited)</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="edit-bandwidth" required style="flex: 1;">
+                                <select id="edit-bandwidth-unit" style="width: auto;">
+                                    <option value="GB">GB</option>
+                                    <option value="MB">MB</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Monthly Rate (INR)</label>
+                            <input type="number" id="edit-monthly-rate" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Next Billing Date</label>
+                            <input type="date" id="edit-next-billing-date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Billing Status</label>
+                        <select id="edit-billing-status">
+                            <option value="Active">Active</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Past Due">Past Due</option>
+                            <option value="Pending Payment">Pending Payment</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; margin: 10px 0;">
+                        <input type="checkbox" id="edit-auto-renew" style="width: auto; cursor: pointer;">
+                        <label for="edit-auto-renew" style="text-transform: none; font-size: 0.82rem; font-weight: normal; cursor: pointer;">Auto-Renewal Enabled</label>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Flags & Restrictions</label>
+                        <div style="display: flex; gap: 20px; align-items: center; margin-top: 5px; flex-wrap: wrap;">
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-block-downloads" style="width: auto;"> Block Downloads
+                            </label>
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-block-uploads" style="width: auto;"> Block Uploads
+                            </label>
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-email-verified" style="width: auto;"> Email Verified
+                            </label>
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-domain-verified" style="width: auto;"> Domain Verified
+                            </label>
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-papers-enabled" style="width: auto;"> Papers App Access
+                            </label>
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-photos-enabled" style="width: auto;"> Photos App Access
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1.5px solid var(--border-color); margin-top: 20px; padding-top: 15px;">
+                        <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                            <label style="margin-bottom: 0;">Custom Banner Message</label>
+                            <label style="text-transform: none; font-size: 0.82rem; font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="edit-custom-message-active" style="width: auto;"> Active
+                            </label>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 10px;">
+                            <textarea id="edit-custom-message" rows="2" placeholder="e.g. RESOURCES ARE LIMITED: YOU REACHED THE LIMITS." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color); resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                            <div class="form-group">
+                                <label>Theme Color</label>
+                                <select id="edit-custom-message-theme">
+                                    <option value="danger">Red / Danger</option>
+                                    <option value="warning">Yellow / Warning</option>
+                                    <option value="info">Blue / Info</option>
+                                    <option value="success">Green / Success</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Phosphor Icon</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <div style="background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 6px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <i id="edit-custom-message-icon-preview" class="ph ph-warning-circle" style="font-size: 1.5rem; color: var(--text-color);"></i>
+                                    </div>
+                                    <select id="edit-custom-message-icon" onchange="document.getElementById('edit-custom-message-icon-preview').className = 'ph ' + this.value;">
+                                        <option value="ph-warning-circle">Warning Circle</option>
+                                        <option value="ph-info">Info</option>
+                                        <option value="ph-check-circle">Check Circle</option>
+                                        <option value="ph-x-circle">X Circle</option>
+                                        <option value="ph-bell">Bell</option>
+                                        <option value="ph-megaphone">Megaphone</option>
+                                        <option value="ph-seal-warning">Seal Warning</option>
+                                        <option value="ph-shield-warning">Shield Warning</option>
+                                        <option value="ph-confetti">Confetti</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 25px; border-top: 1.5px solid var(--border-color); padding-top: 20px; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary" id="btn-edit-mode" onclick="toggleEditMode()" style="flex: 1; min-width: 150px;"><i class="ph ph-pencil-simple"></i> Edit Configuration</button>
+                        <button type="submit" class="btn btn-primary" id="btn-save" style="flex: 1; min-width: 150px; display: none;"><i class="ph ph-floppy-disk"></i> Save Configuration</button>
+                        <button type="button" class="btn" id="btn-terminate" onclick="terminateService()" style="flex: 1; min-width: 150px; background: var(--warning-bg); border-color: #fca5a5; color: var(--warning);"><i class="ph ph-x-circle"></i> Terminate Service</button>
+                        <button type="button" class="btn" id="btn-reactivate" onclick="reactivateService()" style="flex: 1; min-width: 150px; background: #e8f5e9; border-color: #a7f3d0; color: #059669; display: none;"><i class="ph ph-check-circle"></i> Reactivate Service</button>
+                        <button type="button" class="btn btn-danger" onclick="deleteTenantAccount()" style="flex: 1; min-width: 150px;"><i class="ph ph-trash"></i> Delete Account</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column: Status & Resources -->
+            <div>
+                <!-- Resource Consumption Stats Card -->
+                <div class="card">
+                    <h3><i class="ph ph-chart-bar"></i> Usage & Performance</h3>
+                    <div style="margin-bottom: 20px; font-size: 0.88rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                        <span>Cloud Name ID: <strong style="color: var(--text-color);" id="lbl-cloud-id">--</strong></span>
+                        <span>Status: <span id="badge-billing" class="badge">--</span></span>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Total Views</div>
+                            <div class="metric-value" id="val-views">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Downloads Count</div>
+                            <div class="metric-value" id="val-downloads">0</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Storage Usage</span>
+                            <span id="lbl-storage-ratio">0 B / 0 B</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="bar-storage" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container" style="margin-bottom: 0;">
+                        <div class="progress-label">
+                            <span>Bandwidth quota</span>
+                            <span id="lbl-bandwidth-ratio">0 B / 0 B</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="bar-bandwidth" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Administrative Actions Card -->
+                <div class="card" style="margin-top: 25px;">
+                    <h3><i class="ph ph-lightning"></i> Administrative Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                        <button class="btn" onclick="sendPasswordReset()" style="justify-content: flex-start; text-align: left; padding: 10px 15px; border-radius: 8px;"><i class="ph ph-envelope-simple" style="font-size: 1.1rem; color: var(--primary-color);"></i> <span style="font-weight: 500;">Send Password Reset Email</span></button>
+                        <button class="btn" onclick="sendVerificationEmail()" style="justify-content: flex-start; text-align: left; padding: 10px 15px; border-radius: 8px;"><i class="ph ph-envelope-simple-open" style="font-size: 1.1rem; color: #10b981;"></i> <span style="font-weight: 500;">Send Email Verification Link</span></button>
+                        <button class="btn" onclick="regenerateApiKey()" style="justify-content: flex-start; text-align: left; padding: 10px 15px; border-radius: 8px; background: var(--warning-bg); border-color: #fca5a5; color: var(--warning);"><i class="ph ph-key" style="font-size: 1.1rem;"></i> <span style="font-weight: 500;">Regenerate API Key</span></button>
+                    </div>
+                </div>
+
+                <!-- Files Stored Table Card -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 24px 24px 10px 24px;">
+                        <h3 style="margin-bottom: 0;"><i class="ph ph-folder-open"></i> Uploaded Assets</h3>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Size</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="files-table-body">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 25px;">No files.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Ledger Card -->
+                <div class="card" style="padding: 0; overflow: hidden; margin-top: 25px;">
+                    <div style="padding: 24px 24px 10px 24px;">
+                        <h3 style="margin-bottom: 0;"><i class="ph ph-list-bullets"></i> Billing Transactions</h3>
+                    </div>
+                    <div style="max-height: 250px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-table-body">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 25px;">No transactions recorded.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Message</div>
+
+    <script>
+        // Extract tenant ID from path /info/<id>
+        const segments = window.location.pathname.split('/');
+        const tenantId = parseInt(segments[segments.length - 1]);
+
+        let tenantUsername = '';
+
+        let isEditMode = false;
+        function toggleEditMode() {
+            isEditMode = true;
+            const form = document.getElementById('form-edit-tenant');
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
+            // Keep api-key readonly if present
+            const apiKeyInput = document.getElementById('edit-api-key');
+            if (apiKeyInput) apiKeyInput.readOnly = true;
+            
+            document.getElementById('btn-edit-mode').style.display = 'none';
+            document.getElementById('btn-save').style.display = 'flex';
+        }
+
+        function disableFormFields() {
+            isEditMode = false;
+            const form = document.getElementById('form-edit-tenant');
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            document.getElementById('btn-edit-mode').style.display = 'flex';
+            document.getElementById('btn-save').style.display = 'none';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('active');
+            setTimeout(() => t.classList.remove('active'), 3000);
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function loadTenantData() {
+            if (!tenantId || isNaN(tenantId)) {
+                alert("Invalid Tenant ID.");
+                window.location.href = 'https://host.echo.oqens.me/#tenants';
+                return;
+            }
+
+            try {
+                // Fetch all tenants and filter by ID
+                const res = await fetch('/api/admin/tenants');
+                const tenants = await res.json();
+                const tenant = tenants.find(t => t.id === tenantId);
+                
+                if (!tenant) {
+                    alert("Tenant not found.");
+                    window.location.href = 'https://host.echo.oqens.me/#tenants';
+                    return;
+                }
+
+                tenantUsername = tenant.username;
+                document.getElementById('lbl-workspace-title').innerText = `Manage workspace: ${tenantUsername}`;
+                
+                // Form setup
+                document.getElementById('edit-tid').value = tenant.id;
+                document.getElementById('edit-user').value = tenant.username;
+                document.getElementById('edit-cloud-id').value = tenant.cloud_id || '';
+                document.getElementById('edit-email').value = tenant.custom_domain_email || '';
+                document.getElementById('edit-custom-domain').value = tenant.custom_domain || '';
+                document.getElementById('edit-code').value = tenant.secret_code || '';
+                document.getElementById('edit-password').value = '';
+                document.getElementById('edit-api-key').value = tenant.api_key || 'None';
+                document.getElementById('edit-monthly-rate').value = tenant.monthly_rate || 0;
+                document.getElementById('edit-next-billing-date').value = tenant.next_billing_date || '';
+                document.getElementById('edit-billing-status').value = tenant.billing_status || 'Active';
+                if (tenant.billing_status === 'Suspended') {
+                    document.getElementById('btn-terminate').style.display = 'none';
+                    document.getElementById('btn-reactivate').style.display = '';
+                } else {
+                    document.getElementById('btn-terminate').style.display = '';
+                    document.getElementById('btn-reactivate').style.display = 'none';
+                }
+                document.getElementById('edit-auto-renew').checked = tenant.auto_renew === 1;
+                document.getElementById('edit-block-downloads').checked = tenant.block_downloads === 1;
+                document.getElementById('edit-block-uploads').checked = tenant.block_uploads === 1;
+                document.getElementById('edit-email-verified').checked = tenant.email_verified === 1;
+                document.getElementById('edit-domain-verified').checked = tenant.custom_domain_verified === 1;
+                document.getElementById('edit-papers-enabled').checked = tenant.papers_enabled === 1 || tenant.papers_enabled === true;
+                document.getElementById('edit-photos-enabled').checked = tenant.photos_enabled === 1 || tenant.photos_enabled === true;
+                
+                document.getElementById('edit-custom-message').value = tenant.custom_message || '';
+                document.getElementById('edit-custom-message-theme').value = tenant.custom_message_theme || 'danger';
+                document.getElementById('edit-custom-message-icon').value = tenant.custom_message_icon || 'ph-warning-circle';
+                document.getElementById('edit-custom-message-icon-preview').className = 'ph ' + (tenant.custom_message_icon || 'ph-warning-circle');
+                document.getElementById('edit-custom-message-active').checked = tenant.custom_message_active === 1;
+
+                // Storage Limit format
+                let limit = tenant.storage_limit_bytes || 0;
+                if (limit >= 1024**3 && limit % 1024**3 === 0) {
+                    document.getElementById('edit-limit').value = limit / (1024**3);
+                    document.getElementById('edit-limit-unit').value = 'GB';
+                } else {
+                    document.getElementById('edit-limit').value = Math.round(limit / (1024**2));
+                    document.getElementById('edit-limit-unit').value = 'MB';
+                }
+
+                // Bandwidth Limit format
+                let bwLimit = tenant.bandwidth_limit_bytes || 0;
+                if (bwLimit === 0) {
+                    document.getElementById('edit-bandwidth').value = 0;
+                    document.getElementById('edit-bandwidth-unit').value = 'GB';
+                } else if (bwLimit >= 1024**3 && bwLimit % 1024**3 === 0) {
+                    document.getElementById('edit-bandwidth').value = bwLimit / (1024**3);
+                    document.getElementById('edit-bandwidth-unit').value = 'GB';
+                } else {
+                    document.getElementById('edit-bandwidth').value = Math.round(bwLimit / (1024**2));
+                    document.getElementById('edit-bandwidth-unit').value = 'MB';
+                }
+
+                // Analytics overview card setup
+                document.getElementById('lbl-cloud-id').innerText = tenant.cloud_id || 'N/A';
+                document.getElementById('val-views').innerText = tenant.unique_views_count || 0;
+                document.getElementById('val-downloads').innerText = tenant.downloads_count || 0;
+
+                function getBarColor(pct) {
+                    if (pct >= 100) return 'linear-gradient(90deg, #ef4444, #7f1d1d)';
+                    if (pct >= 85) return '#fca5a5';
+                    if (pct >= 60) return '#fbbf24';
+                    return '#ffffff';
+                }
+
+                // Storage progress
+                const storageRatioStr = `${formatBytes(tenant.storage_used_bytes || 0)} / ${formatBytes(tenant.storage_limit_bytes || 0)}`;
+                document.getElementById('lbl-storage-ratio').innerText = storageRatioStr;
+                const storagePercent = tenant.storage_limit_bytes > 0 
+                    ? Math.min(100, Math.round(((tenant.storage_used_bytes || 0) / tenant.storage_limit_bytes) * 100))
+                    : 0;
+                document.getElementById('bar-storage').style.width = `${storagePercent}%`;
+                document.getElementById('bar-storage').style.background = getBarColor(storagePercent);
+
+                // Bandwidth progress
+                const bwLimitStr = tenant.bandwidth_limit_bytes > 0 ? formatBytes(tenant.bandwidth_limit_bytes) : 'Unlimited';
+                document.getElementById('lbl-bandwidth-ratio').innerText = `${formatBytes(tenant.bandwidth_bytes || 0)} / ${bwLimitStr}`;
+                const bwPercent = tenant.bandwidth_limit_bytes > 0 
+                    ? Math.min(100, Math.round(((tenant.bandwidth_bytes || 0) / tenant.bandwidth_limit_bytes) * 100))
+                    : 0;
+                document.getElementById('bar-bandwidth').style.width = `${bwPercent}%`;
+                document.getElementById('bar-bandwidth').style.background = getBarColor(bwPercent);
+
+                // Status Badge styling
+                const badge = document.getElementById('badge-billing');
+                badge.innerText = tenant.billing_status;
+                badge.className = 'badge';
+                if (tenant.billing_status === 'Active') {
+                    badge.style.background = 'var(--success-bg)';
+                    badge.style.color = 'var(--success)';
+                    badge.style.border = '1px solid var(--success)';
+                } else if (tenant.billing_status === 'Suspended') {
+                    badge.style.background = 'var(--danger-bg)';
+                    badge.style.color = 'var(--danger)';
+                    badge.style.border = '1px solid #fca5a5';
+                } else {
+                    badge.style.background = 'var(--warning-bg)';
+                    badge.style.color = 'var(--warning)';
+                    badge.style.border = '1px solid #fcd34d';
+                }
+
+                disableFormFields();
+
+                // Load files list and transactions ledger
+                await loadFilesList();
+                await loadTransactionsLedger();
+
+            } catch (err) {
+                console.error("Load tenant failed", err);
+                showToast("Failed to load tenant details.");
+            }
+        }
+
+        async function loadFilesList() {
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/files`);
+                const data = await res.json();
+                const tbody = document.getElementById('files-table-body');
+                tbody.innerHTML = '';
+
+                if (!data.files || data.files.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 25px;">No files.</td></tr>';
+                    return;
+                }
+
+                data.files.forEach(f => {
+                    const tr = document.createElement('tr');
+                    const sizeMB = (f.size / (1024*1024)).toFixed(2);
+                    
+                    tr.innerHTML = `
+                        <td style="padding:10px 15px; font-weight:500;">${f.key}</td>
+                        <td style="padding:10px 15px; color:var(--text-muted);">${sizeMB} MB</td>
+                        <td style="padding:10px 15px; text-align:right;">
+                            <a href="/api/bucket/download?key=${encodeURIComponent(tenantUsername + '/' + f.key)}&attachment=true" target="_blank" class="btn" style="padding:4px 8px; font-size:0.75rem;"><i class="ph ph-download"></i></a>
+                            <button onclick="adminDeleteFile('${f.key.replace(/'/g, "\\'")}')" class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;"><i class="ph ph-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Failed to load files", e);
+            }
+        }
+
+        async function adminDeleteFile(filename) {
+            if (!confirm(`Are you sure you want to permanently delete "${filename}"?`)) return;
+            try {
+                const res = await fetch('/api/bucket/delete', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', 'X-Access-Code': '6069' },
+                    body: JSON.stringify({ key: tenantUsername + '/' + filename })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast('File deleted.');
+                    loadTenantData();
+                } else {
+                    alert('Delete failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Connection error.');
+            }
+        }
+
+        async function loadTransactionsLedger() {
+            try {
+                const res = await fetch('/api/admin/billing/transactions');
+                const transactions = await res.json();
+                const tbody = document.getElementById('tx-table-body');
+                tbody.innerHTML = '';
+
+                // Filter by tenant ID
+                const filtered = transactions.filter(t => t.tenant_id === tenantId);
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 25px;">No transactions recorded.</td></tr>';
+                    return;
+                }
+
+                filtered.forEach(tx => {
+                    const tr = document.createElement('tr');
+                    const statusStyle = tx.status === 'Paid' ? 'color: var(--success); font-weight:600;' : 'color: var(--danger); font-weight:600;';
+                    tr.innerHTML = `
+                        <td style="padding:10px 15px;">${tx.date}</td>
+                        <td style="padding:10px 15px; font-weight:500;">₹${parseFloat(tx.amount).toFixed(2)}</td>
+                        <td style="padding:10px 15px; ${statusStyle}">${tx.status}</td>
+                        <td style="padding:10px 15px; font-size:0.8rem; color:var(--text-muted);">${tx.description || ''}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Failed to load transactions", e);
+            }
+        }
+
+        async function saveTenantChanges(e) {
+            e.preventDefault();
+            
+            const limitVal = parseFloat(document.getElementById('edit-limit').value);
+            const limitUnit = document.getElementById('edit-limit-unit').value;
+            const storage_limit_bytes = limitUnit === 'GB' ? parseInt(limitVal * 1024**3) : parseInt(limitVal * 1024**2);
+
+            const bwVal = parseFloat(document.getElementById('edit-bandwidth').value);
+            const bwUnit = document.getElementById('edit-bandwidth-unit').value;
+            const bandwidth_limit_bytes = bwVal === 0 ? 0 : (bwUnit === 'GB' ? parseInt(bwVal * 1024**3) : parseInt(bwVal * 1024**2));
+
+            const payload = {
+                username: document.getElementById('edit-user').value.trim(),
+                cloud_id: document.getElementById('edit-cloud-id').value.trim(),
+                email: document.getElementById('edit-email').value.trim(),
+                custom_domain: document.getElementById('edit-custom-domain').value.trim(),
+                secret_code: document.getElementById('edit-code').value.trim(),
+                password: document.getElementById('edit-password').value.trim(),
+                storage_limit_bytes: storage_limit_bytes,
+                bandwidth_limit_bytes: bandwidth_limit_bytes,
+                monthly_rate: parseFloat(document.getElementById('edit-monthly-rate').value),
+                next_billing_date: document.getElementById('edit-next-billing-date').value,
+                billing_status: document.getElementById('edit-billing-status').value,
+                auto_renew: document.getElementById('edit-auto-renew').checked ? 1 : 0,
+                block_downloads: document.getElementById('edit-block-downloads').checked ? 1 : 0,
+                block_uploads: document.getElementById('edit-block-uploads').checked ? 1 : 0,
+                email_verified: document.getElementById('edit-email-verified').checked ? 1 : 0,
+                custom_domain_verified: document.getElementById('edit-domain-verified').checked ? 1 : 0,
+                papers_enabled: document.getElementById('edit-papers-enabled').checked ? 1 : 0,
+                photos_enabled: document.getElementById('edit-photos-enabled').checked ? 1 : 0,
+                custom_message: document.getElementById('edit-custom-message').value.trim(),
+                custom_message_theme: document.getElementById('edit-custom-message-theme').value,
+                custom_message_icon: document.getElementById('edit-custom-message-icon').value.trim(),
+                custom_message_active: document.getElementById('edit-custom-message-active').checked ? 1 : 0
+            };
+
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast("Workspace configuration saved successfully!");
+                    loadTenantData();
+                } else {
+                    alert("Failed to save changes: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Save operation failed.");
+            }
+        }
+
+        async function terminateService() {
+            if (!confirm(`Are you sure you want to terminate/suspend the service for "${tenantUsername}" immediately?`)) return;
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/terminate`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast("Service terminated successfully.");
+                    loadTenantData();
+                } else {
+                    alert("Failed to terminate service: " + (data.error || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Connection error.");
+            }
+        }
+
+        async function reactivateService() {
+            if (!confirm(`Are you sure you want to reactivate the service for "${tenantUsername}"?`)) return;
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/reactivate`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast("Service reactivated successfully.");
+                    loadTenantData();
+                } else {
+                    alert("Failed to reactivate service: " + (data.error || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Connection error.");
+            }
+        }
+
+        async function sendPasswordReset() {
+            if (!confirm(`Are you sure you want to send a password reset email to ${tenantUsername}?`)) return;
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/send-password-reset`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast("Password reset email sent.");
+                } else {
+                    alert("Failed to send: " + (data.error || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Connection error.");
+            }
+        }
+
+        async function sendVerificationEmail() {
+            if (!confirm(`Are you sure you want to send an email verification link to ${tenantUsername}?`)) return;
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/send-verification`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast("Verification email sent.");
+                } else {
+                    alert("Failed to send: " + (data.error || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Connection error.");
+            }
+        }
+
+        async function regenerateApiKey() {
+            if (!confirm(`Are you sure you want to regenerate the API key for ${tenantUsername}? The old key will stop working immediately.`)) return;
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}/regenerate-api-key`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    showToast("API Key regenerated successfully.");
+                    document.getElementById('edit-api-key').value = data.api_key;
+                } else {
+                    alert("Failed to regenerate: " + (data.error || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Connection error.");
+            }
+        }
+
+        async function deleteTenantAccount() {
+            if (!confirm(`CRITICAL WARNING: Are you sure you want to permanently delete the workspace "${tenantUsername}"? This will delete all settings, metadata, and uploaded files. THIS ACTION CANNOT BE UNDONE.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/admin/tenants/${tenantId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    alert("Tenant workspace deleted successfully.");
+                    window.location.href = 'https://host.echo.oqens.me/#tenants';
+                } else {
+                    alert("Failed to delete workspace: " + (data.error || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Connection error during delete.");
+            }
+        }
+
+        window.onload = loadTenantData;
+    </script>
+</body>
+</html>

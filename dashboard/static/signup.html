@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Create Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <style>
+        :root {
+            --bg: #fafafa; --text: #111111; --muted: #666666;
+            --border: #eeeeee; --card: #ffffff;
+            --accent: #111111; --accent-h: #333333; --accent-text: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+        .logo { font-weight: 600; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; margin-bottom: 24px; text-decoration: none; color: var(--text); }
+        .logo i { font-size: 1.4rem; }
+
+        .card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 38px 36px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,0.03); }
+
+        h1 { font-size: 1.3rem; font-weight: 500; letter-spacing: -0.3px; margin-bottom: 6px; }
+        .subtitle { font-size: 0.82rem; color: var(--muted); margin-bottom: 22px; }
+
+        .free-badge { display: inline-flex; align-items: center; gap: 5px; background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #16a34a; font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 22px; }
+
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); border-radius: 6px; font-size: 0.86rem; outline: none; transition: border-color 0.18s; }
+        input:focus { border-color: var(--text); }
+
+        .field-err { color: #dc2626; font-size: 0.75rem; margin-top: 4px; display: none; }
+
+        .alert { display: none; padding: 11px 14px; border-radius: 8px; font-size: 0.81rem; line-height: 1.5; margin-bottom: 14px; }
+        .alert.error { background: #fff5f5; border: 1.5px solid #fecaca; color: #b91c1c; }
+        .alert.success { background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #15803d; }
+
+        .btn { width: 100%; padding: 11px; background: var(--accent); color: var(--accent-text); border: none; border-radius: 6px; font-size: 0.87rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 20px; transition: background 0.2s; }
+        .btn:hover { background: var(--accent-h); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .footer-note { text-align: center; margin-top: 20px; font-size: 0.8rem; color: var(--muted); }
+        .footer-note a { color: var(--text); font-weight: 500; text-decoration: none; }
+        .footer-note a:hover { text-decoration: underline; }
+
+        /* In-app success modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 9999; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: #fff; border-radius: 14px; padding: 36px 32px; max-width: 360px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: popIn 0.25s ease; }
+        .modal-icon { width: 56px; height: 56px; border-radius: 50%; background: #f0fdf4; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .modal-icon i { font-size: 1.8rem; color: #16a34a; }
+        .modal-box h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .modal-box p { font-size: 0.83rem; color: #555; line-height: 1.55; }
+        .modal-email { font-weight: 600; color: #111; }
+        .modal-progress { width: 100%; height: 3px; background: #eee; border-radius: 2px; margin-top: 20px; overflow: hidden; }
+        .modal-progress-bar { height: 100%; background: #16a34a; border-radius: 2px; animation: progress 3s linear forwards; }
+        .modal-hint { font-size: 0.75rem; color: #999; margin-top: 10px; }
+
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes progress { from { width: 0%; } to { width: 100%; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="logo"><i class="ph ph-cube"></i> OQENS</a>
+
+    <div class="card">
+        <h1>Create Account</h1>
+        <p class="subtitle">Set up your cloud storage workspace in seconds.</p>
+
+        <span class="free-badge"><i class="ph ph-check-circle"></i> Free Plan · No credit card needed</span>
+
+        <div class="alert error" id="alert-error"></div>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="e.g. acme_media" autocomplete="username">
+            <div class="field-err" id="err-username"></div>
+        </div>
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="e.g. admin@company.com" autocomplete="email">
+            <div class="field-err" id="err-email"></div>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Min 6 characters" autocomplete="new-password">
+        </div>
+
+        <button class="btn" id="btn-register" onclick="registerUser()">
+            <span>Create Free Account</span><i class="ph ph-arrow-right"></i>
+        </button>
+
+        <div class="footer-note">Already have an account? <a href="/login" id="login-link">Login here</a></div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="ph ph-envelope-simple-open"></i></div>
+            <h2>Account Created!</h2>
+            <p>A verification link has been sent to<br><span class="modal-email" id="modal-email-display"></span></p>
+            <p style="margin-top:8px; font-size:0.78rem; color:#888;">Please verify your email to activate your workspace. Redirecting to login&hellip;</p>
+            <div class="modal-progress"><div class="modal-progress-bar"></div></div>
+            <div class="modal-hint">You'll be redirected automatically in 3 seconds</div>
+        </div>
+    </div>
+
+    <script>
+        function showError(msg) {
+            const el = document.getElementById('alert-error');
+            el.innerHTML = msg;
+            el.style.display = 'block';
+        }
+        function clearErrors() {
+            document.getElementById('alert-error').style.display = 'none';
+            ['err-username','err-email'].forEach(id => document.getElementById(id).style.display = 'none');
+        }
+        function showFieldError(fieldId, msg) {
+            const el = document.getElementById(fieldId);
+            el.innerText = msg;
+            el.style.display = 'block';
+        }
+        function showSuccessModal(email) {
+            document.getElementById('modal-email-display').innerText = email;
+            document.getElementById('success-modal').classList.add('show');
+            setTimeout(() => { window.location.href = '/login'; }, 3000);
+        }
+
+        async function registerUser() {
+            clearErrors();
+            const username = document.getElementById('username').value.trim();
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !email || !password) { showError('Please fill in all fields.'); return; }
+            if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+
+            const btn = document.getElementById('btn-register');
+            btn.disabled = true;
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<i class="ph ph-spinner" style="animation:spin 1s linear infinite;display:inline-block;"></i> Creating Account...`;
+
+            try {
+                const res = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, plan: 'free' })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    showSuccessModal(email);
+                    btn.innerHTML = `<i class="ph ph-check"></i> Account Created`;
+                } else {
+                    const errMsg = data.error || 'Registration failed.';
+                    if (errMsg.toLowerCase().includes('username')) showFieldError('err-username', errMsg);
+                    else if (errMsg.toLowerCase().includes('email')) showFieldError('err-email', errMsg);
+                    else showError(errMsg);
+                    btn.disabled = false;
+                    btn.innerHTML = orig;
+                }
+            } catch (e) {
+                showError('An error occurred. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        }
+
+        // Preserve redirect query parameters for login link
+        const loginLink = document.getElementById('login-link');
+        if (loginLink && window.location.search) {
+            loginLink.href = `/login${window.location.search}`;
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', e => { if (e.key === 'Enter') registerUser(); });
+    </script>
+</body>
+</html>

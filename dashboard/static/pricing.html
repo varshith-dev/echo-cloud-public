@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Pricing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --text-color: #111111;
+            --text-muted: #666666;
+            --border-color: #eeeeee;
+            --card-bg: #ffffff;
+            --accent: #111111;
+            --accent-hover: #333333;
+            --accent-text: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Navbar */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 8%; border-bottom: 1.5px solid var(--border-color);
+            background: var(--card-bg); sticky top: 0; z-index: 100;
+        }
+        .logo { font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: var(--text-color); }
+        .logo i { font-size: 1.3rem; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.88rem; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+        .nav-links a:hover { color: var(--text-color); }
+
+        /* Pricing Hero */
+        .pricing-hero { text-align: center; padding: 60px 4% 40px 4%; max-width: 800px; margin: 0 auto; }
+        .pricing-hero h1 { font-weight: 500; font-size: 2.2rem; letter-spacing: -0.8px; margin-bottom: 15px; }
+        .pricing-hero p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
+
+        /* Pricing Grid */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px; max-width: 1100px; width: 90%; margin: 0 auto 60px auto;
+        }
+        .price-card {
+            background: var(--card-bg); border: 1.5px solid var(--border-color);
+            border-radius: 12px; padding: 35px 25px; display: flex; flex-direction: column;
+            transition: all 0.3s ease; position: relative;
+        }
+        .price-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.04); border-color: var(--text-color); }
+        
+        .price-card.popular { border-color: var(--text-color); }
+        .price-card.popular::before {
+            content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: var(--accent-text); padding: 4px 12px; border-radius: 20px;
+            font-size: 0.65rem; font-weight: 600; letter-spacing: 0.5px;
+        }
+
+        .plan-name { font-size: 1rem; font-weight: 500; margin-bottom: 10px; color: var(--text-muted); }
+        .plan-price { font-size: 2.2rem; font-weight: 300; letter-spacing: -1px; margin-bottom: 20px; display: flex; align-items: baseline; }
+        .plan-price span { font-size: 0.9rem; color: var(--text-muted); letter-spacing: 0; font-weight: 400; margin-left: 4px; }
+        
+        .plan-limits {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            border-bottom: 1.5px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        .limit-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        .features-list { list-style: none; margin-bottom: 35px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .features-list li { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+        .features-list li i { color: #2ecc71; font-size: 1rem; }
+
+        .btn-plan {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 24px; border: 1.5px solid var(--text-color); background: transparent;
+            color: var(--text-color); text-decoration: none; border-radius: 6px; font-size: 0.88rem;
+            font-weight: 500; transition: all 0.2s ease; cursor: pointer; text-align: center;
+        }
+        .btn-plan:hover { background: var(--accent); color: var(--accent-text); }
+        .btn-primary { background: var(--accent); color: var(--accent-text); }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        /* Footer */
+        footer { margin-top: auto; padding: 40px 0; text-align: center; border-top: 1.5px solid var(--border-color); background: var(--card-bg); font-size: 0.8rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo" onclick="window.location.href='/'" style="cursor:pointer;">
+            <i class="ph ph-cube"></i> OQENS
+        </div>
+        <div class="nav-links">
+            <a href="/docs"><i class="ph ph-book-open-text"></i> Docs</a>
+            <a href="https://support.oqens.me/" target="_blank"><i class="ph ph-headset"></i> Support</a>
+            <a href="/login" id="nav-login"><i class="ph ph-sign-in"></i> Login</a>
+        </div>
+    </nav>
+
+    <div class="pricing-hero">
+        <h1>Predictable, developer-friendly pricing.</h1>
+        <p>Start free to build, and scale up as your traffic grows. No surprise bills, simple quotas, and direct edge delivery.</p>
+    </div>
+
+    <div class="pricing-grid" id="pricing-grid">
+        <div style="text-align: center; width: 100%; grid-column: 1 / -1; padding: 40px;">
+            <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+            <p>Loading plans...</p>
+        </div>
+    </div>
+
+    <!-- Enquiry Modal -->
+    <div id="enquiry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 8px; width: 90%; max-width: 800px; border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: var(--text-color);">Custom Plan Enquiry</h2>
+            <form id="enquiry-form" onsubmit="submitEnquiry(event)">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Email Address</label>
+                        <input type="email" id="enq-email" required style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Mobile Number</label>
+                        <input type="text" id="enq-mobile" required style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Required Storage (GB)</label>
+                        <input type="number" id="enq-storage" required min="1" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Required Bandwidth (GB)</label>
+                        <input type="number" id="enq-bandwidth" required min="1" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Preferred Budget (INR/mo)</label>
+                        <input type="number" id="enq-budget" required min="1" placeholder="e.g. 150" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 25px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Message / Additional Requirements</label>
+                    <textarea id="enq-message" required rows="4" style="padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color); resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                    <button type="button" class="btn" onclick="document.getElementById('enquiry-modal').style.display='none'" style="background: transparent; color: var(--text-color);">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-enq">Submit Enquiry</button>
+                </div>
+            </form>
+        </div>
+    </div></div>
+
+    <footer>
+        <p>&copy; 2026 OQENS Cloud Services. All rights reserved. Powered by OQENS Media Node.</p>
+    </footer>
+
+    <script>
+        let globalSession = null;
+
+        async function initPricingPage() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant' && data.checkout_token) {
+                        globalSession = data;
+                        document.getElementById('enq-email').value = data.email || '';
+                    }
+                }
+            } catch (e) {
+                console.error("Session check failed", e);
+            }
+
+            const navLogin = document.getElementById('nav-login');
+            if (globalSession && navLogin) {
+                navLogin.href = '/';
+                navLogin.innerHTML = '<i class="ph ph-layout"></i> Dashboard';
+            }
+
+            await renderPlans();
+        }
+
+        async function renderPlans() {
+            const grid = document.getElementById('pricing-grid');
+            grid.innerHTML = ''; // clear loading
+
+            // 1. Free Plan (Hardcoded)
+            let currentRate = globalSession ? (parseFloat(globalSession.monthly_rate) || 0.0) : 0.0;
+            
+            let freeBtnHtml = globalSession 
+                ? `<a href="/" class="btn-plan">Current Plan (Free)</a>` 
+                : `<a href="/signup?plan=free" class="btn-plan">Sign Up Free</a>`;
+                
+            if (globalSession && currentRate > 0) {
+                freeBtnHtml = `<a href="/" class="btn-plan">Go to Dashboard</a>`;
+            }
+
+            grid.innerHTML += `
+                <div class="price-card">
+                    <div class="plan-name">Free Plan</div>
+                    <div class="plan-price">₹0<span>/month</span></div>
+                    <div class="plan-limits">
+                        <div class="limit-pill"><i class="ph ph-hard-drive"></i> 100 MB Storage</div>
+                        <div class="limit-pill"><i class="ph ph-activity"></i> 500 MB Bw</div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="ph ph-check"></i> 1 Edge Delivery Node</li>
+                        <li><i class="ph ph-check"></i> Shared oqens.me domain</li>
+                    </ul>
+                    ${freeBtnHtml}
+                </div>
+            `;
+
+            // 2. Fetch Active Plans from API
+            try {
+                const res = await fetch('/api/system/pricing');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.status === 'success' && data.plans) {
+                        data.plans.forEach(p => {
+                            if (p.plan_id === 'free') return;
+                            let featuresHtml = '';
+                            if (p.features_json) {
+                                try {
+                                    const feats = JSON.parse(p.features_json);
+                                    feats.forEach(f => {
+                                        featuresHtml += `<li><i class="ph ph-check"></i> ${f}</li>`;
+                                    });
+                                } catch(e){}
+                            }
+
+                            let btnHtml = '';
+                            if (!globalSession) {
+                                btnHtml = `<a href="/login?redirect=${encodeURIComponent('/pricing?upgrade_plan=' + p.plan_id)}" class="btn-plan btn-primary" id="btn-${p.plan_id}">Get ${p.plan_name}</a>`;
+                            } else {
+                                if (currentRate === p.monthly_rate) {
+                                    btnHtml = `<a style="background: #eee; color: #777; cursor: default; border-color: #ddd;" class="btn-plan">Current Plan</a>`;
+                                } else if (currentRate > p.monthly_rate) {
+                                    btnHtml = `<a style="background: #f5f5f5; color: #aaa; cursor: not-allowed; border-color: #ddd;" class="btn-plan">Downgrade Disabled</a>`;
+                                } else {
+                                    btnHtml = `<a style="cursor: pointer;" onclick="triggerUpgrade('${globalSession.checkout_token}', '${p.plan_id}')" class="btn-plan btn-primary" id="btn-${p.plan_id}">Upgrade to ${p.plan_name}</a>`;
+                                }
+                            }
+
+                            grid.innerHTML += `
+                                <div class="price-card">
+                                    <div class="plan-name">${p.plan_name}</div>
+                                    <div class="plan-price">₹${p.monthly_rate}<span>/month</span></div>
+                                    <div class="plan-limits">
+                                        <div class="limit-pill"><i class="ph ph-hard-drive"></i> ${p.storage_limit_gb} GB Storage</div>
+                                        <div class="limit-pill"><i class="ph ph-activity"></i> ${p.bandwidth_limit_gb} GB Bw</div>
+                                    </div>
+                                    <ul class="features-list">
+                                        ${featuresHtml}
+                                    </ul>
+                                    ${btnHtml}
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to fetch plans", e);
+            }
+
+            // 3. Custom / Enterprise Plan
+            grid.innerHTML += `
+                <div class="price-card">
+                    <div class="plan-name">Custom Plan</div>
+                    <div class="plan-price">Variable</div>
+                    <div class="plan-limits">
+                        <div class="limit-pill"><i class="ph ph-hard-drive"></i> Custom Storage</div>
+                        <div class="limit-pill"><i class="ph ph-activity"></i> Custom Bw</div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="ph ph-check"></i> Tailored for your needs</li>
+                        <li><i class="ph ph-check"></i> Volume discounts</li>
+                        <li><i class="ph ph-check"></i> Dedicated Support</li>
+                    </ul>
+                    <a onclick="document.getElementById('enquiry-modal').style.display='flex';" style="cursor:pointer;" class="btn-plan">Enquire Now</a>
+                </div>
+            `;
+
+            // Auto-upgrade check
+            if (globalSession) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const upgradePlan = urlParams.get('upgrade_plan');
+                if (upgradePlan) {
+                    const btn = document.getElementById(`btn-${upgradePlan}`);
+                    if (btn && btn.onclick) {
+                        triggerUpgrade(globalSession.checkout_token, upgradePlan);
+                    }
+                }
+            }
+        }
+
+        async function submitEnquiry(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-enq');
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+            
+            const payload = {
+                email: document.getElementById('enq-email').value,
+                mobile: document.getElementById('enq-mobile').value,
+                req_storage_gb: parseFloat(document.getElementById('enq-storage').value),
+                req_bandwidth_gb: parseFloat(document.getElementById('enq-bandwidth').value),
+                preferred_budget: document.getElementById('enq-budget').value,
+                message: document.getElementById('enq-message').value
+            };
+            
+            try {
+                const res = await fetch('/api/enquiries/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    document.getElementById('enquiry-modal').style.display = 'none';
+                    alert('Enquiry submitted successfully! Our team will contact you soon.');
+                    document.getElementById('enquiry-form').reset();
+                    if (globalSession) document.getElementById('enq-email').value = globalSession.email || '';
+                } else {
+                    alert('Failed to submit enquiry: ' + (data.error || 'Unknown'));
+                }
+            } catch(err) {
+                alert('Network error. Please try again later.');
+            }
+            btn.disabled = false;
+            btn.innerText = 'Submit Enquiry';
+        }
+
+        async function triggerUpgrade(token, plan) {
+            const btn = document.getElementById(`btn-${plan}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Redirecting to checkout...';
+            }
+
+            try {
+                const res = await fetch('/api/payments/upgrade-plan', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ token, plan })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    window.location.href = `https://payments.oqens.me/checkout?token=${token}`;
+                } else {
+                    alert(data.error || 'Failed to update plan. Please try again.');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = 'Upgrade to ' + plan;
+                    }
+                }
+            } catch (e) {
+                alert('Connection error. Please try again.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'Upgrade to ' + plan;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPricingPage);
+    </script>
+</body>
+</html>

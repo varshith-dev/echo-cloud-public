@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COS - Cloud OS V2</title>
+    <!-- xterm.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --text-main: #ffffff;
+            --accent: #007aff;
+            --bg-dark: rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; user-select: none; }
+        body { background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') no-repeat center center fixed; background-size: cover; color: var(--text-main); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        /* Desktop Area */
+        .desktop { flex: 1; position: relative; padding: 20px; }
+
+        /* Desktop Icons */
+        .desktop-icon { position: absolute; width: 80px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.2s; }
+        .desktop-icon:hover { background: rgba(255,255,255,0.1); }
+        .desktop-icon i { font-size: 36px; color: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .desktop-icon span { font-size: 12px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.8); font-weight: 500; }
+
+        /* Window System */
+        .window {
+            position: absolute;
+            top: 10%; left: 15%;
+            width: 70vw; height: 60vh;
+            min-width: 400px; min-height: 300px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: var(--glass-shadow);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            /* Enable native free-resizing */
+            resize: both;
+        }
+
+        .window.active { display: flex; }
+        .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 60px) !important; border-radius: 0; resize: none; }
+        .window.minimized { display: none; }
+
+        /* Window Header */
+        .window-header { height: 40px; background: rgba(0,0,0,0.2); display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--glass-border); cursor: default; }
+        .window-controls { display: flex; gap: 8px; }
+        .win-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .win-btn i { font-size: 8px; opacity: 0; transition: opacity 0.2s; color: rgba(0,0,0,0.6); }
+        .window-controls:hover .win-btn i { opacity: 1; }
+        .btn-close { background: #ff5f56; } .btn-min { background: #ffbd2e; } .btn-max { background: #27c93f; }
+        .window-title { flex: 1; text-align: center; font-size: 13px; font-weight: 500; margin-left: -44px; }
+        .window-content { flex: 1; position: relative; background: var(--bg-dark); overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Floating Taskbar */
+        .taskbar-container { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); height: 60px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: var(--glass-shadow); display: flex; align-items: center; padding: 0 15px; gap: 15px; z-index: 9999; }
+        .app-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
+        .app-icon:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); }
+        .app-icon i { font-size: 24px; color: #fff; }
+        .app-icon.running::after { content: ''; position: absolute; bottom: -4px; width: 4px; height: 4px; border-radius: 50%; background: var(--text-main); }
+        .sys-tray { display: flex; align-items: center; gap: 15px; padding-left: 15px; border-left: 1px solid var(--glass-border); margin-left: 5px; }
+        .clock { font-size: 13px; font-weight: 500; }
+
+        /* UI Elements for Apps */
+        .app-padding { padding: 20px; overflow-y: auto; height: 100%; user-select: text; }
+        .card { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .card h3 { font-size: 14px; margin-bottom: 10px; color: var(--accent); }
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
+        button.btn { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        button.btn:hover { opacity: 0.9; }
+        input[type="text"] { background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; padding: 6px 10px; border-radius: 4px; outline: none; }
+
+        /* File Manager List */
+        .fm-row { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 13px; }
+        .fm-row:hover { background: rgba(255,255,255,0.1); }
+        .fm-row i { margin-right: 10px; font-size: 18px; color: #ffd166; }
+        .fm-row.file i { color: #118ab2; }
+        .fm-header { display: flex; gap: 10px; padding: 10px; background: rgba(0,0,0,0.3); align-items: center;}
+
+        /* Text Editor */
+        #editor-textarea { width: 100%; flex: 1; background: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 10px; border: none; resize: none; outline: none; }
+        .editor-toolbar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 10px; align-items: center; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Desktop -->
+    <div class="desktop" id="desktop">
+        <!-- Draggable Desktop Icons -->
+        <div class="desktop-icon drag-icon" id="icon-term" ondblclick="openApp('terminal-win')" style="top: 20px; left: 20px;">
+            <i class="ph-fill ph-terminal-window"></i><span>Terminal</span>
+        </div>
+        <div class="desktop-icon drag-icon" id="icon-set" ondblclick="openApp('settings-win')" style="top: 120px; left: 20px;">
+            <i class="ph-fill ph-gear"></i><span>Settings</span>
+        </div>
+        <div class="desktop-icon drag-icon" id="icon-fm" ondblclick="openApp('file-win')" style="top: 220px; left: 20px;">
+            <i class="ph-fill ph-folder"></i><span>Files</span>
+        </div>
+        <div class="desktop-icon drag-icon" id="icon-edit" ondblclick="openApp('editor-win')" style="top: 320px; left: 20px;">
+            <i class="ph-fill ph-notepad"></i><span>Editor</span>
+        </div>
+    </div>
+
+    <!-- Terminal Window -->
+    <div class="window" id="terminal-win">
+        <div class="window-header" id="terminal-header">
+            <div class="window-controls">
+                <button class="win-btn btn-close" onclick="closeApp('terminal-win')"><i class="ph ph-x"></i></button>
+                <button class="win-btn btn-min" onclick="minimizeApp('terminal-win')"><i class="ph ph-minus"></i></button>
+                <button class="win-btn btn-max" onclick="maximizeApp('terminal-win')"><i class="ph ph-arrows-out"></i></button>
+            </div>
+            <div class="window-title">Terminal</div>
+        </div>
+        <div class="window-content" style="padding: 5px; background: #000;">
+            <div id="terminal-container" style="width:100%; height:100%;"></div>
+        </div>
+    </div>
+
+    <!-- Settings Window -->
+    <div class="window" id="settings-win">
+        <div class="window-header" id="settings-header">
+            <div class="window-controls">
+                <button class="win-btn btn-close" onclick="closeApp('settings-win')"><i class="ph ph-x"></i></button>
+                <button class="win-btn btn-min" onclick="minimizeApp('settings-win')"><i class="ph ph-minus"></i></button>
+                <button class="win-btn btn-max" onclick="maximizeApp('settings-win')"><i class="ph ph-arrows-out"></i></button>
+            </div>
+            <div class="window-title">Settings Modules</div>
+        </div>
+        <div class="window-content app-padding">
+            <div class="card">
+                <h3>Hardware</h3>
+                <div class="stat-row"><span>CPU:</span> <span id="sys-cpu">--</span></div>
+                <div class="stat-row"><span>RAM:</span> <span id="sys-ram">--</span></div>
+            </div>
+            <div class="card">
+                <h3>System Services</h3>
+                <div id="services-list">Loading...</div>
+            </div>
+            <div class="card">
+                <h3>Nginx Domains</h3>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="new-domain" placeholder="example.com">
+                    <button class="btn" onclick="addDomain()">Add Domain</button>
+                </div>
+                <div id="domains-list"></div>
+            </div>
+            <div class="card">
+                <h3>Cloud Storage</h3>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="bucket-name" placeholder="Bucket Name (e.g. my-bucket)">
+                    <input type="text" id="bucket-endpoint" placeholder="Endpoint URL (Optional)">
+                    <input type="text" id="bucket-region" placeholder="Region (Optional)">
+                    <input type="text" id="bucket-access" placeholder="Access Key">
+                    <input type="password" id="bucket-secret" placeholder="Secret Key" style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; padding: 6px 10px; border-radius: 4px; outline: none;">
+                    <button class="btn" onclick="saveBucketConfig()">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Manager Window -->
+    <div class="window" id="file-win">
+        <div class="window-header" id="file-header">
+            <div class="window-controls">
+                <button class="win-btn btn-close" onclick="closeApp('file-win')"><i class="ph ph-x"></i></button>
+                <button class="win-btn btn-min" onclick="minimizeApp('file-win')"><i class="ph ph-minus"></i></button>
+                <button class="win-btn btn-max" onclick="maximizeApp('file-win')"><i class="ph ph-arrows-out"></i></button>
+            </div>
+            <div class="window-title">File Explorer</div>
+        </div>
+        <div class="window-content">
+            <div class="fm-header">
+                <button class="btn" onclick="toggleStorageMode()" id="storage-mode-btn" style="background: #ff9f43;">☁ Local</button>
+                <button class="btn" onclick="goUp()">⬆ Up</button>
+                <input type="text" id="current-path" style="flex:1;" value="/" onchange="loadFiles(this.value)">
+                <button class="btn" onclick="loadFiles(document.getElementById('current-path').value)">Go</button>
+            </div>
+            <div class="app-padding" id="file-list" style="padding-top:0;"></div>
+        </div>
+    </div>
+
+    <!-- Text Editor Window -->
+    <div class="window" id="editor-win">
+        <div class="window-header" id="editor-header">
+            <div class="window-controls">
+                <button class="win-btn btn-close" onclick="closeApp('editor-win')"><i class="ph ph-x"></i></button>
+                <button class="win-btn btn-min" onclick="minimizeApp('editor-win')"><i class="ph ph-minus"></i></button>
+                <button class="win-btn btn-max" onclick="maximizeApp('editor-win')"><i class="ph ph-arrows-out"></i></button>
+            </div>
+            <div class="window-title">Text Editor</div>
+        </div>
+        <div class="window-content">
+            <div class="editor-toolbar">
+                <input type="text" id="editor-path" placeholder="/path/to/file.txt" style="flex:1;">
+                <button class="btn" onclick="openFileInEditor()">Open</button>
+                <button class="btn" style="background:#27c93f;" onclick="saveFile()">Save</button>
+            </div>
+            <textarea id="editor-textarea" spellcheck="false"></textarea>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar-container">
+        <div class="app-icon" id="task-terminal" onclick="toggleMinimize('terminal-win')"><i class="ph-fill ph-terminal-window"></i></div>
+        <div class="app-icon" id="task-settings" onclick="toggleMinimize('settings-win')"><i class="ph-fill ph-gear"></i></div>
+        <div class="app-icon" id="task-file" onclick="toggleMinimize('file-win')"><i class="ph-fill ph-folder"></i></div>
+        <div class="app-icon" id="task-editor" onclick="toggleMinimize('editor-win')"><i class="ph-fill ph-notepad"></i></div>
+        <div class="sys-tray">
+            <div class="clock" id="clock">12:00 PM</div>
+        </div>
+    </div>
+
+    <script>
+        // Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }, 1000);
+
+        // Window Management
+        let highestZ = 10;
+        function bringToFront(id) {
+            highestZ++;
+            document.getElementById(id).style.zIndex = highestZ;
+        }
+
+        function openApp(id) {
+            const win = document.getElementById(id);
+            win.classList.add('active');
+            win.classList.remove('minimized');
+            bringToFront(id);
+            
+            if(id === 'terminal-win') document.getElementById('task-terminal').classList.add('running');
+            if(id === 'settings-win') { document.getElementById('task-settings').classList.add('running'); loadSettings(); }
+            if(id === 'file-win') { document.getElementById('task-file').classList.add('running'); loadFiles(document.getElementById('current-path').value); }
+            if(id === 'editor-win') document.getElementById('task-editor').classList.add('running');
+
+            if(id === 'terminal-win' && fitAddon) setTimeout(() => fitAddon.fit(), 100);
+        }
+
+        function closeApp(id) {
+            const win = document.getElementById(id);
+            win.classList.remove('active', 'maximized', 'minimized');
+            if(id === 'terminal-win') document.getElementById('task-terminal').classList.remove('running');
+            if(id === 'settings-win') document.getElementById('task-settings').classList.remove('running');
+            if(id === 'file-win') document.getElementById('task-file').classList.remove('running');
+            if(id === 'editor-win') document.getElementById('task-editor').classList.remove('running');
+        }
+
+        function maximizeApp(id) {
+            const win = document.getElementById(id);
+            win.classList.toggle('maximized');
+            bringToFront(id);
+            if(id === 'terminal-win' && fitAddon) setTimeout(() => fitAddon.fit(), 200);
+        }
+
+        function minimizeApp(id) {
+            document.getElementById(id).classList.add('minimized');
+        }
+
+        function toggleMinimize(id) {
+            const win = document.getElementById(id);
+            if(!win.classList.contains('active')) openApp(id);
+            else if (win.classList.contains('minimized')) { win.classList.remove('minimized'); bringToFront(id); }
+            else if (win.style.zIndex == highestZ) minimizeApp(id);
+            else bringToFront(id);
+        }
+
+        document.querySelectorAll('.window').forEach(w => {
+            w.addEventListener('mousedown', () => bringToFront(w.id));
+        });
+
+        // Draggable Logic (for both Windows and Desktop Icons)
+        function makeDraggable(elementId, handleId) {
+            const el = document.getElementById(elementId);
+            const handle = document.getElementById(handleId) || el;
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            handle.onmousedown = (e) => {
+                if(e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'i') return;
+                // Prevent drag if maximizing or resizing (if clicking near edge of window)
+                if (el.classList.contains('window') && el.classList.contains('maximized')) return;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                if(el.classList.contains('window')) {
+                    bringToFront(elementId);
+                    handle.style.cursor = 'grabbing';
+                }
+            };
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+            }
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                if(el.classList.contains('window')) handle.style.cursor = 'default';
+            }
+        }
+        
+        makeDraggable('terminal-win', 'terminal-header');
+        makeDraggable('settings-win', 'settings-header');
+        makeDraggable('file-win', 'file-header');
+        makeDraggable('editor-win', 'editor-header');
+        // Desktop icons
+        makeDraggable('icon-term', 'icon-term');
+        makeDraggable('icon-set', 'icon-set');
+        makeDraggable('icon-fm', 'icon-fm');
+        makeDraggable('icon-edit', 'icon-edit');
+
+        // Observer for Resize events on terminal window
+        new ResizeObserver(() => {
+            if (document.getElementById('terminal-win').classList.contains('active') && fitAddon) {
+                fitAddon.fit();
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send('RESIZE:' + term.cols + ',' + term.rows);
+                }
+            }
+        }).observe(document.getElementById('terminal-win'));
+
+
+        // Terminal Logic
+        const term = new Terminal({ cursorBlink: true, theme: { background: 'transparent' } });
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal-container'));
+
+        let ws;
+        function connectTerminal() {
+            const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(proto + '//' + window.location.host + '/ws/terminal');
+            ws.onopen = () => ws.send('RESIZE:' + term.cols + ',' + term.rows);
+            ws.binaryType = 'arraybuffer';
+            ws.onmessage = (e) => term.write(e.data instanceof ArrayBuffer ? new Uint8Array(e.data) : e.data);
+            ws.onclose = () => setTimeout(connectTerminal, 2000);
+        }
+        connectTerminal();
+        term.onData(data => { if(ws.readyState===WebSocket.OPEN) ws.send(data); });
+
+        // Settings API logic
+        async function loadSettings() {
+            try {
+                // Hardware
+                let res = await fetch('/api/system');
+                let data = await res.json();
+                document.getElementById('sys-cpu').innerText = data.cpu + '%';
+                document.getElementById('sys-ram').innerText = data.memory.percent + '%';
+                // Services
+                res = await fetch('/api/services');
+                data = await res.json();
+                let shtml = '';
+                data.services.forEach(s => {
+                    shtml += `<div class="stat-row"><span>${s.name}</span>
+                        <div>
+                            <span style="color:${s.status==='Running'?'#27c93f':'#ff5f56'}; margin-right:10px;">${s.status}</span>
+                            <button class="btn" onclick="svcAction('${s.name}','restart')">Restart</button>
+                        </div>
+                    </div>`;
+                });
+                document.getElementById('services-list').innerHTML = shtml;
+                // Domains
+                res = await fetch('/api/domains');
+                data = await res.json();
+                let dhtml = '';
+                data.domains.forEach(d => {
+                    dhtml += `<div class="stat-row"><span>${d}</span> <span style="color:#27c93f">Active</span></div>`;
+                });
+                document.getElementById('domains-list').innerHTML = dhtml;
+                
+                // Cloud Storage
+                res = await fetch('/api/bucket/config');
+                data = await res.json();
+                if(data.bucket_name) document.getElementById('bucket-name').value = data.bucket_name;
+                if(data.endpoint_url) document.getElementById('bucket-endpoint').value = data.endpoint_url;
+                if(data.region) document.getElementById('bucket-region').value = data.region;
+                if(data.access_key) document.getElementById('bucket-access').value = data.access_key;
+                if(data.secret_key) document.getElementById('bucket-secret').value = data.secret_key;
+            } catch(e) {}
+        }
+        async function saveBucketConfig() {
+            const config = {
+                bucket_name: document.getElementById('bucket-name').value,
+                endpoint_url: document.getElementById('bucket-endpoint').value,
+                region: document.getElementById('bucket-region').value,
+                access_key: document.getElementById('bucket-access').value,
+                secret_key: document.getElementById('bucket-secret').value
+            };
+            await fetch('/api/bucket/config', {
+                method: 'POST', body: JSON.stringify(config)
+            });
+            alert('Cloud Storage Config Saved');
+        }
+        async function svcAction(srv, act) {
+            await fetch('/api/services/action', {
+                method: 'POST', body: JSON.stringify({service: srv, action: act})
+            });
+            loadSettings();
+        }
+        async function addDomain() {
+            const dom = document.getElementById('new-domain').value;
+            if(!dom) return;
+            await fetch('/api/domains', {
+                method: 'POST', body: JSON.stringify({domain: dom, port: 80})
+            });
+            document.getElementById('new-domain').value = '';
+            loadSettings();
+        }
+
+        // File Manager Logic
+        let useCloudStorage = false;
+        function toggleStorageMode() {
+            useCloudStorage = !useCloudStorage;
+            const btn = document.getElementById('storage-mode-btn');
+            btn.innerText = useCloudStorage ? '☁ Cloud' : '☁ Local';
+            btn.style.background = useCloudStorage ? '#118ab2' : '#ff9f43';
+            loadFiles('/');
+        }
+        async function loadFiles(path) {
+            try {
+                const apiPath = useCloudStorage ? '/api/bucket/files' : '/api/files';
+                const res = await fetch(apiPath + '?' + (useCloudStorage ? 'prefix' : 'path') + '=' + encodeURIComponent(path));
+                const data = await res.json();
+                if(data.error) return alert(data.error);
+                
+                document.getElementById('current-path').value = data.current_path;
+                let html = '';
+                data.items.forEach(i => {
+                    const icon = i.is_dir ? '<i class="ph-fill ph-folder"></i>' : '<i class="ph-fill ph-file"></i>';
+                    const onclick = i.is_dir ? `loadFiles('${i.path}')` : `editFile('${i.path}')`;
+                    html += `<div class="fm-row ${i.is_dir?'':'file'}" onclick="${onclick}">
+                        ${icon} <span>${i.name}</span>
+                        <span style="margin-left:auto; color:gray;">${i.is_dir ? '' : (i.size/1024).toFixed(1)+' kb'}</span>
+                    </div>`;
+                });
+                document.getElementById('file-list').innerHTML = html;
+            } catch(e) {}
+        }
+        function goUp() {
+            let p = document.getElementById('current-path').value;
+            if(p === '/' || p === '') return;
+            let parts = p.split('/').filter(x=>x);
+            parts.pop();
+            let newPath = parts.join('/');
+            if (!useCloudStorage) newPath = '/' + newPath;
+            else if (newPath !== "") newPath += '/';
+            loadFiles(newPath);
+        }
+
+        // Editor Logic
+        function editFile(path) {
+            document.getElementById('editor-path').value = path;
+            openApp('editor-win');
+            openFileInEditor();
+        }
+        async function openFileInEditor() {
+            const path = document.getElementById('editor-path').value;
+            const apiPath = useCloudStorage ? '/api/bucket/read?path=' : '/api/files/read?path=';
+            const res = await fetch(apiPath + encodeURIComponent(path));
+            const data = await res.json();
+            if(data.error) alert(data.error);
+            else document.getElementById('editor-textarea').value = data.content;
+        }
+        async function saveFile() {
+            const path = document.getElementById('editor-path').value;
+            const content = document.getElementById('editor-textarea').value;
+            const apiPath = useCloudStorage ? '/api/bucket/write' : '/api/files/write';
+            await fetch(apiPath, {
+                method: 'POST', body: JSON.stringify({path, content})
+            });
+            alert('Saved!');
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #111111;
+            --text-muted: #4a4a4a;
+            --border-color: #eeeeee;
+            --hover-bg: #fafafa;
+            --code-bg: #f9f9f9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-color); color: var(--text-color); 
+            line-height: 1.6; font-weight: 300;
+        }
+
+        nav { 
+            padding: 15px 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid var(--border-color); 
+        }
+        .logo { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.2px; display: flex; align-items: center; gap: 8px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; margin-left: 20px; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; }
+        .nav-links a:hover { color: var(--text-color); }
+
+        .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        
+        h1 { font-size: 2rem; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 20px; }
+        h2 { font-size: 1.25rem; font-weight: 500; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; letter-spacing: -0.2px; }
+        
+        p, ul { margin-bottom: 15px; color: var(--text-muted); font-size: 0.92rem; }
+        li { margin-left: 15px; margin-bottom: 8px; }
+        
+        .alert { padding: 15px; border-left: 2px solid var(--text-color); background: var(--hover-bg); color: var(--text-color); font-weight: 400; margin-bottom: 25px; font-size: 0.92rem; }
+        
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+        code {
+            font-family: monospace;
+            font-size: 0.85em;
+            color: var(--text-color);
+        }
+        p code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .sketch-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .step-num {
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1.5px solid var(--text-color);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-content h3 {
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--text-color); background: transparent; color: var(--text-color); cursor: pointer; border-radius: 6px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500; }
+        .btn:hover { background: var(--hover-bg); transform: translateY(-1px); }
+        .btn-primary { background: var(--text-color) !important; color: var(--bg-color) !important; border-color: var(--text-color) !important; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        .card { border: 1.5px solid var(--border-color); padding: 20px; margin-bottom: 25px; border-radius: 8px; background: var(--bg-color); }
+        .card h3 { font-size: 0.82rem; margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <!-- Global Limit Warning Banner -->
+    <div id="global-limit-warning-banner" style="display: none; background-color: rgba(254, 242, 242, 0.9); background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.08) 10px, rgba(239, 68, 68, 0.08) 20px); border-bottom: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; padding: 14px 20px; font-size: 0.88rem; font-weight: 500; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(239,68,68,0.05); z-index: 9999; position: sticky; top: 0; width: 100%; box-sizing: border-box;">
+        <i class="ph ph-warning-octagon" style="font-size: 1.25rem;"></i>
+        <span><strong>RESOURCES ARE LIMITED:</strong> YOU REACHED THE LIMITS. Some system actions may be restricted.</span>
+    </div>
+
+    <nav>
+        <div class="logo"><i class="ph ph-cube"></i> OQENS</div>
+        <div class="nav-links">
+            <a href="/"><i class="ph ph-house"></i> Home</a>
+            
+            <a href="https://support.oqens.me/" target="_blank"><i class="ph ph-headset"></i> Support</a>
+            <a href="/dash"><i class="ph ph-sign-in"></i> Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Storage & API Guide</h1>
+        
+        <div class="alert">
+            Welcome to the OQENS developer integration guide. Below you will find step-by-step instructions on accessing files from the UI, as well as the complete REST API documentation for programmatic access.
+        </div>
+
+        <h2>Dashboard Operations</h2>
+        
+        <div class="sketch-step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <h3>Access Code Login</h3>
+                <p>Log into your tenant dashboard using your secret access code. You can locate your access code and integration tokens inside the **Settings** panel on your dashboard.</p>
+            </div>
+        </div>
+
+        <div class="sketch-step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <h3>File Management</h3>
+                <p>Drag and drop assets directly onto the dashboard to upload. Media files (images, videos) can be previewed inline, and all assets are downloadable or deletable instantly.</p>
+            </div>
+        </div>
+
+        <div class="sketch-step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <h3>Sharing URLs</h3>
+                <p>Click **Share** to copy the public delivery CDN link. It serves your assets directly via the secure delivery network (<code>dl.oqens.me</code>).</p>
+            </div>
+        </div>
+
+        <h2>Developer & Creator REST API</h2>
+        <p style="margin-bottom: 25px;">Integrate OQENS storage into your apps, websites, or scripts. Authenticate programmatic requests by passing your unique API Key in the <code>X-API-Key</code> header.</p>
+ 
+        <!-- AI Agent System Prompt Copy Card -->
+        <div class="card" style="margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin-bottom: 0;">AI Agent System Prompt</h3>
+                <button class="btn btn-primary" onclick="copyAgentPrompt()"><i class="ph ph-copy"></i> Copy Agent Prompt</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin-bottom: 12px;">Deploying an AI Coding Agent (like Antigravity, Claude Engineer, or Cursor)? Copy this optimized system prompt to feed to your agent so it knows exactly how to read, upload, and delete files from your OQENS bucket.</p>
+            <pre style="background: var(--code-bg); max-height: 250px; overflow-y: auto; padding: 15px; border-radius: 6px; border: 1.5px solid var(--border-color);"><code id="code-agent-prompt" style="font-size: 0.8rem; font-family: monospace; white-space: pre-wrap;">Loading prompt...</code></pre>
+        </div>
+
+        <!-- REST API Commands Reference -->
+        <div class="card" style="margin-top: 25px;">
+            <h3>API Reference Reference</h3>
+            
+            <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; margin-top: 15px;">1. List Files</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Retrieve list of all active files and sizes in your storage bucket.</p>
+            <pre><code id="code-list-files">curl -H "X-API-Key: YOUR_SECRET_API_KEY" https://auth.oqens.me/api/bucket/list</code></pre>
+
+            <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; margin-top: 15px;">2. Upload File</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Upload a new file using multipart/form-data payload.</p>
+            <pre><code id="code-upload-file">curl -X POST -H "X-API-Key: YOUR_SECRET_API_KEY" -F "file=@/local/path/file.png" https://auth.oqens.me/api/bucket/upload</code></pre>
+
+            <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; margin-top: 15px;">3. Download File</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Retrieve file stream. Pass parameter <code>attachment=true</code> to force download.</p>
+            <pre><code id="code-download-file">curl -H "X-API-Key: YOUR_SECRET_API_KEY" -o file.png "https://auth.oqens.me/api/bucket/download?key=file.png&amp;attachment=true"</code></pre>
+
+            <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; margin-top: 15px;">4. Delete File</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Delete file from bucket by passing its key as JSON body.</p>
+            <pre><code id="code-delete-file">curl -X DELETE -H "X-API-Key: YOUR_SECRET_API_KEY" -H "Content-Type: application/json" -d '{"key":"file.png"}' https://auth.oqens.me/api/bucket/delete</code></pre>
+
+            <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; margin-top: 15px;">5. Public CDN Delivery URL</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Access publicly shared links on <code>dl.oqens.me</code> without headers. Append <code>?preview=true</code> for browser rendering.</p>
+            <pre><code id="code-delivery-url">https://dl.oqens.me/YOUR_CLOUD_ID/file.png</code></pre>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast" style="position: fixed; bottom: 30px; right: 30px; background: var(--text-color); color: var(--bg-color); padding: 12px 20px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2000;">Copied to clipboard!</div>
+
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function buildAgentPrompt() {
+            return `You are an AI coding assistant. The user has integrated the OQENS Storage Bucket API. 
+Use the following endpoints to read, upload, and delete files on behalf of the user. You must pass the X-API-Key header in programmatic requests.
+
+Developer Credentials:
+- Base API URL: https://auth.oqens.me
+- CDN URL: https://dl.oqens.me
+- API Key: YOUR_SECRET_API_KEY
+- Cloud ID: YOUR_CLOUD_ID
+
+Programmatic Commands:
+1. List all files:
+   curl -H "X-API-Key: YOUR_SECRET_API_KEY" https://auth.oqens.me/api/bucket/list
+2. Upload a file:
+   curl -X POST -H "X-API-Key: YOUR_SECRET_API_KEY" -F "file=@{local_filepath}" https://auth.oqens.me/api/bucket/upload
+3. Download/Stream a file:
+   curl -H "X-API-Key: YOUR_SECRET_API_KEY" -o {output_filename} "https://auth.oqens.me/api/bucket/download?key={filename}&attachment=true"
+4. Delete a file:
+   curl -X DELETE -H "X-API-Key: YOUR_SECRET_API_KEY" -H "Content-Type: application/json" -d '{"key":"{filename}"}' https://auth.oqens.me/api/bucket/delete
+5. Public CDN direct download:
+   https://dl.oqens.me/YOUR_CLOUD_ID/{filename}
+6. Public CDN inline preview:
+   https://dl.oqens.me/YOUR_CLOUD_ID/{filename}?preview=true`;
+        }
+
+        function copyAgentPrompt() {
+            navigator.clipboard.writeText(buildAgentPrompt());
+            showToast('AI Agent System Prompt copied to clipboard!');
+        }
+
+        document.getElementById('code-agent-prompt').innerText = buildAgentPrompt();
+
+        (async function() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.role === 'tenant') {
+                        const isStorageOver = data.storage_used_bytes >= data.storage_limit_bytes;
+                        const isBandwidthOver = data.bandwidth_limit_bytes > 0 && (data.bandwidth_bytes >= data.bandwidth_limit_bytes);
+                        if (isStorageOver || isBandwidthOver) {
+                            const banner = document.getElementById('global-limit-warning-banner');
+                            if (banner) banner.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Session verification failed", e);
+            }
+        })();
+    </script>
+</body>
+</html>

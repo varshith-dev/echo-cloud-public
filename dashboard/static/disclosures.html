@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Collection Disclosures — OQENS</title>
+    <meta name="description" content="Full transparency about what data OQENS collects when you view public shared albums, how it's used, and how long it's stored.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0b0e;
+            --surface: #111318;
+            --surface2: #1a1d24;
+            --border: rgba(255,255,255,0.08);
+            --accent: #6366f1;
+            --accent-2: #8b5cf6;
+            --text-1: #f1f5f9;
+            --text-2: #94a3b8;
+            --text-3: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-1);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* ── Top Bar ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10,11,14,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-1);
+            font-weight: 700;
+            font-size: 17px;
+        }
+        .logo img { height: 26px; }
+        .topbar-links { display: flex; gap: 24px; }
+        .topbar-links a { color: var(--text-2); text-decoration: none; font-size: 14px; transition: color .2s; }
+        .topbar-links a:hover { color: var(--text-1); }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 80px 5% 60px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 400px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .hero h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            color: var(--text-2);
+            font-size: 16px;
+            max-width: 580px;
+            margin: 0 auto 28px;
+        }
+        .last-updated {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-3);
+            font-size: 13px;
+        }
+
+        /* ── Layout ── */
+        .content {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 60px 5%;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .card-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+        .card-icon.orange { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .card-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
+        .card-icon.teal { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+        .card-icon.pink { background: rgba(236,72,153,0.15); color: #f472b6; }
+
+        .card h2 {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-1);
+        }
+        .card h2 small {
+            display: block;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        /* ── Data Table ── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .data-table th {
+            color: var(--text-3);
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(255,255,255,0.02);
+        }
+        .data-table td { color: var(--text-2); }
+        .data-table td:first-child { color: var(--text-1); font-weight: 500; }
+        .data-table tr:last-child td { border-bottom: none; }
+
+        /* ── Chips ── */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .chip.yes { background: rgba(16,185,129,0.1); color: #34d399; }
+        .chip.no { background: rgba(239,68,68,0.1); color: #f87171; }
+        .chip.cond { background: rgba(245,158,11,0.1); color: #fbbf24; }
+
+        /* ── Info blocks ── */
+        .info-block {
+            background: rgba(99,102,241,0.05);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-2);
+        }
+        .info-block strong { color: var(--text-1); }
+
+        .warning-block {
+            background: rgba(245,158,11,0.05);
+            border: 1px solid rgba(245,158,11,0.2);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #fbbf24;
+        }
+
+        /* ── Section dividers ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-3);
+            margin: 40px 0 16px;
+        }
+
+        p { color: var(--text-2); font-size: 14px; margin-bottom: 12px; }
+        ul { padding-left: 20px; }
+        ul li { color: var(--text-2); font-size: 14px; margin-bottom: 6px; }
+
+        /* ── Footer ── */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 5%;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 13px;
+        }
+        .footer a { color: var(--text-2); text-decoration: none; }
+        .footer a:hover { color: var(--text-1); }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <a class="logo" href="https://oqens.me">
+            <img src="/static/logo.png" alt="OQENS">
+            OQENS
+        </a>
+        <div class="topbar-links">
+            <a href="https://oqens.me">Home</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+            <a href="https://support.oqens.me">Support</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="badge"><i class="ph ph-eye"></i> Full Transparency</div>
+        <h1>Data Collection Disclosures</h1>
+        <p>We believe in radical transparency. This page discloses every piece of data collected when you visit a public OQENS Photos page, why we collect it, and exactly where it goes.</p>
+        <span class="last-updated"><i class="ph ph-clock"></i> Last updated: June 2026</span>
+    </div>
+
+    <div class="content">
+
+        <div class="section-label">Overview</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon purple"><i class="ph ph-info"></i></div>
+                <h2>What pages collect data?
+                    <small>Only public shared album pages — not private authenticated sessions</small>
+                </h2>
+            </div>
+            <p>Data is collected <strong>only</strong> when a visitor opens a <strong>public shared album link</strong> (e.g. <code>photos.echo.oqens.me/shared/&lt;token&gt;</code>). This is analytics data collected to help OQENS and album owners understand how their shared content is being viewed.</p>
+            <p>This data is <strong>never collected</strong> during:</p>
+            <ul>
+                <li>Private authenticated dashboard sessions</li>
+                <li>File downloads from the main dashboard</li>
+                <li>Account management pages</li>
+                <li>Any page behind a login wall</li>
+            </ul>
+            <div class="info-block">
+                <strong>Who sees this data?</strong> Only the OQENS platform administrator (host) can view this analytics data from the admin console. Individual album owners <strong>cannot</strong> see visitor analytics. The data is not shared with or sold to any third parties.
+            </div>
+        </div>
+
+        <div class="section-label">Data Collected</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon blue"><i class="ph ph-database"></i></div>
+                <h2>Complete list of data fields collected
+                    <small>Every dataset, its source, and purpose</small>
+                </h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data Field</th>
+                        <th>What It Is</th>
+                        <th>Source</th>
+                        <th>Stored?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>IP Address</td>
+                        <td>Your network IP at time of visit</td>
+                        <td>Server-side (HTTP headers)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Country &amp; Country Code</td>
+                        <td>Approximate country derived from IP</td>
+                        <td>IP geolocation (ip-api.com)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>City &amp; Region</td>
+                        <td>Approximate city and region from IP</td>
+                        <td>IP geolocation (ip-api.com)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>ISP / Network Provider</td>
+                        <td>Your internet service provider name</td>
+                        <td>IP geolocation (ip-api.com)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Device Type</td>
+                        <td>Mobile, tablet, or desktop</td>
+                        <td>User-Agent string (browser-sent)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Device Name</td>
+                        <td>Model info from User-Agent (e.g. iPhone, Samsung Galaxy S21)</td>
+                        <td>User-Agent string (browser-sent)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Operating System &amp; Version</td>
+                        <td>e.g. iOS 17.2, Android 14, Windows 11</td>
+                        <td>User-Agent string (browser-sent)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Browser Name &amp; Version</td>
+                        <td>e.g. Chrome 124, Safari 17</td>
+                        <td>User-Agent string (browser-sent)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Full User-Agent String</td>
+                        <td>The raw browser identification string</td>
+                        <td>HTTP request header</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Screen Resolution</td>
+                        <td>Width × Height of your screen in pixels</td>
+                        <td>JavaScript (window.screen)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Battery Level</td>
+                        <td>Approximate battery percentage (if browser exposes it)</td>
+                        <td>JavaScript Battery Status API</td>
+                        <td><span class="chip cond">◑ If available</span></td>
+                    </tr>
+                    <tr>
+                        <td>Network Connection Type</td>
+                        <td>e.g. WiFi, 4G, 3G (if browser exposes it)</td>
+                        <td>JavaScript Network Information API</td>
+                        <td><span class="chip cond">◑ If available</span></td>
+                    </tr>
+                    <tr>
+                        <td>Page URL</td>
+                        <td>The URL of the shared album page you visited</td>
+                        <td>JavaScript (window.location.href)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Referrer URL</td>
+                        <td>The page you came from (if any)</td>
+                        <td>JavaScript (document.referrer)</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Share Token</td>
+                        <td>The unique token of the album being viewed</td>
+                        <td>URL path parameter</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Timestamp</td>
+                        <td>Date and time of the visit (UTC)</td>
+                        <td>Server clock</td>
+                        <td><span class="chip yes">✓ Yes</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="warning-block">
+                <strong>⚠ Note on Battery &amp; Network APIs:</strong> The Battery Status API has been removed from most modern browsers (Firefox removed it in 2019; Chrome never exposed it to general web pages). As a result, battery level will typically not be available. The Network Information API availability varies by browser and platform.
+            </div>
+        </div>
+
+        <div class="section-label">How Data Is Collected</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon teal"><i class="ph ph-code"></i></div>
+                <h2>Collection mechanism
+                    <small>A JavaScript beacon sent in the background</small>
+                </h2>
+            </div>
+            <p>When you open a public shared album, a JavaScript script runs <strong>after the page loads</strong>. It collects the fields listed above and sends them in a single HTTP POST request to <code>https://echo.oqens.me/api/analytics/collect</code>.</p>
+            <ul>
+                <li>The script <strong>does not use cookies</strong> for tracking.</li>
+                <li>The script <strong>does not use browser fingerprinting</strong> techniques (canvas, WebGL, font enumeration, etc.).</li>
+                <li>The request is <strong>non-blocking</strong> — it runs after the media loads and does not affect page performance.</li>
+                <li>The collection happens <strong>once per page load</strong>. No persistent tracking across sessions.</li>
+                <li>No <strong>tracking pixels</strong>, third-party analytics scripts, or ad networks are used.</li>
+            </ul>
+            <div class="info-block">
+                <strong>IP Geolocation:</strong> Your IP address is looked up using <a href="https://ip-api.com" target="_blank" rel="noopener">ip-api.com</a>, a third-party geolocation service. Your IP is sent to their API for location resolution. ip-api.com's own <a href="https://ip-api.com/docs/legal" target="_blank" rel="noopener">usage terms</a> apply to this lookup. The result (country, city, ISP) is stored by OQENS; the raw lookup is not cached by ip-api.com for our usage.
+            </div>
+        </div>
+
+        <div class="section-label">Data Usage &amp; Retention</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon green"><i class="ph ph-chart-pie"></i></div>
+                <h2>How the data is used
+                    <small>Platform analytics only — no advertising, no profiling</small>
+                </h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Use Case</th><th>Used?</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Platform-wide visitor analytics (aggregate)</td><td><span class="chip yes">✓ Yes</span></td></tr>
+                    <tr><td>Per-album view statistics for host admin</td><td><span class="chip yes">✓ Yes</span></td></tr>
+                    <tr><td>Sharing with album owners</td><td><span class="chip no">✗ No</span></td></tr>
+                    <tr><td>Advertising / Ad targeting</td><td><span class="chip no">✗ No</span></td></tr>
+                    <tr><td>Profiling or cross-site tracking</td><td><span class="chip no">✗ No</span></td></tr>
+                    <tr><td>Selling to third parties</td><td><span class="chip no">✗ No</span></td></tr>
+                    <tr><td>Automated decision-making about individuals</td><td><span class="chip no">✗ No</span></td></tr>
+                </tbody>
+            </table>
+            <div class="info-block" style="margin-top:16px;">
+                <strong>Retention:</strong> Visitor analytics data is stored indefinitely unless manually cleared by the platform administrator. There is currently no automatic expiry. We may add configurable retention limits in a future update.
+            </div>
+        </div>
+
+        <div class="section-label">Your Rights</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon orange"><i class="ph ph-shield-check"></i></div>
+                <h2>Your privacy rights
+                    <small>GDPR, CCPA, and general data subject rights</small>
+                </h2>
+            </div>
+            <p>Depending on your jurisdiction, you may have the following rights regarding the data collected about you:</p>
+            <ul>
+                <li><strong>Right to Access:</strong> Request a copy of the data collected about your IP address / visit.</li>
+                <li><strong>Right to Erasure:</strong> Request deletion of your visit records.</li>
+                <li><strong>Right to Object:</strong> Object to the processing of your data for analytics purposes.</li>
+                <li><strong>Right to Portability:</strong> Request your data in a machine-readable format (CSV).</li>
+            </ul>
+            <div class="info-block">
+                To exercise any of these rights, contact us at <strong><a href="https://support.oqens.me" style="color:#a5b4fc;">support.oqens.me</a></strong>. Include your approximate IP address (you can find it at <a href="https://www.whatismyip.com" target="_blank" rel="noopener" style="color:#a5b4fc;">whatismyip.com</a>) and the date(s) of your visit so we can locate and delete your records.
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon red"><i class="ph ph-x-circle"></i></div>
+                <h2>How to opt out
+                    <small>Technical methods to prevent data collection</small>
+                </h2>
+            </div>
+            <p>You can prevent data collection by:</p>
+            <ul>
+                <li><strong>Using a VPN or Tor</strong> — masks your real IP address and location.</li>
+                <li><strong>Disabling JavaScript</strong> in your browser — the collection script requires JS to run.</li>
+                <li><strong>Using a content blocker</strong> — blocking requests to <code>echo.oqens.me/api/analytics/collect</code>.</li>
+                <li><strong>Using a privacy browser</strong> — browsers like Firefox with Enhanced Tracking Protection enabled may block the request.</li>
+            </ul>
+            <div class="info-block">
+                If JavaScript is disabled, the page will still display the shared album media (photos/videos). Only analytics collection will be prevented.
+            </div>
+        </div>
+
+        <div class="section-label">Contact</div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon pink"><i class="ph ph-envelope"></i></div>
+                <h2>Questions about this disclosure?</h2>
+            </div>
+            <p>If you have questions, concerns, or requests related to this disclosure or data collection practices, contact us via our support portal.</p>
+            <a href="https://support.oqens.me" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background: var(--surface2); border: 1px solid var(--border); border-radius:8px; color:var(--text-1); text-decoration:none; font-size:14px; font-weight:500; margin-top:8px; transition: border-color .2s;">
+                <i class="ph ph-headphones"></i> Contact Support
+            </a>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <div>
+            &copy; 2026 OQENS Cloud. &nbsp;·&nbsp;
+            <a href="/privacy">Privacy Policy</a> &nbsp;·&nbsp;
+            <a href="/terms">Terms of Service</a> &nbsp;·&nbsp;
+            <a href="/disclosures">Data Disclosures</a> &nbsp;·&nbsp;
+            <a href="https://support.oqens.me">Support</a>
+        </div>
+    </footer>
+</body>
+</html>

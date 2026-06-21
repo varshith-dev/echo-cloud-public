@@ -1,0 +1,1 @@
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS custom_message TEXT; ALTER TABLE tenants ADD COLUMN IF NOT EXISTS custom_message_theme TEXT DEFAULT 'danger'; ALTER TABLE tenants ADD COLUMN IF NOT EXISTS custom_message_icon TEXT DEFAULT 'ph-warning-circle'; ALTER TABLE tenants ADD COLUMN IF NOT EXISTS custom_message_active INTEGER DEFAULT 0;

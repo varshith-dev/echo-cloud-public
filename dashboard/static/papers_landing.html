@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS Papers - The Modern Markdown Editor</title>
+    <meta name="description" content="OQENS Papers is the ultimate markdown editing and publishing platform. Collaborate seamlessly, embed interactive charts, and share your ideas with the world.">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #ffffff;
+            --bg-alt: #fafafa;
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --accent: #000000;
+            --accent-hover: #374151;
+            --border-light: #e5e7eb;
+            --border-dark: #d1d5db;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* Typography */
+        h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--text-main); }
+        h1 { font-size: 4.5rem; margin-bottom: 24px; }
+        h2 { font-size: 3rem; margin-bottom: 20px; }
+        p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            z-index: 1000; padding: 16px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-main); }
+        .logo img { width: 32px; height: 32px; }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text-main); }
+        
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 28px; border-radius: 100px; font-weight: 600; font-size: 1rem;
+            text-decoration: none; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); cursor: pointer; border: none;
+        }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+        .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: var(--accent-hover); }
+        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border-dark); }
+        .btn-outline:hover { background: var(--bg-alt); transform: translateY(-2px); }
+        .btn-sm { padding: 8px 20px; font-size: 0.9rem; }
+
+        /* Animated Background Elements */
+        .bg-elements { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
+        .glow { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: float 15s infinite ease-in-out alternate; }
+        .glow-1 { background: #dbeafe; width: 600px; height: 600px; top: -100px; left: -100px; }
+        .glow-2 { background: #e0e7ff; width: 500px; height: 500px; top: 20%; right: -100px; animation-delay: -5s; }
+        .glow-3 { background: #dcfce3; width: 400px; height: 400px; bottom: -100px; left: 20%; animation-delay: -10s; opacity: 0.3; }
+        
+        .grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4;
+            background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(50px, 80px) scale(1.1) rotate(10deg); }
+        }
+
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 140px 24px; }
+
+        /* Hero */
+        .hero { position: relative; padding: 180px 24px 100px; text-align: center; }
+        .hero h1 { max-width: 900px; margin: 0 auto 24px; background: linear-gradient(to right, #111827, #4b5563); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { max-width: 650px; margin: 0 auto 40px; font-size: 1.3rem; }
+        .hero-actions { display: flex; gap: 16px; justify-content: center; margin-bottom: 80px; }
+        
+        .mockup-wrapper {
+            max-width: 1000px; margin: 0 auto;
+            position: relative;
+        }
+        .mockup-glow {
+            position: absolute;
+            top: 10px; left: -10px; right: -10px; bottom: -10px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #f43f5e, #f59e0b, #3b82f6);
+            background-size: 300% 300%;
+            filter: blur(40px);
+            opacity: 0.5;
+            border-radius: 30px;
+            z-index: -1;
+            animation: flow-glow 10s ease infinite;
+            transform: perspective(1000px) rotateX(2deg);
+            transition: transform 0.5s;
+        }
+        @keyframes flow-glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .mockup-wrapper:hover .mockup-glow { transform: perspective(1000px) rotateX(0deg) translateY(-10px); opacity: 0.7; }
+        .mockup-wrapper:hover .hero-mockup { transform: perspective(1000px) rotateX(0deg) translateY(-10px); }
+
+        .hero-mockup {
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+            background: #fff;
+            transform: perspective(1000px) rotateX(2deg);
+            transition: transform 0.5s;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Step by Step Section (NEW) */
+        .steps-section { background: var(--bg-alt); padding: 140px 24px; border-top: 1px solid var(--border-light); position: relative; overflow: hidden; }
+        .steps-header { text-align: center; max-width: 700px; margin: 0 auto 80px; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; }
+        .step-card { background: var(--bg-card); padding: 40px; border-radius: 24px; border: 1px solid var(--border-light); position: relative; z-index: 1; }
+        .step-number { font-size: 4rem; font-weight: 800; color: #f3f4f6; position: absolute; top: 20px; right: 20px; z-index: -1; line-height: 1; }
+        .step-card h3 { font-size: 1.5rem; margin-bottom: 16px; margin-top: 20px; }
+        .step-icon { width: 56px; height: 56px; background: var(--accent); color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        /* Alternating Features */
+        .feature-row { display: flex; align-items: center; gap: 80px; margin-bottom: 160px; }
+        .feature-row:nth-child(even) { flex-direction: row-reverse; }
+        .feature-content { flex: 1; }
+        .feature-content h2 { font-size: 2.5rem; margin-bottom: 20px; }
+        .feature-image { flex: 1; border-radius: 24px; box-shadow: 0 24px 48px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .feature-image .placeholder-block { width: 100%; height: 450px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #d1d5db; }
+        .feature-badge { display: inline-block; padding: 6px 12px; background: #f3f4f6; color: var(--accent); border-radius: 100px; font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.05em; }
+
+        /* Bento Box Grid (Features) */
+        .bento-section { padding: 140px 24px; }
+        .bento-header { text-align: center; max-width: 600px; margin: 0 auto 60px; }
+        .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
+        .bento-card { background: var(--bg-alt); padding: 40px; border-radius: 20px; border: 1px solid var(--border-light); transition: all 0.3s; }
+        .bento-card:hover { transform: translateY(-4px); background: #f3f4f6; }
+        .bento-icon { width: 56px; height: 56px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 24px; color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .bento-card h3 { font-size: 1.35rem; margin-bottom: 12px; }
+
+        /* API & Integrations Section (NEW) */
+        .api-section { padding: 140px 24px; text-align: center; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); color: var(--text-main); }
+        .api-section h2 { color: var(--text-main); }
+        .api-section p { color: var(--text-muted); max-width: 700px; margin: 0 auto 60px; }
+        .api-terminal { max-width: 800px; margin: 0 auto; background: #1f2937; border-radius: 12px; text-align: left; overflow: hidden; border: 1px solid #374151; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .api-header { background: #374151; padding: 12px 16px; display: flex; gap: 8px; }
+        .api-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .api-dot.red { background: #ef4444; }
+        .api-dot.yellow { background: #eab308; }
+        .api-dot.green { background: #22c55e; }
+        .api-code { padding: 32px; font-family: monospace; color: #a5b4fc; font-size: 1rem; line-height: 1.6; }
+
+        /* FAQ */
+        .faq-section { background: var(--bg-alt); padding: 140px 24px; border-top: 1px solid var(--border-light); }
+        .faq-container { max-width: 800px; margin: 0 auto; }
+        .faq-header { text-align: center; margin-bottom: 60px; }
+        .faq-item { background: white; border-radius: 16px; margin-bottom: 16px; padding: 24px; cursor: pointer; border: 1px solid var(--border-light); transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .faq-item:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .faq-question { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.15rem; color: var(--text-main); }
+        .faq-answer { margin-top: 0; max-height: 0; overflow: hidden; opacity: 0; color: var(--text-muted); line-height: 1.6; transition: all 0.3s ease; }
+        .faq-item.active .faq-answer { margin-top: 16px; max-height: 200px; opacity: 1; }
+        .faq-icon { transition: transform 0.3s; background: #f3f4f6; padding: 4px; border-radius: 50%; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); background: var(--accent); color: white; }
+
+        /* CTA */
+        .cta-section { text-align: center; padding: 140px 24px; position: relative; overflow: hidden; }
+        .cta-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); z-index: -1; }
+        .cta-section h2 { color: var(--text-main); font-size: 3.5rem; margin-bottom: 24px; }
+        .cta-section p { color: var(--text-muted); max-width: 600px; margin: 0 auto 40px; font-size: 1.25rem; }
+        .cta-section .btn-primary { background: var(--accent); color: #fff; padding: 16px 32px; font-size: 1.1rem; }
+        .cta-section .btn-primary:hover { background: #374151; transform: translateY(-4px) scale(1.05); }
+
+        /* Footer */
+        footer { background: var(--bg-base); padding: 80px 40px; text-align: center; }
+        .footer-logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; display: inline-flex; align-items: center; gap: 8px; }
+        .footer-logo img { width: 32px; height: 32px; }
+        .footer-links { display: flex; justify-content: center; gap: 32px; margin-bottom: 40px; flex-wrap: wrap; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 1rem; font-weight: 500; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--accent); }
+        .footer-copyright { color: #9ca3af; font-size: 0.9rem; }
+
+        /* Animations */
+        .animate { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .animate.in-view { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.15s; }
+        .delay-2 { transition-delay: 0.3s; }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 12px;
+            height: 1.2em;
+            background-color: #3b82f6;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2.2rem; }
+            .feature-row { flex-direction: column !important; gap: 40px; text-align: left; margin-bottom: 100px; }
+            .bento-grid, .steps-grid { grid-template-columns: 1fr; }
+            nav { padding: 16px 24px; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="OQENS">
+            Papers
+        </a>
+        <div class="nav-links">
+            <a href="/features">Features</a>
+            <a href="/publishing">Publishing</a>
+            <a href="/api">API docs</a>
+            <a href="/faq">FAQ</a>
+            <a href="https://echo.oqens.me/login?app=papers" class="btn btn-outline btn-sm">Sign In</a>
+            <a href="https://echo.oqens.me/signup?app=papers" class="btn btn-primary btn-sm">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero with Animated Background -->
+    <header class="hero">
+        <div class="bg-elements">
+            <div class="grid-bg"></div>
+            <div class="glow glow-1"></div>
+            <div class="glow glow-2"></div>
+            <div class="glow glow-3"></div>
+        </div>
+        
+        <h1 class="animate">Write. Visualize. Publish.</h1>
+        <p class="animate delay-1">The ultimate markdown workspace designed for speed. Create beautiful documents, embed interactive charts, and publish to the world in a single click.</p>
+        <div class="hero-actions animate delay-2">
+            <a href="https://echo.oqens.me/signup?app=papers" class="btn btn-primary">Start Writing for Free <i class="ph-bold ph-arrow-right"></i></a>
+            <a href="/features" class="btn btn-outline">Explore Features</a>
+        </div>
+        
+        <div class="mockup-wrapper animate delay-2">
+            <div class="mockup-glow"></div>
+            <div class="hero-mockup">
+                <div style="width:100%; height: 600px; background: #fafafa; display: flex; flex-direction: column;">
+                    <div style="height: 50px; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; display:flex; align-items:center; padding: 0 20px; gap: 8px;">
+                        <div style="width:12px; height:12px; border-radius:50%; background:#e5e7eb;"></div>
+                        <div style="width:12px; height:12px; border-radius:50%; background:#e5e7eb;"></div>
+                        <div style="width:12px; height:12px; border-radius:50%; background:#e5e7eb;"></div>
+                        <div style="flex:1;"></div>
+                        <div style="font-family:monospace; color:#9ca3af; font-size:14px;">untitled.md</div>
+                    </div>
+                    <div style="flex:1; padding: 40px 60px; text-align: left; font-family: monospace; font-size: 1.3rem; color: #374151; line-height: 1.6;">
+                        <span id="typewriter-text"></span><span class="typewriter-cursor"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Step by Step Section (NEW) -->
+    <section class="steps-section">
+        <div class="bg-elements" style="opacity:0.3;"><div class="grid-bg"></div></div>
+        <div class="steps-header animate">
+            <div class="feature-badge">THE WORKFLOW</div>
+            <h2>Frictionless documentation.</h2>
+            <p>We designed Papers to completely eliminate the friction between having an idea and publishing it to your audience.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card animate">
+                <div class="step-number">1</div>
+                <div class="step-icon"><i class="ph ph-keyboard"></i></div>
+                <h3>Draft Fast</h3>
+                <p>Use standard Markdown syntax in a completely distraction-free editor. Real-time preview ensures your formatting is always perfect.</p>
+            </div>
+            <div class="step-card animate delay-1">
+                <div class="step-number">2</div>
+                <div class="step-icon"><i class="ph ph-chart-line-up"></i></div>
+                <h3>Add Visuals</h3>
+                <p>Embed Chart.js graphs, Mermaid flowcharts, and Grid.js interactive tables natively without ever writing a line of JavaScript.</p>
+            </div>
+            <div class="step-card animate delay-2">
+                <div class="step-number">3</div>
+                <div class="step-icon"><i class="ph ph-globe"></i></div>
+                <h3>Hit Publish</h3>
+                <p>Toggle the visibility switch and instantly generate a public, SEO-optimized webpage hosted on our edge CDN.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Deep Dives -->
+    <section class="container">
+        <div class="feature-row animate">
+            <div class="feature-content">
+                <div class="feature-badge">DISTRACTION-FREE</div>
+                <h2>A blank canvas for your best ideas.</h2>
+                <p>OQENS Papers removes the clutter so you can focus entirely on your words. Experience an ultra-clean, minimalist interface that feels as fast as you type.</p>
+                <ul style="list-style: none; margin-top:32px;">
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Real-time dual-pane preview</li>
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> GitHub Flavored Markdown</li>
+                    <li style="display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Beautiful typography by default</li>
+                </ul>
+            </div>
+            <div class="feature-image">
+                <div class="placeholder-block"><i class="ph ph-pen-nib" style="font-size:4rem;"></i></div>
+            </div>
+        </div>
+
+        <div class="feature-row animate">
+            <div class="feature-content">
+                <div class="feature-badge">INSTANT PUBLISHING</div>
+                <h2>From private draft to public web page.</h2>
+                <p>With a single toggle switch, your markdown document becomes a beautiful, fully-responsive public webpage. No servers to configure, no deployments to manage.</p>
+                <ul style="list-style: none; margin-top:32px;">
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Custom URL slugs</li>
+                    <li style="margin-bottom:16px; display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Instant global CDN delivery</li>
+                    <li style="display:flex; align-items:center; gap:16px; font-weight:500;"><i class="ph-fill ph-check-circle" style="color:var(--accent); font-size:1.5rem;"></i> Custom domain support</li>
+                </ul>
+            </div>
+            <div class="feature-image">
+                <div class="placeholder-block"><i class="ph ph-globe" style="font-size:4rem;"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Box -->
+    <section class="bento-section">
+        <div class="bento-header animate">
+            <div class="feature-badge">THE TOOLKIT</div>
+            <h2>Everything you need to write brilliantly.</h2>
+            <p>OQENS Papers is packed with professional-grade features built directly into the vanilla core for ultimate performance.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-card animate">
+                <div class="bento-icon"><i class="ph ph-folder-open"></i></div>
+                <h3>Collections</h3>
+                <p>Organize your pages effortlessly into themed collections and folders for rapid retrieval.</p>
+            </div>
+            <div class="bento-card animate delay-1">
+                <div class="bento-icon"><i class="ph ph-function"></i></div>
+                <h3>Math Equations</h3>
+                <p>Native KaTeX support allows you to render beautiful LaTeX mathematical formulas instantly.</p>
+            </div>
+            <div class="bento-card animate delay-2">
+                <div class="bento-icon"><i class="ph ph-code"></i></div>
+                <h3>Code Highlighting</h3>
+                <p>Syntax highlighting for over 100+ programming languages powered by highlight.js.</p>
+            </div>
+            <div class="bento-card animate">
+                <div class="bento-icon"><i class="ph ph-palette"></i></div>
+                <h3>Custom Backgrounds</h3>
+                <p>Personalize your public pages with custom background colors, gradients, and subtle themes.</p>
+            </div>
+            <div class="bento-card animate delay-1">
+                <div class="bento-icon"><i class="ph ph-lock-key"></i></div>
+                <h3>Private by Default</h3>
+                <p>All pages start as private drafts. You have absolute control over what gets published.</p>
+            </div>
+            <div class="bento-card animate delay-2">
+                <div class="bento-icon"><i class="ph ph-lightning"></i></div>
+                <h3>Blazing Fast</h3>
+                <p>Built purely on vanilla JS architecture for sub-millisecond interaction speeds.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Headless API Section -->
+    <section class="api-section">
+        <div class="feature-badge">DEVELOPER FIRST</div>
+        <h2 class="animate">Use it as a Headless CMS.</h2>
+        <p class="animate delay-1">Build entirely custom frontends using our incredibly fast JSON API. Fetch your rendered markdown pages securely from anywhere.</p>
+        
+        <div class="api-terminal animate delay-2">
+            <div class="api-header">
+                <div class="api-dot red"></div><div class="api-dot yellow"></div><div class="api-dot green"></div>
+            </div>
+            <div class="api-code">
+                <span style="color:#fb7185">const</span> response = <span style="color:#fb7185">await</span> fetch(<span style="color:#a7f3d0">'https://api.oqens.me/v1/papers/my-post'</span>, {<br/>
+                &nbsp;&nbsp;headers: { <span style="color:#a7f3d0">'Authorization'</span>: <span style="color:#a7f3d0">'Bearer oq_123...'</span> }<br/>
+                });<br/><br/>
+                <span style="color:#fb7185">const</span> post = <span style="color:#fb7185">await</span> response.json();<br/>
+                console.log(post.html_content);
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="faq-header animate">
+                <h2>Frequently Asked Questions</h2>
+                <p>Everything you need to know about OQENS Papers.</p>
+            </div>
+            <div class="faq-list animate delay-1">
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Does OQENS Papers support Markdown? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Yes, OQENS Papers is fully built around Markdown, offering real-time previews, syntax highlighting, and KaTeX math support.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Can I publish my documents to the web? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Absolutely. With a single click, you can toggle any private draft into a public, beautifully rendered webpage with a custom slug.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Are there interactive features like charts? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Yes! OQENS Papers supports interactive Chart.js charts, Grid.js tables, and Mermaid flowcharts right out of the box using special markdown code blocks.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">Is it free to use? <i class="ph-bold ph-plus faq-icon"></i></div>
+                    <div class="faq-answer">Yes, OQENS Papers offers a generous free tier for individuals. Premium plans are available for custom domains and advanced API access.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final Massive CTA -->
+    <section class="cta-section">
+        <div class="cta-bg"></div>
+        <div class="glow glow-1" style="opacity: 0.15; top: -200px;"></div>
+        <div class="glow glow-2" style="opacity: 0.15; bottom: -200px;"></div>
+        
+        <h2 class="animate">Ready to start writing?</h2>
+        <p class="animate delay-1">Join thousands of creators using OQENS Papers to build, write, and share their ideas faster than ever before.</p>
+        <a href="https://echo.oqens.me/signup?app=papers" class="btn btn-primary animate delay-2">Create Your Free Account <i class="ph-bold ph-arrow-right"></i></a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">
+            <img src="/static/logo.png" alt="OQENS"> OQENS
+        </div>
+        <div class="footer-links">
+            <a href="/features">Features</a>
+            <a href="/pricing">Pricing</a>
+            <a href="https://oqens.me/privacy">Privacy Policy</a>
+            <a href="https://oqens.me/terms">Terms of Service</a>
+            <a href="https://support.oqens.me">Support Hub</a>
+            <a href="/api">API Documentation</a>
+        </div>
+        <div class="footer-copyright">
+            &copy; 2026 OQENS Cloud Platform. All rights reserved. Designed for creators.
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+        // Typewriter Effect with Typos
+        const typeTarget = document.getElementById('typewriter-text');
+        const textSequence = [
+            { text: "# Welcome to OQENS Papers\n\n", type: 'type' },
+            { text: "We are building the fastets ", type: 'type' },
+            { length: 5, type: 'delete' },
+            { text: "test markdown editor.\n\n", type: 'type' },
+            { text: "- Write without dsitr", type: 'type' },
+            { length: 5, type: 'delete' },
+            { text: "istractions\n", type: 'type' },
+            { text: "- Embed intercative charts\n", type: 'type' },
+            { length: 13, type: 'delete' },
+            { text: "active charts\n", type: 'type' },
+            { text: "- Publish to the wolrd instantly", type: 'type' },
+            { length: 14, type: 'delete' },
+            { text: "rld instantly.", type: 'type' }
+        ];
+
+        let seqIndex = 0;
+        let charIndex = 0;
+
+        function typeWriter() {
+            if (!typeTarget) return;
+            if (seqIndex >= textSequence.length) {
+                setTimeout(() => {
+                    typeTarget.innerHTML = "";
+                    seqIndex = 0;
+                    typeWriter();
+                }, 5000);
+                return;
+            }
+
+            const currentObj = textSequence[seqIndex];
+
+            if (currentObj.type === 'type') {
+                if (charIndex < currentObj.text.length) {
+                    let char = currentObj.text.charAt(charIndex);
+                    if (char === '\n') {
+                        typeTarget.innerHTML += '<br>';
+                    } else if (char === ' ') {
+                        typeTarget.innerHTML += '&nbsp;';
+                    } else {
+                        typeTarget.innerHTML += char;
+                    }
+                    charIndex++;
+                    setTimeout(typeWriter, Math.random() * 40 + 40); // 40-80ms typing
+                } else {
+                    charIndex = 0;
+                    seqIndex++;
+                    setTimeout(typeWriter, 300); // pause after typing segment
+                }
+            } else if (currentObj.type === 'delete') {
+                if (charIndex < currentObj.length) {
+                    let currentHTML = typeTarget.innerHTML;
+                    if (currentHTML.endsWith('<br>')) {
+                        typeTarget.innerHTML = currentHTML.slice(0, -4);
+                    } else if (currentHTML.endsWith('&nbsp;')) {
+                        typeTarget.innerHTML = currentHTML.slice(0, -6);
+                    } else {
+                        typeTarget.innerHTML = currentHTML.slice(0, -1);
+                    }
+                    charIndex++;
+                    setTimeout(typeWriter, 40); // faster backspacing
+                } else {
+                    charIndex = 0;
+                    seqIndex++;
+                    setTimeout(typeWriter, 200); // pause after deleting
+                }
+            }
+        }
+
+        setTimeout(typeWriter, 1500); // Start delay
+    </script>
+</body>
+</html>

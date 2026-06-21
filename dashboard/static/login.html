@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/logo-white.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQENS | Authentication</title>
+    <link rel="stylesheet" type="text/css" href="/static/phosphor/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --border-color: #eaeaea;
+            --accent-blue: #2563eb;
+            --accent-blue-faded: rgba(37, 99, 235, 0.05);
+            --red: #ef4444;
+            --green: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle, #e5e5e5 1px, transparent 1px);
+            background-size: 24px 24px;
+            padding: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header i {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s ease;
+            background: #fafafa;
+        }
+
+        .form-input:focus {
+            border-color: var(--text-primary);
+            background: #ffffff;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            font-size: 0.82rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.15s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+
+        .alert-box {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            display: none;
+            text-align: center;
+        }
+
+        .alert-box.error {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        .alert-box.success {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login View -->
+    <div class="card" id="login-card">
+        <div class="header">
+            <i class="ph ph-cube"></i>
+            <h1 id="portal-title">OQENS Authentication</h1>
+            <p id="portal-desc">Provide your email and password to enter the dashboard.</p>
+        </div>
+        
+        <div class="alert-box error" id="login-error-box"></div>
+        <div class="alert-box success" id="login-success-box"></div>
+
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="user@domain.com">
+        </div>
+
+        <div class="form-group">
+            <label id="password-label">Password</label>
+            <input type="password" id="code" class="form-input" placeholder="••••••••">
+        </div>
+
+        <button class="btn-submit" onclick="login()">Login</button>
+        
+        <div class="footer-links" id="forgot-link-container" style="display: flex; justify-content: space-between; margin-top: 15px;">
+            <a onclick="showRecoveryView()">Forgot Password?</a>
+            <a href="/signup" id="signup-link" style="font-weight: 500;">Create Account</a>
+        </div>
+    </div>
+
+    <!-- Recovery View -->
+    <div class="card" id="recovery-card" style="display: none;">
+        <div class="header">
+            <i class="ph ph-key"></i>
+            <h1>Credentials Recovery</h1>
+            <p>Enter your email address, and we will send you a password reset link.</p>
+        </div>
+        
+        <div class="alert-box error" id="recovery-error-box"></div>
+        <div class="alert-box success" id="recovery-success-box"></div>
+
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="recovery-email" class="form-input" placeholder="user@domain.com">
+        </div>
+
+        <button class="btn-submit" onclick="recoverCredentials()">Recover Credentials</button>
+        
+        <div class="footer-links">
+            <a onclick="showLoginView()"><i class="ph ph-arrow-left"></i> Back to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const host = window.location.hostname;
+        const isHostConsole = host === 'auth2.oqens.me' || host === 'host.echo.oqens.me' || host === 'host.oqens.me' || host === 'host.support.oqens.me' || host.includes('host') || host.includes('auth2') || window.location.search.includes('host=');
+
+        // Adjust labels and text based on subdomain
+        if (isHostConsole) {
+            document.getElementById('portal-title').innerText = "Host Portal Login";
+            document.getElementById('portal-desc').innerText = "Authentication gate for OQENS Super Hosts.";
+            document.getElementById('password-label').innerText = "Host Password";
+            document.getElementById('forgot-link-container').style.display = 'none'; // Host setup is automated
+        }
+
+        // Preserve redirect query parameters for signup link
+        const signupLink = document.getElementById('signup-link');
+        if (signupLink && window.location.search) {
+            signupLink.href = `/signup${window.location.search}`;
+        }
+
+        function showNotification(type, msg, boxId) {
+            const el = document.getElementById(boxId);
+            el.className = `alert-box ${type}`;
+            el.innerHTML = msg;
+            el.style.display = 'block';
+            
+            // Hide the other box
+            const otherId = boxId.includes('error') ? boxId.replace('error', 'success') : boxId.replace('success', 'error');
+            document.getElementById(otherId).style.display = 'none';
+        }
+
+        function showRecoveryView() {
+            document.getElementById('login-card').style.display = 'none';
+            document.getElementById('recovery-card').style.display = 'flex';
+        }
+
+        function showLoginView() {
+            document.getElementById('recovery-card').style.display = 'none';
+            document.getElementById('login-card').style.display = 'flex';
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value.trim();
+            const code = document.getElementById('code').value.trim();
+            
+            if (!email || !code) {
+                return showNotification('error', 'Please fill in all credentials.', 'login-error-box');
+            }
+
+            const btn = document.querySelector('#login-card .btn-submit');
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, code })
+                });
+
+                const data = await res.json();
+                
+                if (res.ok) {
+                    if (data.status === 'setup_sent') {
+                        showNotification('success', data.message, 'login-success-box');
+                        document.getElementById('code').value = '';
+                        btn.disabled = false;
+                        btn.innerText = "Login";
+                    } else {
+                        // Show redirecting feedback
+                        showNotification('success', 'Logging you in...', 'login-success-box');
+                        btn.innerText = "Redirecting...";
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redir = urlParams.get('redirect');
+                        setTimeout(() => { window.location.href = redir || data.redirect; }, 800);
+                    }
+                } else {
+                    let errMsg = data.error || 'Authentication failed.';
+                    if (res.status === 403 && errMsg.toLowerCase().includes('verify')) {
+                        errMsg += ` <br><a onclick="resendVerification('${email}')" style="color: #2563eb; text-decoration: underline; cursor: pointer; font-weight: 600; font-size: 0.8rem; margin-top: 5px; display: inline-block;">Resend Verification Link</a>`;
+                    }
+                    showNotification('error', errMsg, 'login-error-box');
+                    btn.disabled = false;
+                    btn.innerText = "Login";
+                }
+            } catch (e) {
+                showNotification('error', 'Network error. Please try again.', 'login-error-box');
+                btn.disabled = false;
+                btn.innerText = "Login";
+            }
+        }
+
+        async function resendVerification(email) {
+            try {
+                const res = await fetch('/api/auth/resend-verification', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showNotification('success', data.message || 'Verification email resent successfully.', 'login-success-box');
+                } else {
+                    showNotification('error', data.error || 'Failed to resend verification.', 'login-error-box');
+                }
+            } catch (e) {
+                showNotification('error', 'Network error. Try again.', 'login-error-box');
+            }
+        }
+
+        async function recoverCredentials() {
+            const email = document.getElementById('recovery-email').value.trim();
+            if (!email) {
+                return showNotification('error', 'Email address is required.', 'recovery-error-box');
+            }
+
+            const btn = document.querySelector('#recovery-card .btn-submit');
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                const res = await fetch('/api/auth/forgot-code', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showNotification('success', data.message, 'recovery-success-box');
+                    document.getElementById('recovery-email').value = '';
+                } else {
+                    showNotification('error', data.error || 'Failed to trigger recovery.', 'recovery-error-box');
+                }
+            } catch (e) {
+                showNotification('error', 'Network error. Try again.', 'recovery-error-box');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Recover Credentials";
+            }
+        }
+
+        // Enable Enter key to trigger login
+        document.getElementById('email').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                login();
+            }
+        });
+
+        document.getElementById('code').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                login();
+            }
+        });
+    </script>
+</body>
+</html>
